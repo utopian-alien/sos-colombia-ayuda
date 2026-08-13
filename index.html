@@ -141,14 +141,14 @@
           <label class="block font-bold text-slate-600 mb-1">Filtrar por Categoría:</label>
           <select id="filtroCategoria" onchange="aplicarFiltrosYOrden()" class="w-full border rounded p-2 bg-white">
             <option value="todos">Todas las categorías</option>
-            <option value="🩸 Donación de Sangre">🩸 Donación de Sangre</option>
-            <option value="💸 Nequi / Colectas y Donaciones">💸 Nequi / Colectas y Donaciones</option>
-            <option value="🐾 Mascotas Perdidas y Encontradas">🐾 Mascotas Perdidas / Encontradas</option>
             <option value="🥣 Alimentos y Agua Potable">🥣 Alimentos y Agua</option>
             <option value="💊 Insumos Médicos y Salud">💊 Insumos Médicos</option>
             <option value="🙋‍♂️ Trabajo Voluntario / Mano de Obra">🙋‍♂️ Trabajo Voluntario</option>
             <option value="⛺ Albergue, Carpas y Colchonetas">⛺ Albergue y Carpas</option>
             <option value="🚜 Herramientas y Remoción">🚜 Herramientas</option>
+            <option value="🩸 Donación de Sangre">🩸 Donación de Sangre</option>
+            <option value="💸 Nequi / Colectas y Donaciones">💸 Nequi / Colectas y Donaciones</option>
+            <option value="🐾 Mascotas Perdidas y Encontradas">🐾 Mascotas Perdidas / Encontradas</option>
             <option value="💡 Otro (Donaciones, Apoyo, etc.)">💡 Otro (Apoyo, etc.)</option>
           </select>
         </div>
@@ -369,21 +369,21 @@
           </button>
         </div>
 
-        <!-- Tipos de Ayuda Múltiples (Donación de Sangre y Mascotas al inicio) -->
+        <!-- Tipos de Ayuda Múltiples (Orden original: Alimentos, Insumos, Voluntariado, Albergue, Herramientas, Sangre, Mascotas, Nequi) -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs font-bold text-slate-700 uppercase">Tipos de Ayuda (Selecciona varias)</label>
             <button type="button" onclick="marcarTodosTipos(true)" class="text-[11px] text-red-700 font-bold hover:underline">🚨 Seleccionar Todos</button>
           </div>
           <div class="grid grid-cols-1 gap-1.5 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto/flyer)</label>
-            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas (Requiere foto)</label>
-            <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🥣 Alimentos y Agua Potable" class="chk-tipo accent-red-700"> 🥣 Alimentos y Agua Potable</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="💊 Insumos Médicos y Salud" class="chk-tipo accent-red-700"> 💊 Insumos Médicos y Salud</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
+            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto/flyer)</label>
+            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas (Requiere foto)</label>
+            <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
             
             <!-- OPCIÓN OTRO -->
             <label class="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1 font-bold text-amber-800">
@@ -392,7 +392,7 @@
             </label>
           </div>
 
-          <!-- Cuadro de texto dinámico adicional para "Otro" / Información adicional -->
+          <!-- Cuadro de texto dinámico adicional para "Otro" -->
           <div id="containerOtroDetalle" class="hidden mt-2 p-3 bg-amber-50 rounded-xl border border-amber-300 space-y-1.5 transition">
             <label class="block text-xs font-bold text-amber-900 uppercase">Información adicional (Tipo de sangre, Nequi, descripción de mascota, etc.)</label>
             <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Tipo de sangre O- / Nombre y raza de mascota..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
@@ -884,7 +884,7 @@
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV33')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV34')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1292,7 +1292,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1317,7 +1317,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1360,7 +1360,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1383,7 +1383,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1458,7 +1458,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1483,7 +1483,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
