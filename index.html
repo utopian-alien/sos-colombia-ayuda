@@ -277,7 +277,7 @@
             Sangre, Nequi y Mascotas 🩸💸🐾
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Puedes publicar y filtrar campañas de <b>donación de sangre</b>, cuentas de <b>Nequi / Colectas monetarias</b> y reportes de <b>mascotas perdidas o encontradas</b>.
+            Puedes publicar y filtrar campañas de <b>donación de sangre</b> (requiere foto/flyer), cuentas de <b>Nequi / Colectas monetarias</b> y reportes de <b>mascotas perdidas o encontradas</b> (requiere foto).
           </p>
         </div>
 
@@ -334,9 +334,9 @@
           </div>
         </div>
 
-        <!-- Foto o Flyer -->
+        <!-- Foto o Flyer (Obligatoria para Sangre y Mascotas) -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">📷 Adjuntar Foto o Flyer (Opcional)</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">📷 Adjuntar Foto o Flyer <span id="lblReqFoto" class="text-red-600 font-semibold">(Obligatorio para Sangre y Mascotas)</span></label>
           <input type="file" id="campoImagen" accept="image/*" onchange="procesarImagen(event)" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
           <div id="containerPreview" class="hidden mt-2 relative">
             <img id="previewImagen" class="w-full h-32 object-cover rounded-lg border border-slate-200">
@@ -369,20 +369,20 @@
           </button>
         </div>
 
-        <!-- Tipos de Ayuda Múltiples (Nuevas opciones ubicadas al inicio) -->
+        <!-- Tipos de Ayuda Múltiples (Donación de Sangre y Mascotas al inicio) -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs font-bold text-slate-700 uppercase">Tipos de Ayuda (Selecciona varias)</label>
             <button type="button" onclick="marcarTodosTipos(true)" class="text-[11px] text-red-700 font-bold hover:underline">🚨 Seleccionar Todos</button>
           </div>
           <div class="grid grid-cols-1 gap-1.5 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Campaña / Urgencia)</label>
+            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto/flyer)</label>
+            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas (Requiere foto)</label>
             <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
-            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🥣 Alimentos y Agua Potable" class="chk-tipo accent-red-700"> 🥣 Alimentos y Agua Potable</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="💊 Insumos Médicos y Salud" class="chk-tipo accent-red-700"> 💊 Insumos Médicos y Salud</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
-            <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue, Carpas y Colchonetas</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
             
             <!-- OPCIÓN OTRO -->
@@ -392,10 +392,10 @@
             </label>
           </div>
 
-          <!-- Cuadro de texto dinámico adicional para "Otro" -->
+          <!-- Cuadro de texto dinámico adicional para "Otro" / Información adicional -->
           <div id="containerOtroDetalle" class="hidden mt-2 p-3 bg-amber-50 rounded-xl border border-amber-300 space-y-1.5 transition">
-            <label class="block text-xs font-bold text-amber-900 uppercase">Detalle de la ayuda "Otro", Nequi o especificaciones</label>
-            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Datos de la mascota perdida / Tipo de sangre O-..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
+            <label class="block text-xs font-bold text-amber-900 uppercase">Información adicional (Tipo de sangre, Nequi, descripción de mascota, etc.)</label>
+            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Tipo de sangre O- / Nombre y raza de mascota..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
           </div>
         </div>
 
@@ -884,7 +884,7 @@
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV32')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV33')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1292,7 +1292,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1317,7 +1317,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1360,7 +1360,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1383,7 +1383,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1395,22 +1395,28 @@
       e.preventDefault();
 
       const btn = document.getElementById('btnEnviar');
-      btn.disabled = true;
-      btn.innerText = "Guardando...";
-
       const editId = document.getElementById('editId').value;
       let lat = parseFloat(document.getElementById('campoLatitud').value);
       let lng = parseFloat(document.getElementById('campoLongitud').value);
 
       if (isNaN(lat) || isNaN(lng)) {
         alert("Haz doble clic sobre el mapa para indicar la ubicación.");
-        btn.disabled = false;
-        btn.innerText = "Publicar Solicitud de Ayuda";
         return;
       }
 
       const modalidad = document.querySelector('input[name="campoModalidad"]:checked').value;
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
+      
+      // VALIDACIÓN OBLIGATORIA DE FOTO PARA SANGRE O MASCOTAS
+      const requiereFoto = chks.includes("🩸 Donación de Sangre") || chks.includes("🐾 Mascotas Perdidas y Encontradas");
+      if (requiereFoto && !imagenBase64Actual) {
+        alert("⚠️ Para reportes de 'Donación de Sangre' o 'Mascotas Perdidas y Encontradas' es obligatorio adjuntar una foto o flyer.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Guardando...";
+
       const tiposActivos = chks.length > 0 ? chks : ["Varias Necesidades Generales"];
 
       const chkOtro = document.getElementById('chkOtro');
@@ -1452,7 +1458,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1477,7 +1483,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV32', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV33', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
