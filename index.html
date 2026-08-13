@@ -29,7 +29,7 @@
           ℹ️ Fuentes de Información
         </button>
         <button onclick="sincronizarGoogleSheets()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded-lg border border-emerald-500 shadow text-xs md:text-sm transition flex items-center gap-1">
-          📊 Sincronizar Sheets
+          📊 Sincronizar Sheets (H1 & H2)
         </button>
         <button onclick="abrirInstrucciones()" class="bg-red-800 hover:bg-red-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
           ❓ ¿Cómo usar?
@@ -180,7 +180,7 @@
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
       <div>
         <p class="font-bold text-white text-sm">SOS Colombia: Red Humanitaria Comunitaria</p>
-        <p class="mt-1">Desarrollado de forma abierta por la Fundación Asimov. Código abierto disponible en <a href="https://github.com/utopian-alien" target="_blank" class="text-red-400 font-bold hover:underline">@utopian-alien</a> en GitHub.</p>
+        <p class="mt-1">Desarrollado de forma abierta por <a href="https://github.com/utopian-alien" target="_blank" class="text-red-400 font-bold hover:underline">@utopian-alien</a> en GitHub.</p>
       </div>
       <div class="flex items-center gap-3">
         <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="bg-slate-800 hover:bg-slate-800/80 p-2 rounded-lg border border-slate-700 text-slate-300 font-semibold flex items-center gap-2">
@@ -204,8 +204,8 @@
 
       <div class="space-y-3 text-xs leading-relaxed text-slate-700">
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📊 1. Hoja Pública de Google Sheets (Voluntariados)</p>
-          <p>Los datos de tareas de carga, inventario y voluntariado se integran en tiempo real mediante sincronización selectiva:</p>
+          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets (Hoja 1 y Hoja 2 - Donaciones y Voluntariado)</p>
+          <p>Integración en tiempo real sincronizando las pestañas de la hoja de cálculo pública:</p>
           <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
             🔗 Ver Google Sheets de Referencia &rarr;
           </a>
@@ -213,16 +213,16 @@
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario Validadas en Campo (Formulario normal)</p>
-          <p>Publicaciones y centros de acopio agregados directamente por la comunidad. El sistema protege estos registros y verifica la ubicación mediante GPS en terreno (< 50 metros).</p>
+          <p>Publicaciones agregadas por la comunidad protegidas y validadas mediante GPS en terreno (< 50 metros).</p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Flyers y Posts de Redes Sociales</p>
-          <p>Información procesada y estructurada mediante inteligencia artificial multimodal desde afiches, piezas gráficas y publicaciones oficiales.</p>
+          <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Flyers y Redes Sociales</p>
+          <p>Información estructurada mediante IA multimodal desde afiches y publicaciones oficiales.</p>
         </div>
 
         <div class="bg-red-50 p-3 rounded-xl border border-red-200 text-red-900 text-[11px] font-semibold">
-          ⚖️ <b>Código Abierto:</b> Este proyecto es un desarrollo sin fines de lucro bajo licencia libre <b>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</b>. Desarrollado por la Fundación Asimov. Código abierto disponible en <a href="https://github.com/utopian-alien" target="_blank" class="underline font-bold">@utopian-alien</a>.
+          ⚖️ <b>Código Abierto:</b> Proyecto bajo licencia libre <b>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</b> por <a href="https://github.com/utopian-alien" target="_blank" class="underline font-bold">@utopian-alien</a>.
         </div>
       </div>
 
@@ -453,8 +453,10 @@
     // 🔑 TOKEN OFICIAL DE MAPBOX INTEGRADO
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
     
-    // ID de la hoja de Google Sheets pública (Lector directo Frontend)
+    // IDs de Google Sheets (Hoja 1 y Hoja 2)
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
+    const GID_HOJA_1 = "0";             // Pestaña 1 (Voluntariados)
+    const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación)
 
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
@@ -547,73 +549,90 @@
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
     }
 
-    // LECTOR DIRECTO Y SINCRONIZACIÓN SELECTIVA DE GOOGLE SHEETS
+    // LECTOR MULTI-HOJA EN TIEMPO REAL (HOJA 1 + HOJA 2)
     async function sincronizarGoogleSheets() {
       const btn = event ? event.target : null;
-      if (btn) btn.innerText = "⏳ Sincronizando Sheets...";
+      if (btn) btn.innerText = "⏳ Sincronizando Hoja 1 y Hoja 2...";
 
       try {
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv`;
-        const response = await fetch(csvUrl);
-        if (!response.ok) throw new Error("No se pudo conectar con la hoja pública de Google Sheets.");
+        const urlHoja1 = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv&gid=${GID_HOJA_1}`;
+        const urlHoja2 = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv&gid=${GID_HOJA_2}`;
 
-        const csvText = await response.text();
-        const lineas = csvText.split('\n').map(l => l.trim()).filter(Boolean);
-        
-        if (lineas.length <= 1) {
-          alert("La hoja está vacía o no tiene contenido legible.");
-          return;
-        }
+        // Descargar ambas hojas en paralelo
+        const [res1, res2] = await Promise.all([
+          fetch(urlHoja1),
+          fetch(urlHoja2).catch(() => null)
+        ]);
 
-        // 1. CONSERVAR TODOS LOS PUNTOS DE USUARIOS (Firebase / Formulario) y purgar solo los antiguos de Sheets
-        listaGlobalPublicaciones = listaGlobalPublicaciones.filter(p => p.origen !== "google_sheets_publico");
+        if (!res1.ok) throw new Error("No se pudo conectar con la Hoja 1 de Google Sheets.");
 
-        let contadorCargados = 0;
+        const text1 = await res1.text();
+        const text2 = res2 && res2.ok ? await res2.text() : "";
 
-        // 2. Parsear y cargar los elementos vigentes de la hoja pública
-        for (let i = 1; i < lineas.length; i++) {
-          const columnas = lineas[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+        // 1. Conservar los datos de Firebase/Usuarios y purgar solo los antiguos de Google Sheets
+        listaGlobalPublicaciones = listaGlobalPublicaciones.filter(p => !p.origen || !p.origen.startsWith("google_sheets_"));
+
+        let contadorTotal = 0;
+
+        // --- PROCESAR HOJA 1 ---
+        const lineas1 = text1.split('\n').map(l => l.trim()).filter(Boolean);
+        for (let i = 1; i < lineas1.length; i++) {
+          const columnas = lineas1[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
           if (columnas.length < 1 || !columnas[0]) continue;
 
           const titulo = columnas[0];
           const detalle = columnas.slice(1).join(" ");
-          
           const esOferta = detalle.includes("🟢") || detalle.toLowerCase().includes("sí voluntarios") || detalle.toLowerCase().includes("necesitan voluntarios");
-          
-          let lat = 4.6500;
-          let lng = -74.0800;
 
-          const puntoExterno = {
-            id: `sheet_external_${i}`,
+          listaGlobalPublicaciones.push({
+            id: `sheet1_node_${i}`,
             modalidad: esOferta ? "ofrece" : "necesita",
             ubicacion: `${titulo}, Colombia`,
             tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
             prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
-            descripcion: `[Hoja Pública] ${titulo} | ${detalle}`,
-            lat: lat,
-            lng: lng,
-            contacto: "",
-            pin: "2026",
-            imagen: null,
-            otroDetalle: detalle,
-            verificaciones: esOferta ? 3 : 1,
-            reportesCount: 0,
-            tiposInactivos: [],
-            origen: "google_sheets_publico"
-          };
+            descripcion: `[Hoja 1] ${titulo} | ${detalle}`,
+            lat: 4.6500, lng: -74.0800,
+            contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
+            verificaciones: esOferta ? 3 : 1, reportesCount: 0, tiposInactivos: [],
+            origen: "google_sheets_hoja1"
+          });
+          contadorTotal++;
+        }
 
-          listaGlobalPublicaciones.push(puntoExterno);
-          contadorCargados++;
+        // --- PROCESAR HOJA 2 (Necesidades de Donación) ---
+        if (text2) {
+          const lineas2 = text2.split('\n').map(l => l.trim()).filter(Boolean);
+          for (let i = 1; i < lineas2.length; i++) {
+            const columnas = lineas2[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+            if (columnas.length < 1 || !columnas[0]) continue;
+
+            const titulo = columnas[0];
+            const detalle = columnas.slice(1).join(" ");
+
+            listaGlobalPublicaciones.push({
+              id: `sheet2_node_${i}`,
+              modalidad: "necesita",
+              ubicacion: `${titulo}, Colombia`,
+              tiposActivos: ["🥣 Alimentos y Agua Potable"],
+              prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
+              descripcion: `[Hoja 2 - Donación] ${titulo} | ${detalle}`,
+              lat: 4.6500, lng: -74.0800,
+              contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
+              verificaciones: 1, reportesCount: 0, tiposInactivos: [],
+              origen: "google_sheets_hoja2"
+            });
+            contadorTotal++;
+          }
         }
 
         aplicarFiltrosYOrden();
-        alert(`🔄 ¡Sincronización completada!\nSe actualizaron ${contadorCargados} puntos de la hoja pública. Los registros añadidos por los usuarios mediante el formulario del aplicativo se conservaron intactos.`);
+        alert(`🔄 ¡Sincronización multi-hoja completada!\nSe actualizaron ${contadorTotal} registros combinados entre la Hoja 1 y la Hoja 2.`);
 
       } catch (e) {
         console.error(e);
-        alert("⚠️ Hubo un error al leer la hoja pública de Google Sheets.");
+        alert("⚠️ Hubo un error al leer las hojas de Google Sheets.");
       } finally {
-        if (btn) btn.innerText = "📊 Sincronizar Sheets";
+        if (btn) btn.innerText = "📊 Sincronizar Sheets (H1 & H2)";
       }
     }
 
@@ -838,16 +857,19 @@
 
       referenciaSolicitudes.on('value', snapshot => {
         const data = snapshot.val() || {};
-        // Conservamos los elementos de Sheets que ya estaban cargados en memoria si los hay
-        const sheetItemsPrevios = listaGlobalPublicaciones.filter(p => p.origen === "google_sheets_publico");
+        const sheetItemsPrevios = listaGlobalPublicaciones.filter(p => p.origen && p.origen.startsWith("google_sheets_"));
         const firebaseItems = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         
         listaGlobalPublicaciones = [...firebaseItems, ...sheetItemsPrevios];
         aplicarFiltrosYOrden();
       });
+
+      // Sincronización automática inicial al abrir la página
+      sincronizarGoogleSheets();
+
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV27')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV29')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1043,7 +1065,13 @@
           : `<span class="text-slate-400 font-semibold italic">Sin teléfono directo</span>`;
 
         let btnAccionesExtras = '';
-        if (item.origen !== "google_sheets_publico") {
+        if (item.origen && item.origen.startsWith("google_sheets_")) {
+          btnAccionesExtras = `
+            <div class="pt-2 border-t border-slate-200 text-[11px] text-slate-400 italic text-center">
+              📌 Sincronizado desde Hoja Pública externa
+            </div>
+          `;
+        } else {
           btnAccionesExtras = `
             <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
               <div class="flex gap-2 font-bold text-slate-600">
@@ -1052,12 +1080,6 @@
                 <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
               </div>
               <button onclick="reportarFalsa('${id}', ${rCount}, ${item.lat}, ${item.lng})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
-            </div>
-          `;
-        } else {
-          btnAccionesExtras = `
-            <div class="pt-2 border-t border-slate-200 text-[11px] text-slate-400 italic text-center">
-              📌 Sincronizado desde Hoja Pública externa
             </div>
           `;
         }
@@ -1250,7 +1272,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1275,7 +1297,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1318,7 +1340,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1341,7 +1363,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1410,7 +1432,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1435,7 +1457,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
