@@ -1,0 +1,27 @@
+name: Sincronizacion Espejo Google Sheets a Firebase
+
+on:
+  schedule:
+    # Se ejecuta automáticamente cada 15 minutos
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub cuando quieras
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar librerías
+        run: pip install requests firebase-admin
+
+      - name: Ejecutar Sincronizador
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python sync_sheets.py
