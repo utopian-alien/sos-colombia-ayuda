@@ -28,9 +28,6 @@
         <button onclick="abrirFuentes()" class="bg-red-900 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
           ℹ️ Fuentes de Información
         </button>
-        <button onclick="sincronizarGoogleSheets()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded-lg border border-emerald-500 shadow text-xs md:text-sm transition flex items-center gap-1">
-          📊 Sincronizar Sheets (H1 & H2)
-        </button>
         <button onclick="abrirInstrucciones()" class="bg-red-800 hover:bg-red-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
           ❓ ¿Cómo usar?
         </button>
@@ -208,7 +205,7 @@
       <div class="space-y-3 text-xs leading-relaxed text-slate-700">
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets (Hojas de voluntariado, donaciones y sangre)</p>
-          <p>Integración en tiempo real sincronizando las pestañas de la hoja de cálculo pública:</p>
+          <p>Integración en tiempo real sincronizando automáticamente las pestañas de la hoja de cálculo pública:</p>
           <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
             🔗 Ver Google Sheets de Referencia &rarr;
           </a>
@@ -369,7 +366,7 @@
           </button>
         </div>
 
-        <!-- Tipos de Ayuda Múltiples (Orden original: Alimentos, Insumos, Voluntariado, Albergue, Herramientas, Sangre, Mascotas, Nequi) -->
+        <!-- Tipos de Ayuda Múltiples -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs font-bold text-slate-700 uppercase">Tipos de Ayuda (Selecciona varias)</label>
@@ -558,30 +555,24 @@
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
     }
 
-    // LECTOR MULTI-HOJA EN TIEMPO REAL (HOJA 1 + HOJA 2)
-    async function sincronizarGoogleSheets() {
-      const btn = event ? event.target : null;
-      if (btn) btn.innerText = "⏳ Sincronizando Hoja 1 y Hoja 2...";
-
+    // LECTOR AUTOMÁTICO SILENCIOSO MULTI-HOJA EN SEGUNDO PLANO
+    async function sincronizarGoogleSheetsAutomatico() {
       try {
         const urlHoja1 = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv&gid=${GID_HOJA_1}`;
         const urlHoja2 = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv&gid=${GID_HOJA_2}`;
 
-        // Descargar ambas hojas en paralelo
         const [res1, res2] = await Promise.all([
           fetch(urlHoja1),
           fetch(urlHoja2).catch(() => null)
         ]);
 
-        if (!res1.ok) throw new Error("No se pudo conectar con la Hoja 1 de Google Sheets.");
+        if (!res1.ok) return;
 
         const text1 = await res1.text();
         const text2 = res2 && res2.ok ? await res2.text() : "";
 
-        // 1. Conservar los datos de Firebase/Usuarios y purgar solo los antiguos de Google Sheets
+        // Conservar los datos de Firebase/Usuarios y purgar solo los antiguos de Google Sheets
         listaGlobalPublicaciones = listaGlobalPublicaciones.filter(p => !p.origen || !p.origen.startsWith("google_sheets_"));
-
-        let contadorTotal = 0;
 
         // --- PROCESAR HOJA 1 ---
         const lineas1 = text1.split('\n').map(l => l.trim()).filter(Boolean);
@@ -605,10 +596,9 @@
             verificaciones: esOferta ? 3 : 1, reportesCount: 0, tiposInactivos: [],
             origen: "google_sheets_hoja1"
           });
-          contadorTotal++;
         }
 
-        // --- PROCESAR HOJA 2 (Necesidades, Sangre, Nequi, Mascotas) ---
+        // --- PROCESAR HOJA 2 ---
         if (text2) {
           const lineas2 = text2.split('\n').map(l => l.trim()).filter(Boolean);
           for (let i = 1; i < lineas2.length; i++) {
@@ -636,18 +626,12 @@
               verificaciones: 1, reportesCount: 0, tiposInactivos: [],
               origen: "google_sheets_hoja2"
             });
-            contadorTotal++;
           }
         }
 
         aplicarFiltrosYOrden();
-        alert(`🔄 ¡Sincronización multi-hoja completada!\nSe actualizaron ${contadorTotal} registros combinados entre la Hoja 1 y la Hoja 2.`);
-
       } catch (e) {
-        console.error(e);
-        alert("⚠️ Hubo un error al leer las hojas de Google Sheets.");
-      } finally {
-        if (btn) btn.innerText = "📊 Sincronizar Sheets (H1 & H2)";
+        console.error("Sincronización automática silenciosa en segundo plano:", e);
       }
     }
 
@@ -879,12 +863,12 @@
         aplicarFiltrosYOrden();
       });
 
-      // Sincronización automática inicial al abrir la página
-      sincronizarGoogleSheets();
+      // 🚀 Sincronización automática silenciosa al arrancar la página
+      sincronizarGoogleSheetsAutomatico();
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV34')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV35')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1292,7 +1276,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1317,7 +1301,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1360,7 +1344,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1383,7 +1367,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1458,7 +1442,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1483,7 +1467,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV34', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
