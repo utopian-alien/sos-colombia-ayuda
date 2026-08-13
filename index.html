@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; }
+    #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
     .custom-pin { display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
@@ -22,7 +22,7 @@
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
       <div>
         <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">SOS Colombia: Red de Ayuda Humanitaria</h1>
-        <p class="text-xs text-red-100 mt-0.5">Gestión de emergencias, georreferenciación y validación en tiempo real</p>
+        <p class="text-xs text-red-100 mt-0.5">Haz doble clic en el mapa para ubicar y publicar directamente</p>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="abrirInstrucciones()" class="bg-red-800 hover:bg-red-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
@@ -58,7 +58,7 @@
           id="buscadorPrincipal" 
           list="sugerenciasPrincipal" 
           onkeypress="if(event.key==='Enter') buscarMunicipioPrincipal()" 
-          placeholder="🔍 Escribe dirección, barrio o municipio (ej: Calle 13 # 4-25, Cali)..." 
+          placeholder="🔍 Escribe municipio o dirección para centrar el mapa..." 
           class="flex-1 border border-slate-300 rounded-lg p-2 text-xs md:text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
         />
         <datalist id="sugerenciasPrincipal"></datalist>
@@ -66,6 +66,11 @@
           🔎 Buscar en Mapa
         </button>
       </div>
+    </div>
+
+    <!-- Indicador de acción sobre el mapa -->
+    <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
+      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte.
     </div>
 
     <!-- Mapa Interactivo -->
@@ -124,7 +129,7 @@
 
   </main>
 
-  <!-- VENTANA MODAL: INSTRUCCIONES DE USO SIN LA CLAVE MAESTRA PÚBLICA -->
+  <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarInstrucciones()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -133,7 +138,7 @@
         <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
           📖 ¿Cómo funciona la plataforma?
         </h3>
-        <p class="text-xs text-slate-500">Guía rápida para pedir ayuda, adjuntar imágenes, donar y moderar información.</p>
+        <p class="text-xs text-slate-500">Guía ágil para solicitar ayuda, donar e informar en situaciones de emergencia.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -141,40 +146,40 @@
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-            Explora o Busca en el Mapa
+            Doble Clic para Ubicar
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Busca un municipio o dirección. Los pines 🔴 indican solicitudes, los 🟢 ofertas disponibles y los ⚪ ayudas completamente atendidas. Haz clic en la vista previa del mapa para bajar directo a la tarjeta.
+            Navega por el mapa y haz <b>doble clic</b> sobre el punto exacto donde se necesita u ofrece la ayuda. Las coordenadas se asignarán automáticamente.
           </p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-            Publica, Adjunta Foto y PIN
+            Publica con PIN de Control
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Presiona <b>"➕ Publicar"</b>. Puedes subir una foto o flyer directamente desde tu celular y definir un <b>PIN personal de 4 dígitos</b> para editar o eliminar tu publicación cuando quieras.
+            Completa la información requerida. Los datos de dirección y teléfono son <b>opcionales</b>. Define un <b>PIN personal de 4 dígitos</b> para editar o eliminar tu publicación cuando sea necesario.
           </p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
-            Validación en Terreno (3/3)
+            Validación Comunitaria (3/3)
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Para validar necesidades reales, presiona <b>"🙋‍♂️ Validar (+1)"</b>. Al sumar 3 confirmaciones obtendrá la insignia <b>✅ Validado</b>.
+            Cualquier persona en el territorio puede confirmar una necesidad presionando el botón <b>"🙋‍♂️ Validar (+1)"</b>. Al reunir 3 confirmaciones obtendrá la insignia <b>✅ Validado</b>.
           </p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
-            Moderación Comunitaria (Falsos)
+            Control de Contenido
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Si detectas una publicación falsa, presiona <b>"🚨 Reportar como falsa"</b>. Si acumula 3 reportes, la plataforma la ocultará automáticamente.
+            Si encuentras información falsa o desactualizada, presiona <b>"🚨 Reportar como falsa"</b>. Si una tarjeta suma 3 reportes comunitarios, se ocultará del mapa.
           </p>
         </div>
 
@@ -191,7 +196,7 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
       <button onclick="cerrarFormulario()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
       <h3 id="tituloModal" class="text-xl font-bold text-red-700 mb-1">Registrar Publicación</h3>
-      <p class="text-xs text-slate-500 mb-4">Ingresa la ubicación exacta, adjunta foto opcional y crea tu PIN de seguridad.</p>
+      <p class="text-xs text-slate-500 mb-4">Ubicación registrada desde el mapa. Completa los detalles a continuación.</p>
 
       <form id="formularioAyuda" onsubmit="guardarSolicitud(event)" class="space-y-4">
         <input type="hidden" id="editId" value="">
@@ -221,20 +226,11 @@
           </div>
         </div>
 
-        <!-- Ubicación -->
+        <!-- Ubicación / Referencia (OPCIONAL) -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Dirección Exacta / Municipio / Vereda</label>
-          <div class="flex gap-2">
-            <input type="text" id="campoUbicacion" list="sugerenciasFormulario" required placeholder="Ej: Carrera 7 # 32-10, Bogotá" class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm">
-            <datalist id="sugerenciasFormulario"></datalist>
-            <button type="button" onclick="geocodificarDesdeFormulario()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg text-xs transition shrink-0">
-              📍 Ubicar Exacto
-            </button>
-          </div>
-          <div class="flex justify-between items-center mt-1">
-            <p class="text-[11px] text-slate-500">💡 Mueve el pin azul para afinar la ubicación.</p>
-            <button type="button" onclick="activarModoSeleccionMapa()" class="text-[11px] font-bold text-red-700 hover:underline">🎯 Mover pin en mapa</button>
-          </div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+          <input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej: Vereda El Tambo / Sector La Cancha (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
+          <datalist id="sugerenciasFormulario"></datalist>
         </div>
 
         <!-- Tipos de Ayuda Múltiples -->
@@ -265,7 +261,13 @@
         <!-- Descripción -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico</label>
-          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, condiciones y punto de entrega..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
+          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, necesidades puntuales o puntos de entrega..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
+        </div>
+
+        <!-- Contacto (OPCIONAL) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Teléfono / WhatsApp de Contacto <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+          <input type="tel" id="campoContacto" placeholder="Ej: 3001234567 (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
         </div>
 
         <!-- PIN de Autor -->
@@ -274,22 +276,16 @@
           <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Ej: 1234" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
         </div>
 
-        <!-- Coordenadas -->
+        <!-- Coordenadas asignadas automáticamente -->
         <div class="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-0.5">Latitud</label>
-            <input type="number" step="any" id="campoLatitud" required placeholder="Ej: 4.570" class="w-full border rounded p-1.5 text-xs bg-white">
+            <input type="number" step="any" id="campoLatitud" required readonly class="w-full border rounded p-1.5 text-xs bg-slate-100 font-mono text-slate-600">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-0.5">Longitud</label>
-            <input type="number" step="any" id="campoLongitud" required placeholder="Ej: -74.297" class="w-full border rounded p-1.5 text-xs bg-white">
+            <input type="number" step="any" id="campoLongitud" required readonly class="w-full border rounded p-1.5 text-xs bg-slate-100 font-mono text-slate-600">
           </div>
-        </div>
-
-        <!-- Contacto -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Teléfono / WhatsApp de Contacto</label>
-          <input type="tel" id="campoContacto" required placeholder="Ej: 3001234567" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
         </div>
 
         <button type="submit" id="btnEnviar" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg shadow-md transition text-sm">
@@ -308,64 +304,50 @@
   <script>
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
+    let marcadorPicker = null;
 
-    // 1. Inicializar Mapa Leaflet
-    const mapa = L.map('mapa').setView([4.5709, -74.2973], 6);
+    // 1. Inicializar Mapa Leaflet con Desactivación de Zoom por Doble Clic
+    const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap Colombia', maxZoom: 19
     }).addTo(mapa);
 
     setTimeout(() => { mapa.invalidateSize(); }, 300);
 
-    let marcadorPicker = null;
+    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA
+    mapa.on('dblclick', function(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
 
-    function activarMarcadorPicker(lat, lng) {
+      document.getElementById('campoLatitud').value = lat.toFixed(5);
+      document.getElementById('campoLongitud').value = lng.toFixed(5);
+
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
+      marcadorPicker = L.marker([lat, lng]).addTo(mapa);
 
-      marcadorPicker = L.marker([lat, lng], { draggable: true }).addTo(mapa)
-        .bindPopup("<b>📍 Arrastra este pin</b> hasta el punto exacto.")
-        .openPopup();
-
-      marcadorPicker.on('dragend', async function(e) {
-        const pos = e.target.getLatLng();
-        document.getElementById('campoLatitud').value = pos.lat.toFixed(5);
-        document.getElementById('campoLongitud').value = pos.lng.toFixed(5);
-        actualizarDireccionPorReverse(pos.lat, pos.lng);
-      });
-    }
+      actualizarDireccionPorReverse(lat, lng);
+      abrirFormulario();
+    });
 
     async function actualizarDireccionPorReverse(lat, lng) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
         const data = await res.json();
-        if (data && data.display_name) {
+        if (data && data.display_name && !document.getElementById('campoUbicacion').value) {
           document.getElementById('campoUbicacion').value = data.display_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) {}
     }
 
-    function activarModoSeleccionMapa() {
-      cerrarFormulario();
-      const lat = parseFloat(document.getElementById('campoLatitud').value) || 4.5709;
-      const lng = parseFloat(document.getElementById('campoLongitud').value) || -74.2973;
-      centrarMapa([lat, lng], 16);
-      activarMarcadorPicker(lat, lng);
-      alert("📍 Arrastra el pin azul. Luego presiona '➕ Publicar' para volver.");
-    }
-
-    // Scroll suave hacia la tarjeta correspondiente
     function scrollACard(id) {
       const tarjeta = document.getElementById(`card-${id}`);
       if (tarjeta) {
         tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
         tarjeta.classList.add('ring-4', 'ring-red-500');
-        setTimeout(() => {
-          tarjeta.classList.remove('ring-4', 'ring-red-500');
-        }, 2500);
+        setTimeout(() => { tarjeta.classList.remove('ring-4', 'ring-red-500'); }, 2500);
       }
     }
 
-    // Compresión de Imagen a Base64
     function procesarImagen(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -405,7 +387,6 @@
       document.getElementById('containerPreview').classList.add('hidden');
     }
 
-    // Autocompletado en vivo
     function activarAutocompletadoVivo(inputId, datalistId) {
       const input = document.getElementById(inputId);
       const datalist = document.getElementById(datalistId);
@@ -440,7 +421,7 @@
 
     async function buscarMunicipioPrincipal() {
       const query = document.getElementById('buscadorPrincipal').value.trim();
-      if (!query) return alert("Escribe una dirección, municipio o vereda.");
+      if (!query) return alert("Escribe un municipio o dirección.");
 
       let consulta = query;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
@@ -451,66 +432,29 @@
         if (data && data.length > 0) {
           const lat = parseFloat(data[0].lat);
           const lon = parseFloat(data[0].lon);
-          mapa.setView([lat, lon], 17);
+          mapa.setView([lat, lon], 15);
         } else {
           alert("No se encontró el lugar.");
         }
       } catch (e) { alert("Error al buscar."); }
     }
 
-    async function geocodificarDesdeFormulario() {
-      const input = document.getElementById('campoUbicacion');
-      let direccion = input.value.trim();
-      if (!direccion) return alert("Ingresa una dirección.");
-
-      let consulta = direccion;
-      if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
-
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=co&addressdetails=1&limit=1&q=${encodeURIComponent(consulta)}`);
-        const data = await res.json();
-
-        if (data && data.length > 0) {
-          const punto = data[0];
-          const lat = parseFloat(punto.lat);
-          const lon = parseFloat(punto.lon);
-
-          document.getElementById('campoLatitud').value = lat.toFixed(5);
-          document.getElementById('campoLongitud').value = lon.toFixed(5);
-
-          centrarMapa([lat, lon], 17);
-          activarMarcadorPicker(lat, lon);
-
-          const nombreCorto = punto.display_name.split(',').slice(0, 3).join(',');
-          input.value = nombreCorto;
-          alert(`📍 Ubicación localizada:\n${nombreCorto}`);
-        } else {
-          alert("No se encontró la nomenclatura.");
-        }
-      } catch (e) { alert("Error al geocodificar."); }
-    }
-
-    mapa.on('click', function(e) {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-      document.getElementById('campoLatitud').value = lat.toFixed(5);
-      document.getElementById('campoLongitud').value = lng.toFixed(5);
-
-      activarMarcadorPicker(lat, lng);
-      actualizarDireccionPorReverse(lat, lng);
-      abrirFormulario();
-    });
-
     function centrarMapa(coords, zoom) { mapa.setView(coords, zoom); }
     function abrirInstrucciones() { document.getElementById('modalInstrucciones').classList.remove('hidden'); }
     function cerrarInstrucciones() { document.getElementById('modalInstrucciones').classList.add('hidden'); }
+    
     function abrirFormularioNueva() {
+      const centro = mapa.getCenter();
+      document.getElementById('campoLatitud').value = centro.lat.toFixed(5);
+      document.getElementById('campoLongitud').value = centro.lng.toFixed(5);
+
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
       document.getElementById('formularioAyuda').reset();
       quitarImagen();
       abrirFormulario();
     }
+
     function abrirFormulario() { document.getElementById('modalFormulario').classList.remove('hidden'); }
     function cerrarFormulario() { document.getElementById('modalFormulario').classList.add('hidden'); }
     function marcarTodosTipos(valor) {
@@ -551,7 +495,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV13')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV14')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -648,8 +592,7 @@
         const tiposInactivos = item.tiposInactivos || [];
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
-        // Preview en el popup del mapa + Scroll hacia el panel
-        let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver la tarjeta en el panel">` : '';
+        let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
 
         const icono = crearIcono(item.modalidad, esVerificado, totalmenteAtendido);
         const marcador = L.marker([item.lat, item.lng], { icon: icono }).addTo(mapa)
@@ -661,7 +604,7 @@
               <h4 class="font-bold text-slate-800 text-sm mt-1">${item.ubicacion}</h4>
               ${imgPopupHTML}
               <p class="text-xs text-slate-600 my-1">${item.descripcion}</p>
-              <p class="text-xs font-mono font-bold text-slate-700 mb-2">Contacto: ${item.contacto}</p>
+              ${item.contacto ? `<p class="text-xs font-mono font-bold text-slate-700 mb-2">Contacto: ${item.contacto}</p>` : ''}
               <button onclick="scrollACard('${id}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-[11px] py-1 px-2 rounded shadow transition">
                 👇 Ver detalle en el panel
               </button>
@@ -684,6 +627,11 @@
         tiposInactivos.forEach(t => {
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
         });
+
+        // Contacto opcional
+        let contactoHTML = item.contacto 
+          ? `<a href="https://wa.me/57${item.contacto.replace(/\D/g,'')}" target="_blank" class="text-green-700 font-bold hover:underline">💬 Contactar (${item.contacto})</a>`
+          : `<span class="text-slate-400 font-semibold italic">Sin teléfono de contacto</span>`;
 
         const tarjetaHTML = `
           <div id="card-${id}" class="border ${totalmenteAtendido ? 'border-slate-300 bg-slate-100' : (item.modalidad === 'ofrece' ? 'border-emerald-300 bg-emerald-50/20' : 'border-red-200 bg-red-50/20')} p-4 rounded-xl shadow-sm flex flex-col justify-between transition">
@@ -712,9 +660,7 @@
 
             <div class="mt-3 pt-2 border-t border-slate-200 space-y-2">
               <div class="flex justify-between items-center text-xs">
-                <a href="https://wa.me/57${item.contacto}" target="_blank" class="text-green-700 font-bold hover:underline">
-                  💬 Contactar (${item.contacto})
-                </a>
+                ${contactoHTML}
                 <button onclick="centrarMapa([${item.lat}, ${item.lng}], 17)" class="text-red-700 font-semibold hover:underline">
                   Ver en mapa &rarr;
                 </button>
@@ -745,18 +691,18 @@
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
 
-      const pin = prompt("Ingresa el PIN de 4 dígitos (o la Clave Maestra) para editar:");
+      const pin = prompt("Ingresa el PIN de 4 dígitos de esta publicación:");
       if (!pin) return;
 
       if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
         document.getElementById('editId').value = id;
         document.getElementById('tituloModal').innerText = "Modificar Publicación";
-        document.getElementById('campoUbicacion').value = item.ubicacion;
+        document.getElementById('campoUbicacion').value = item.ubicacion || "";
         document.getElementById('campoPrioridad').value = item.prioridad || "Media";
         document.getElementById('campoDescripcion').value = item.descripcion;
         document.getElementById('campoLatitud').value = item.lat;
         document.getElementById('campoLongitud').value = item.lng;
-        document.getElementById('campoContacto').value = item.contacto;
+        document.getElementById('campoContacto').value = item.contacto || "";
         document.getElementById('campoPin').value = item.pin || "";
 
         if (item.imagen) {
@@ -777,7 +723,7 @@
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
 
-      const pin = prompt("Ingresa el PIN de 4 dígitos (o la Clave Maestra) para borrar:");
+      const pin = prompt("Ingresa el PIN de 4 dígitos para borrar:");
       if (!pin) return;
 
       if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
@@ -786,7 +732,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -810,11 +756,11 @@
         if (item) {
           item.reportesCount = nuevoCount;
           if (nuevoCount >= 3) item.desactivado = true;
-          localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
-      alert("Reporte registrado. ¡Gracias por mantener la red confiable!");
+      alert("Reporte registrado. ¡Gracias por colaborar!");
     }
 
     function alternarTipoAyuda(id, tipoTexto, estaActivo) {
@@ -852,7 +798,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -873,7 +819,7 @@
           item.verificaciones = nuevaCantidad;
           misVerificaciones.push(String(id));
           localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-          localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -891,8 +837,9 @@
       let lng = parseFloat(document.getElementById('campoLongitud').value);
 
       if (isNaN(lat) || isNaN(lng)) {
-        alert("Selecciona una ubicación válida.");
+        alert("Haz doble clic sobre el mapa para indicar la ubicación.");
         btn.disabled = false;
+        btn.innerText = "Publicar Solicitud de Ayuda";
         return;
       }
 
@@ -900,15 +847,20 @@
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
       const tiposActivos = chks.length > 0 ? chks : ["Varias Necesidades Generales"];
 
+      let ubicacionTexto = document.getElementById('campoUbicacion').value.trim();
+      if (!ubicacionTexto) {
+        ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+      }
+
       const payload = {
         modalidad: modalidad,
-        ubicacion: document.getElementById('campoUbicacion').value,
+        ubicacion: ubicacionTexto,
         tiposActivos: tiposActivos,
         prioridad: document.getElementById('campoPrioridad').value,
         descripcion: document.getElementById('campoDescripcion').value,
         lat: lat,
         lng: lng,
-        contacto: document.getElementById('campoContacto').value,
+        contacto: document.getElementById('campoContacto').value.trim(),
         pin: document.getElementById('campoPin').value,
         imagen: imagenBase64Actual
       };
@@ -920,7 +872,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -945,7 +897,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV13', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
@@ -958,7 +910,8 @@
       cerrarFormulario();
       document.getElementById('formularioAyuda').reset();
       quitarImagen();
-      centrarMapa([lat, lng], 17);
+      if (marcadorPicker) mapa.removeLayer(marcadorPicker);
+      centrarMapa([lat, lng], 16);
       alert("¡Publicación guardada con éxito!");
     }
   </script>
