@@ -1,10 +1,12 @@
 import os
 import json
+import csv
+import io
 import requests
 import firebase_admin
 from firebase_admin import credentials, db
 
-# Configuración de URLs y Constantes
+# Configuración de URLs y Constantes con tu ID real de Google Sheets
 SHEET_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8"
 MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
 
@@ -33,25 +35,36 @@ def geocodificar(direccion):
 def ejecutar_sincronizacion_espejo():
     print("🔄 Iniciando sincronización espejo desde Google Sheets...")
     
-    # 1. Leer CSV de Google Sheets
+    # 1. Descargar CSV de Google Sheets
     csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
     res_sheets = requests.get(csv_url)
     if not res_sheets.ok:
         print("⚠️ No se pudo obtener la hoja de cálculo de Google Sheets.")
         return
 
-    filas = res_sheets.text.strip().split('\n')
-    print(f"📊 {len(filas)} filas leídas desde Google Sheets.")
+    # 2. Parsear el CSV de manera segura con el módulo estándar de Python
+    f = io.StringIO(res_sheets.text)
+    lector = csv.reader(f)
+    filas = list(lector)
+    
+    if not filas:
+        print("⚠️ La hoja de Google Sheets está vacía.")
+        return
 
-    # 2. Construir el nuevo estado basado en Sheets
+    print(f"📊 {len(filas) - 1} filas de datos leídas (ignorando encabezado).")
+
+    # 3. Construir el nuevo estado basado en Sheets
     nuevo_estado = {}
-    for idx, fila in enumerate(filas[1:]): # Ignorar encabezado
-        columnas = [c.strip() for c in fila.split(',')]
-        if len(columnas) < 2:
+    for idx, columnas in enumerate(filas[1:]): # Ignorar la primera fila (encabezado)
+        if not columnas or len(columnas) < 1:
             continue
 
-        titulo = columnas[0]
-        detalle = " ".join(columnas[1:])
+        titulo = columnas[0].strip()
+        detalle = " ".join([c.strip() for c in columnas[1:] if c.strip()])
+        
+        if not titulo:
+            continue
+
         is_oferta = "🟢" in detalle or "sí voluntarios" in detalle.lower() or "necesitan voluntarios" in detalle.lower()
         lat, lng = geocodificar(titulo)
 
@@ -73,21 +86,21 @@ def ejecutar_sincronizacion_espejo():
             "origen": "google_sheets"
         }
 
-    # 3. Obtener referencia a la base de datos
+    # 4. Conectar a Firebase
     ref = db.reference('solicitudes_ayuda')
     estado_actual = ref.get() or {}
 
-    # 4. Sincronización Espejo: Eliminar nodos de Sheets que ya no están en la tabla
+    # 5. Sincronización Espejo: Eliminar registros que ya no están en Sheets
     for key, item in list(estado_actual.items()):
         if isinstance(item, dict) and item.get("origen") == "google_sheets":
             if key not in nuevo_estado:
                 print(f"🗑️ Eliminando registro borrado en Sheets: {key}")
                 ref.child(key).delete()
 
-    # 5. Actualizar/Insertar nodos actualizados de forma masiva
+    # 6. Actualizar o insertar los registros vigentes
     ref.update(nuevo_estado)
 
-    print("✅ ¡Sincronización Espejo Completada con Éxito mediante Firebase Admin!")
+    print("✅ ¡Sincronización Espejo Completada con Éxito!")
 
 if __name__ == "__main__":
     ejecutar_sincronizacion_espejo()
