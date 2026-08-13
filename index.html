@@ -208,7 +208,7 @@
             Publica, Edita o Duplica
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Al <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> puedes presionar <b>"📍 Reubicar punto"</b> para elegir la nueva posición directamente en el mapa.
+            Al <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> puedes buscar la nueva dirección con Mapbox o presionar <b>"📍 Señalar en mapa"</b>.
           </p>
         </div>
 
@@ -275,15 +275,28 @@
           </div>
         </div>
 
-        <!-- Ubicación / Referencia -->
+        <!-- Ubicación / Referencia (Con Buscador Mapbox y Botón de Mapa) -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
-          <input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej: Calle 13 # 4-25 / Vereda El Tambo (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
+          
+          <div class="flex gap-1.5">
+            <input 
+              type="text" 
+              id="campoUbicacion" 
+              list="sugerenciasFormulario" 
+              onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarDireccionEnFormulario(); }" 
+              placeholder="Ej: Calle 13 # 4-25 / Vereda El Tambo (opcional)" 
+              class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+            >
+            <button type="button" onclick="buscarDireccionEnFormulario()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg text-xs transition shrink-0">
+              🔎 Ubicar
+            </button>
+          </div>
           <datalist id="sugerenciasFormulario"></datalist>
 
           <!-- Botón de reubicación directa en el mapa -->
           <button type="button" onclick="seleccionarNuevaUbicacionEnMapa()" class="mt-2 w-full bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold py-2 px-3 rounded-lg border border-sky-300 text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
-            📍 Reubicar punto en el mapa (Doble clic)
+            📍 O señalar directamente en el mapa (Doble clic)
           </button>
         </div>
 
@@ -374,7 +387,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
-    // 🔑 TOKEN DE MAPBOX (Ingresa tu Access Token de Mapbox aquí)
+    // 🔑 TOKEN OFICIAL DE MAPBOX INTEGRADO
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
 
     const CLAVE_MAESTRA = "2026";
@@ -395,12 +408,7 @@
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
 
-      document.getElementById('campoLatitud').value = lat.toFixed(5);
-      document.getElementById('campoLongitud').value = lng.toFixed(5);
-
-      if (marcadorPicker) mapa.removeLayer(marcadorPicker);
-      marcadorPicker = L.marker([lat, lng]).addTo(mapa);
-
+      actualizarCoordenadasYMarcador(lat, lng);
       actualizarDireccionPorReverseMapbox(lat, lng);
 
       // Ocultar banner flotante si estaba activo
@@ -411,6 +419,14 @@
       abrirFormulario();
     });
 
+    function actualizarCoordenadasYMarcador(lat, lng) {
+      document.getElementById('campoLatitud').value = parseFloat(lat).toFixed(5);
+      document.getElementById('campoLongitud').value = parseFloat(lng).toFixed(5);
+
+      if (marcadorPicker) mapa.removeLayer(marcadorPicker);
+      marcadorPicker = L.marker([lat, lng]).addTo(mapa);
+    }
+
     function seleccionarNuevaUbicacionEnMapa() {
       enModoSeleccionUbicacion = true;
       document.getElementById('modalFormulario').classList.add('hidden');
@@ -418,7 +434,6 @@
       const banner = document.getElementById('bannerSeleccionMapa');
       if (banner) banner.classList.remove('hidden');
 
-      // Desplazar suavemente hasta el mapa
       document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -429,10 +444,34 @@
       abrirFormulario();
     }
 
+    // Geocodificación por Texto desde el propio Formulario
+    async function buscarDireccionEnFormulario() {
+      const query = document.getElementById('campoUbicacion').value.trim();
+      if (!query) return alert("Escribe una dirección o municipio para ubicar.");
+
+      let consulta = query;
+      if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
+
+      try {
+        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(consulta)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
+        const data = await res.json();
+        if (data && data.features && data.features.length > 0) {
+          const lon = data.features[0].center[0];
+          const lat = data.features[0].center[1];
+
+          actualizarCoordenadasYMarcador(lat, lon);
+          centrarMapa([lat, lon], 16);
+          alert(`✅ Ubicación encontrada en Mapbox:\n${data.features[0].place_name}`);
+        } else {
+          alert("No se encontraron coordenadas para esa dirección en Mapbox.");
+        }
+      } catch (e) {
+        alert("Error al consultar la dirección en Mapbox.");
+      }
+    }
+
     // Reverse Geocoding usando Mapbox API
     async function actualizarDireccionPorReverseMapbox(lat, lng) {
-      if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") return;
-
       try {
         const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
         const data = await res.json();
@@ -455,8 +494,6 @@
         if (texto.length < 3) return;
 
         temporizador = setTimeout(async () => {
-          if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") return;
-
           try {
             const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(texto)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&autocomplete=true&limit=5`);
             const data = await res.json();
@@ -483,11 +520,6 @@
     async function buscarMunicipioPrincipal() {
       const query = document.getElementById('buscadorPrincipal').value.trim();
       if (!query) return alert("Escribe un municipio o dirección.");
-
-      if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") {
-        alert("⚠️ Por favor ingresa tu MAPBOX_ACCESS_TOKEN en el código para activar la búsqueda con Mapbox.");
-        return;
-      }
 
       let consulta = query;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
@@ -614,8 +646,7 @@
     
     function abrirFormularioNueva() {
       const centro = mapa.getCenter();
-      document.getElementById('campoLatitud').value = centro.lat.toFixed(5);
-      document.getElementById('campoLongitud').value = centro.lng.toFixed(5);
+      actualizarCoordenadasYMarcador(centro.lat, centro.lng);
 
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
@@ -674,7 +705,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV23')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV24')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -978,8 +1009,7 @@
         document.getElementById('campoUbicacion').value = item.ubicacion || "";
         document.getElementById('campoPrioridad').value = item.prioridad || "Media";
         document.getElementById('campoDescripcion').value = item.descripcion || "";
-        document.getElementById('campoLatitud').value = item.lat;
-        document.getElementById('campoLongitud').value = item.lng;
+        actualizarCoordenadasYMarcador(item.lat, item.lng);
         document.getElementById('campoContacto').value = item.contacto || "";
         
         document.getElementById('campoPin').value = "";
@@ -1024,8 +1054,7 @@
       document.getElementById('campoUbicacion').value = item.ubicacion ? `${item.ubicacion} (Punto Adicional)` : "";
       document.getElementById('campoPrioridad').value = item.prioridad || "Media";
       document.getElementById('campoDescripcion').value = item.descripcion || "";
-      document.getElementById('campoLatitud').value = item.lat;
-      document.getElementById('campoLongitud').value = item.lng;
+      actualizarCoordenadasYMarcador(item.lat, item.lng);
       document.getElementById('campoContacto').value = item.contacto || "";
       
       document.getElementById('campoPin').value = "";
@@ -1050,7 +1079,7 @@
       }
 
       abrirFormulario();
-      alert("📋 Se copiaron los datos. Puedes hacer clic en '📍 Reubicar punto en el mapa' para marcar la nueva sede o punto de acopio.");
+      alert("📋 Se copiaron los datos. Puedes buscar la nueva dirección con el botón '🔎 Ubicar' o presionar '📍 O señalar directamente en el mapa'.");
     }
 
     function desactivarPublicacion(id) {
@@ -1066,7 +1095,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1091,7 +1120,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1134,7 +1163,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1157,7 +1186,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1226,7 +1255,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1251,7 +1280,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV24', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
