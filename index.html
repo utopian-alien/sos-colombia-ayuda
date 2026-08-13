@@ -129,6 +129,15 @@
 
   </main>
 
+  <!-- VENTANA MODAL: VISOR DE IMAGEN EN PANTALLA COMPLETA -->
+  <div id="modalImagenFull" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex justify-center items-center p-4 z-[10000]" onclick="cerrarImagenFull()">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col justify-center items-center" onclick="event.stopPropagation()">
+      <button onclick="cerrarImagenFull()" class="absolute -top-10 right-0 text-white hover:text-red-400 font-bold text-3xl transition">&times;</button>
+      <img id="imgFullTarget" src="" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-slate-700">
+      <p class="text-xs text-slate-300 mt-2 font-semibold">Toca fuera de la imagen o la X para cerrar</p>
+    </div>
+  </div>
+
   <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
@@ -306,7 +315,7 @@
     let imagenBase64Actual = null;
     let marcadorPicker = null;
 
-    // 1. Inicializar Mapa Leaflet con Desactivación de Zoom por Doble Clic
+    // 1. Inicializar Mapa Leaflet
     const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap Colombia', maxZoom: 19
@@ -337,6 +346,18 @@
           document.getElementById('campoUbicacion').value = data.display_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) {}
+    }
+
+    // Funciones del Visor de Imagen Full
+    function abrirImagenFull(src) {
+      if (!src) return;
+      document.getElementById('imgFullTarget').src = src;
+      document.getElementById('modalImagenFull').classList.remove('hidden');
+    }
+
+    function cerrarImagenFull() {
+      document.getElementById('modalImagenFull').classList.add('hidden');
+      document.getElementById('imgFullTarget').src = "";
     }
 
     function scrollACard(id) {
@@ -495,7 +516,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV14')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV15')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -612,7 +633,8 @@
           `);
         mapaMarcadores[id] = marcador;
 
-        let imgHTML = item.imagen ? `<img src="${item.imagen}" class="w-full h-36 object-cover rounded-lg my-2 border border-slate-200">` : '';
+        // Foto interactiva en la tarjeta (Clic para ver en pantalla completa)
+        let imgHTML = item.imagen ? `<img src="${item.imagen}" onclick="abrirImagenFull('${item.imagen}')" class="w-full h-36 object-cover rounded-lg my-2 border border-slate-200 cursor-pointer hover:opacity-90 transition shadow-sm" title="Haz clic para ampliar la imagen">` : '';
 
         let distHTML = '';
         if (ubicacionUsuarioGPS) {
@@ -628,7 +650,6 @@
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
         });
 
-        // Contacto opcional
         let contactoHTML = item.contacto 
           ? `<a href="https://wa.me/57${item.contacto.replace(/\D/g,'')}" target="_blank" class="text-green-700 font-bold hover:underline">💬 Contactar (${item.contacto})</a>`
           : `<span class="text-slate-400 font-semibold italic">Sin teléfono de contacto</span>`;
@@ -732,7 +753,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -756,7 +777,7 @@
         if (item) {
           item.reportesCount = nuevoCount;
           if (nuevoCount >= 3) item.desactivado = true;
-          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -798,7 +819,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -819,7 +840,7 @@
           item.verificaciones = nuevaCantidad;
           misVerificaciones.push(String(id));
           localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-          localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -872,7 +893,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -897,7 +918,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV14', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
