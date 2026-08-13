@@ -73,6 +73,14 @@
       💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. Usa la tabla lateral para ir a una ciudad o departamento.
     </div>
 
+    <!-- Banner Flotante para Selección en Mapa -->
+    <div id="bannerSeleccionMapa" class="hidden fixed top-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs md:text-sm font-bold px-5 py-3 rounded-full shadow-2xl z-[10000] flex items-center gap-3 border-2 border-red-500 animate-bounce">
+      <span>📍 Haz <u>doble clic</u> en el mapa para fijar la nueva ubicación.</span>
+      <button onclick="cancelarSeleccionMapa()" class="bg-red-700 hover:bg-red-800 text-white text-xs px-2.5 py-1 rounded-full shadow transition">
+        ✕ Cancelar
+      </button>
+    </div>
+
     <!-- Grilla del Mapa y Tabla Lateral -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Mapa Interactivo (2 columnas en pantallas grandes) -->
@@ -190,7 +198,7 @@
             Doble Clic y Tabla Lateral 📍
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Haz <b>doble clic</b> para registrar un punto. Consulta la <b>tabla a la derecha del mapa</b> para ver qué ciudades/departamentos tienen solicitudes u ofertas activas y haz clic sobre cualquiera para navegar directamente.
+            Haz <b>doble clic</b> para registrar un punto. Consulta la <b>tabla a la derecha del mapa</b> para ver qué ciudades/departamentos tienen solicitudes u ofertas activas.
           </p>
         </div>
 
@@ -200,7 +208,7 @@
             Publica, Edita o Duplica
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Puedes <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> una iniciativa en otro punto. Para confirmar los cambios o crear el nuevo punto deberás ingresar un PIN de 4 dígitos.
+            Al <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> puedes presionar <b>"📍 Reubicar punto"</b> para elegir la nueva posición directamente en el mapa.
           </p>
         </div>
 
@@ -267,11 +275,16 @@
           </div>
         </div>
 
-        <!-- Ubicación / Referencia (OPCIONAL) -->
+        <!-- Ubicación / Referencia -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
           <input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej: Calle 13 # 4-25 / Vereda El Tambo (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
           <datalist id="sugerenciasFormulario"></datalist>
+
+          <!-- Botón de reubicación directa en el mapa -->
+          <button type="button" onclick="seleccionarNuevaUbicacionEnMapa()" class="mt-2 w-full bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold py-2 px-3 rounded-lg border border-sky-300 text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
+            📍 Reubicar punto en el mapa (Doble clic)
+          </button>
         </div>
 
         <!-- Tipos de Ayuda Múltiples -->
@@ -362,11 +375,12 @@
 
   <script>
     // 🔑 TOKEN DE MAPBOX (Ingresa tu Access Token de Mapbox aquí)
-    const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
+    const MAPBOX_ACCESS_TOKEN = "TU_TOKEN_DE_MAPBOX_AQUI";
 
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
     let marcadorPicker = null;
+    let enModoSeleccionUbicacion = false;
 
     // 1. Inicializar Mapa Leaflet
     const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
@@ -376,7 +390,7 @@
 
     setTimeout(() => { mapa.invalidateSize(); }, 300);
 
-    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA CON REVERSE MAPBOX
+    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA
     mapa.on('dblclick', function(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
@@ -388,8 +402,32 @@
       marcadorPicker = L.marker([lat, lng]).addTo(mapa);
 
       actualizarDireccionPorReverseMapbox(lat, lng);
+
+      // Ocultar banner flotante si estaba activo
+      const banner = document.getElementById('bannerSeleccionMapa');
+      if (banner) banner.classList.add('hidden');
+
+      enModoSeleccionUbicacion = false;
       abrirFormulario();
     });
+
+    function seleccionarNuevaUbicacionEnMapa() {
+      enModoSeleccionUbicacion = true;
+      document.getElementById('modalFormulario').classList.add('hidden');
+
+      const banner = document.getElementById('bannerSeleccionMapa');
+      if (banner) banner.classList.remove('hidden');
+
+      // Desplazar suavemente hasta el mapa
+      document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelarSeleccionMapa() {
+      enModoSeleccionUbicacion = false;
+      const banner = document.getElementById('bannerSeleccionMapa');
+      if (banner) banner.classList.add('hidden');
+      abrirFormulario();
+    }
 
     // Reverse Geocoding usando Mapbox API
     async function actualizarDireccionPorReverseMapbox(lat, lng) {
@@ -400,9 +438,7 @@
         const data = await res.json();
         if (data && data.features && data.features.length > 0) {
           const placeName = data.features[0].place_name;
-          if (!document.getElementById('campoUbicacion').value) {
-            document.getElementById('campoUbicacion').value = placeName.split(',').slice(0, 3).join(', ');
-          }
+          document.getElementById('campoUbicacion').value = placeName.split(',').slice(0, 3).join(', ');
         }
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
     }
@@ -593,7 +629,12 @@
     }
 
     function abrirFormulario() { document.getElementById('modalFormulario').classList.remove('hidden'); }
-    function cerrarFormulario() { document.getElementById('modalFormulario').classList.add('hidden'); }
+    function cerrarFormulario() { 
+      document.getElementById('modalFormulario').classList.add('hidden'); 
+      const banner = document.getElementById('bannerSeleccionMapa');
+      if (banner) banner.classList.add('hidden');
+      enModoSeleccionUbicacion = false;
+    }
     function marcarTodosTipos(valor) {
       document.querySelectorAll('.chk-tipo').forEach(c => c.checked = valor);
       toggleOtroDetalle();
@@ -633,7 +674,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV22')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV23')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1009,7 +1050,7 @@
       }
 
       abrirFormulario();
-      alert("📋 Se copiaron los datos. Define el PIN para el nuevo punto, modifica la dirección si lo deseas o haz doble clic en el mapa.");
+      alert("📋 Se copiaron los datos. Puedes hacer clic en '📍 Reubicar punto en el mapa' para marcar la nueva sede o punto de acopio.");
     }
 
     function desactivarPublicacion(id) {
@@ -1025,7 +1066,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1050,7 +1091,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1093,7 +1134,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1116,7 +1157,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1185,7 +1226,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1210,7 +1251,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV23', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
