@@ -73,7 +73,7 @@
 
     <!-- Indicador de acción sobre el mapa -->
     <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
-      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. Usa la tabla lateral para ir a una ciudad o departamento.
+      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. La tabla lateral agrupa automáticamente los puntos por proximidad espacial a los centros operativos (Bogotá, Istmina, etc.).
     </div>
 
     <!-- Banner Flotante para Selección en Mapa -->
@@ -89,11 +89,11 @@
       <!-- Mapa Interactivo (2 columnas en pantallas grandes) -->
       <div id="mapa" class="lg:col-span-2 shadow-md border border-slate-200"></div>
 
-      <!-- Tabla Resumen por Ciudad / Departamento (1 columna a la derecha) -->
+      <!-- Tabla Resumen por Proximidad a Centros Clave -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[500px]">
         <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
           <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-            📍 Ciudades y Dptos Activos
+            📍 Centros y Zonas Activas (Por Proximidad)
           </h3>
           <span id="cantCiudadesBadge" class="bg-red-100 text-red-800 text-[11px] px-2 py-0.5 rounded-full font-extrabold">0</span>
         </div>
@@ -102,7 +102,7 @@
           <table class="w-full text-left border-collapse">
             <thead class="bg-slate-100 sticky top-0 border-b border-slate-200 text-[11px] font-bold text-slate-700 z-10">
               <tr>
-                <th class="p-2">Ciudad / Dpto</th>
+                <th class="p-2">Centro / Hub</th>
                 <th class="p-2 text-center" title="Solicitudes">🔴</th>
                 <th class="p-2 text-center" title="Ofertas">🟢</th>
                 <th class="p-2 text-center">Total</th>
@@ -264,7 +264,7 @@
             Mapa, Doble Clic y Tabla 📍
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Haz <b>doble clic</b> en cualquier punto del mapa para registrar una necesidad u oferta. Usa la tabla lateral para filtrar ciudades y departamentos activos.
+            Haz <b>doble clic</b> en cualquier punto del mapa para registrar una necesidad u oferta. La tabla lateral agrupa automáticamente los puntos por cercanía espacial (Bogotá, Istmina, etc.).
           </p>
         </div>
 
@@ -463,6 +463,32 @@
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
     const GID_HOJA_1 = "0";             // Pestaña 1 (Voluntariados)
     const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación / Sangre / Colectas / Mascotas)
+
+    // 📍 Centros Clave de Referencia para Cálculo de Distancia Euclidiana
+    const CENTROS_REFERENCIA = [
+      { nombre: "Bogotá", dpto: "Cundinamarca", lat: 4.7110, lng: -74.0721 },
+      { nombre: "Istmina", dpto: "Chocó", lat: 5.1583, lng: -76.6972 },
+      { nombre: "Quibdó", dpto: "Chocó", lat: 5.6947, lng: -76.6611 },
+      { nombre: "Medellín", dpto: "Antioquia", lat: 6.2442, lng: -75.5812 },
+      { nombre: "Cali", dpto: "Valle del Cauca", lat: 3.4516, lng: -76.5320 },
+      { nombre: "Bucaramanga", dpto: "Santander", lat: 7.1193, lng: -73.1227 },
+      { nombre: "Cartagena", dpto: "Bolívar", lat: 10.3910, lng: -75.4794 },
+      { nombre: "Barranquilla", dpto: "Atlántico", lat: 10.9685, lng: -74.7813 }
+    ];
+
+    function encontrarCentroMasCercano(lat, lng) {
+      let masCercano = CENTROS_REFERENCIA[0];
+      let minDst = Infinity;
+      CENTROS_REFERENCIA.forEach(c => {
+        // Distancia euclidiana simple en grados de coordenadas
+        const dst = Math.sqrt(Math.pow(lat - c.lat, 2) + Math.pow(lng - c.lng, 2));
+        if (dst < minDst) {
+          minDst = dst;
+          masCercano = c;
+        }
+      });
+      return masCercano;
+    }
 
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
@@ -868,7 +894,7 @@
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV35')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -957,7 +983,7 @@
         return;
       }
 
-      const gruposCiudades = {};
+      const gruposCentros = {};
 
       items.forEach(item => {
         const id = item.id;
@@ -970,46 +996,28 @@
         const tiposInactivos = item.tiposInactivos || [];
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
-        let partes = (item.ubicacion || '').split(',').map(s => s.trim()).filter(Boolean);
-        partes = partes.filter(p => !p.toLowerCase().includes('colombia'));
+        // Calcular centro o hub más cercano usando distancia euclidiana
+        const centroCercano = encontrarCentroMasCercano(item.lat, item.lng);
+        const claveGrupo = centroCercano.nombre.toLowerCase();
 
-        let ciudad = 'Zona sin dirección';
-        let dpto = '';
-
-        if (partes.length >= 2) {
-          ciudad = partes[partes.length - 2];
-          dpto = partes[partes.length - 1];
-        } else if (partes.length === 1) {
-          ciudad = partes[0];
-        }
-
-        if (ciudad.startsWith('Punto en mapa')) {
-          ciudad = 'Ubicación sin dirección';
-          dpto = '';
-        }
-
-        const claveGrupo = `${ciudad}_${dpto}`.toLowerCase();
-
-        if (!gruposCiudades[claveGrupo]) {
-          gruposCiudades[claveGrupo] = {
-            ciudad: ciudad,
-            dpto: dpto,
+        if (!gruposCentros[claveGrupo]) {
+          gruposCentros[claveGrupo] = {
+            ciudad: centroCercano.nombre,
+            dpto: centroCercano.dpto,
             necesidades: 0,
             ofertas: 0,
             total: 0,
-            latSum: 0,
-            lngSum: 0
+            latRef: centroCercano.lat,
+            lngRef: centroCercano.lng
           };
         }
 
-        gruposCiudades[claveGrupo].total += 1;
+        gruposCentros[claveGrupo].total += 1;
         if (item.modalidad === 'ofrece') {
-          gruposCiudades[claveGrupo].ofertas += 1;
+          gruposCentros[claveGrupo].ofertas += 1;
         } else {
-          gruposCiudades[claveGrupo].necesidades += 1;
+          gruposCentros[claveGrupo].necesidades += 1;
         }
-        gruposCiudades[claveGrupo].latSum += item.lat;
-        gruposCiudades[claveGrupo].lngSum += item.lng;
 
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
         let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Detalle/Nequi:</b> ${item.otroDetalle}</div>` : '';
@@ -1136,13 +1144,13 @@
         contenedor.insertAdjacentHTML('beforeend', tarjetaHTML);
       });
 
-      // TABLA LATERAL DE CIUDADES Y DEPARTAMENTOS
+      // TABLA LATERAL DE CENTROS / HUBS POR PROXIMIDAD
       const tablaBody = document.getElementById('tablaCiudadesBody');
       const cantBadge = document.getElementById('cantCiudadesBadge');
 
       if (tablaBody) {
         tablaBody.innerHTML = '';
-        const listaGrupos = Object.values(gruposCiudades);
+        const listaGrupos = Object.values(gruposCentros);
         if (cantBadge) cantBadge.innerText = listaGrupos.length;
 
         if (listaGrupos.length === 0) {
@@ -1150,14 +1158,12 @@
         } else {
           listaGrupos.sort((a, b) => b.total - a.total);
           listaGrupos.forEach(g => {
-            const avgLat = g.latSum / g.total;
-            const avgLng = g.lngSum / g.total;
             const dptoTexto = g.dpto ? `<span class="block text-[10px] text-slate-400 font-normal">${g.dpto}</span>` : '';
 
             const filaHTML = `
-              <tr onclick="centrarMapa([${avgLat}, ${avgLng}], 14)" class="hover:bg-slate-100 cursor-pointer transition">
+              <tr onclick="centrarMapa([${g.latRef}, ${g.lngRef}], 12)" class="hover:bg-slate-100 cursor-pointer transition">
                 <td class="p-2 font-bold text-slate-800 leading-tight">
-                  ${g.ciudad}
+                  📍 ${g.ciudad}
                   ${dptoTexto}
                 </td>
                 <td class="p-2 text-center text-red-700 font-bold">${g.necesidades}</td>
@@ -1276,7 +1282,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1301,7 +1307,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1344,7 +1350,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1367,7 +1373,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1442,7 +1448,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1467,7 +1473,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV35', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
