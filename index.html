@@ -58,7 +58,7 @@
           id="buscadorPrincipal" 
           list="sugerenciasPrincipal" 
           onkeypress="if(event.key==='Enter') buscarMunicipioPrincipal()" 
-          placeholder="🔍 Escribe municipio o dirección para centrar el mapa..." 
+          placeholder="🔍 Escribe dirección, barrio o municipio con tecnología Mapbox..." 
           class="flex-1 border border-slate-300 rounded-lg p-2 text-xs md:text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
         />
         <datalist id="sugerenciasPrincipal"></datalist>
@@ -270,7 +270,7 @@
         <!-- Ubicación / Referencia (OPCIONAL) -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
-          <input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej: Vereda El Tambo / Sector La Cancha (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
+          <input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej: Calle 13 # 4-25 / Vereda El Tambo (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
           <datalist id="sugerenciasFormulario"></datalist>
         </div>
 
@@ -361,6 +361,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
+    // 🔑 TOKEN DE MAPBOX (Ingresa tu Access Token de Mapbox aquí)
+    const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
+
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
     let marcadorPicker = null;
@@ -368,12 +371,12 @@
     // 1. Inicializar Mapa Leaflet
     const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap Colombia', maxZoom: 19
+      attribution: '© OpenStreetMap Colombia | Mapbox Geocoding', maxZoom: 19
     }).addTo(mapa);
 
     setTimeout(() => { mapa.invalidateSize(); }, 300);
 
-    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA
+    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA CON REVERSE MAPBOX
     mapa.on('dblclick', function(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
@@ -384,18 +387,86 @@
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
       marcadorPicker = L.marker([lat, lng]).addTo(mapa);
 
-      actualizarDireccionPorReverse(lat, lng);
+      actualizarDireccionPorReverseMapbox(lat, lng);
       abrirFormulario();
     });
 
-    async function actualizarDireccionPorReverse(lat, lng) {
+    // Reverse Geocoding usando Mapbox API
+    async function actualizarDireccionPorReverseMapbox(lat, lng) {
+      if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") return;
+
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
         const data = await res.json();
-        if (data && data.display_name && !document.getElementById('campoUbicacion').value) {
-          document.getElementById('campoUbicacion').value = data.display_name.split(',').slice(0, 3).join(', ');
+        if (data && data.features && data.features.length > 0) {
+          const placeName = data.features[0].place_name;
+          if (!document.getElementById('campoUbicacion').value) {
+            document.getElementById('campoUbicacion').value = placeName.split(',').slice(0, 3).join(', ');
+          }
         }
-      } catch (e) {}
+      } catch (e) { console.error("Error en Reverse Mapbox:", e); }
+    }
+
+    // Autocompletado en Vivo usando Mapbox Geocoding API
+    function activarAutocompletadoVivoMapbox(inputId, datalistId) {
+      const input = document.getElementById(inputId);
+      const datalist = document.getElementById(datalistId);
+      let temporizador;
+
+      input.addEventListener('input', function() {
+        clearTimeout(temporizador);
+        const texto = this.value.trim();
+        if (texto.length < 3) return;
+
+        temporizador = setTimeout(async () => {
+          if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") return;
+
+          try {
+            const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(texto)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&autocomplete=true&limit=5`);
+            const data = await res.json();
+            datalist.innerHTML = '';
+            if (data && data.features) {
+              data.features.forEach(f => {
+                const nombreLugar = f.place_name;
+                if (nombreLugar) {
+                  const option = document.createElement('option');
+                  option.value = nombreLugar;
+                  datalist.appendChild(option);
+                }
+              });
+            }
+          } catch (e) { console.error("Error Autocomplete Mapbox:", e); }
+        }, 300);
+      });
+    }
+
+    activarAutocompletadoVivoMapbox('buscadorPrincipal', 'sugerenciasPrincipal');
+    activarAutocompletadoVivoMapbox('campoUbicacion', 'sugerenciasFormulario');
+
+    // Buscador Principal con Mapbox
+    async function buscarMunicipioPrincipal() {
+      const query = document.getElementById('buscadorPrincipal').value.trim();
+      if (!query) return alert("Escribe un municipio o dirección.");
+
+      if (!MAPBOX_ACCESS_TOKEN || MAPBOX_ACCESS_TOKEN === "TU_TOKEN_DE_MAPBOX_AQUI") {
+        alert("⚠️ Por favor ingresa tu MAPBOX_ACCESS_TOKEN en el código para activar la búsqueda con Mapbox.");
+        return;
+      }
+
+      let consulta = query;
+      if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
+
+      try {
+        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(consulta)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
+        const data = await res.json();
+        if (data && data.features && data.features.length > 0) {
+          const lon = data.features[0].center[0];
+          const lat = data.features[0].center[1];
+          centrarMapa([lat, lon], 15);
+        } else {
+          alert("No se encontró la dirección en Mapbox.");
+        }
+      } catch (e) { alert("Error al buscar en Mapbox."); }
     }
 
     // VERIFICACIÓN DE PROXIMIDAD DE SEGURIDAD (MENOS DE 50 METROS)
@@ -497,58 +568,6 @@
       document.getElementById('containerPreview').classList.add('hidden');
     }
 
-    function activarAutocompletadoVivo(inputId, datalistId) {
-      const input = document.getElementById(inputId);
-      const datalist = document.getElementById(datalistId);
-      let temporizador;
-
-      input.addEventListener('input', function() {
-        clearTimeout(temporizador);
-        const texto = this.value.trim();
-        if (texto.length < 3) return;
-
-        temporizador = setTimeout(async () => {
-          try {
-            const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(texto)}&bbox=-79.0,0.0,-66.0,12.5&limit=5`);
-            const data = await res.json();
-            datalist.innerHTML = '';
-            data.features.forEach(f => {
-              const props = f.properties;
-              const nombreLugar = [props.name, props.street, props.district || props.suburb, props.city || props.county, props.state].filter(Boolean).join(', ');
-              if (nombreLugar) {
-                const option = document.createElement('option');
-                option.value = nombreLugar;
-                datalist.appendChild(option);
-              }
-            });
-          } catch (e) {}
-        }, 300);
-      });
-    }
-
-    activarAutocompletadoVivo('buscadorPrincipal', 'sugerenciasPrincipal');
-    activarAutocompletadoVivo('campoUbicacion', 'sugerenciasFormulario');
-
-    async function buscarMunicipioPrincipal() {
-      const query = document.getElementById('buscadorPrincipal').value.trim();
-      if (!query) return alert("Escribe un municipio o dirección.");
-
-      let consulta = query;
-      if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
-
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=co&addressdetails=1&limit=1&q=${encodeURIComponent(consulta)}`);
-        const data = await res.json();
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          mapa.setView([lat, lon], 15);
-        } else {
-          alert("No se encontró el lugar.");
-        }
-      } catch (e) { alert("Error al buscar."); }
-    }
-
     function centrarMapa(coords, zoom) { 
       mapa.setView(coords, zoom); 
       setTimeout(() => { mapa.invalidateSize(); }, 200);
@@ -614,7 +633,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV21')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV22')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -703,7 +722,6 @@
         return;
       }
 
-      // Estructura para agrupar Ciudades y Departamentos
       const gruposCiudades = {};
 
       items.forEach(item => {
@@ -717,7 +735,6 @@
         const tiposInactivos = item.tiposInactivos || [];
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
-        // Parse de Ciudad y Departamento
         let partes = (item.ubicacion || '').split(',').map(s => s.trim()).filter(Boolean);
         partes = partes.filter(p => !p.toLowerCase().includes('colombia'));
 
@@ -759,7 +776,6 @@
         gruposCiudades[claveGrupo].latSum += item.lat;
         gruposCiudades[claveGrupo].lngSum += item.lng;
 
-        // Popup e Icono Leaflet
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
         let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
 
@@ -867,7 +883,7 @@
         contenedor.insertAdjacentHTML('beforeend', tarjetaHTML);
       });
 
-      // RENDERIZADO DE LA TABLA LATERAL DE CIUDADES Y DEPARTAMENTOS
+      // TABLA LATERAL DE CIUDADES Y DEPARTAMENTOS
       const tablaBody = document.getElementById('tablaCiudadesBody');
       const cantBadge = document.getElementById('cantCiudadesBadge');
 
@@ -915,11 +931,9 @@
         document.getElementById('tituloModal').innerText = "✏️ Modificar Publicación";
         document.getElementById('btnEnviar').innerText = "💾 Guardar Cambios";
 
-        // Cargar Modalidad
         const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
         radioMod.forEach(r => r.checked = (r.value === item.modalidad));
 
-        // Cargar campos
         document.getElementById('campoUbicacion').value = item.ubicacion || "";
         document.getElementById('campoPrioridad').value = item.prioridad || "Media";
         document.getElementById('campoDescripcion').value = item.descripcion || "";
@@ -927,11 +941,9 @@
         document.getElementById('campoLongitud').value = item.lng;
         document.getElementById('campoContacto').value = item.contacto || "";
         
-        // PIN EN BLANCO
         document.getElementById('campoPin').value = "";
         document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
-        // Cargar Checkboxes
         const chks = document.querySelectorAll('.chk-tipo');
         const activos = item.tiposActivos || [];
         chks.forEach(c => {
@@ -965,11 +977,9 @@
       document.getElementById('tituloModal').innerText = "📋 Duplicar Publicación en Nueva Ubicación";
       document.getElementById('btnEnviar').innerText = "📋 Publicar Nuevo Punto";
 
-      // Copiar Modalidad
       const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
       radioMod.forEach(r => r.checked = (r.value === item.modalidad));
 
-      // Copiar información existente
       document.getElementById('campoUbicacion').value = item.ubicacion ? `${item.ubicacion} (Punto Adicional)` : "";
       document.getElementById('campoPrioridad').value = item.prioridad || "Media";
       document.getElementById('campoDescripcion').value = item.descripcion || "";
@@ -977,11 +987,9 @@
       document.getElementById('campoLongitud').value = item.lng;
       document.getElementById('campoContacto').value = item.contacto || "";
       
-      // PIN EN BLANCO
       document.getElementById('campoPin').value = "";
       document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
-      // Copiar checkboxes de ayuda
       const chks = document.querySelectorAll('.chk-tipo');
       const activos = item.tiposActivos || [];
       chks.forEach(c => {
@@ -1017,7 +1025,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1042,7 +1050,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1085,7 +1093,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1108,7 +1116,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1177,7 +1185,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1202,7 +1210,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV22', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
