@@ -169,7 +169,7 @@
             Publica, Edita o Duplica
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Con tu PIN puedes ingresar a <b>"✏️ Editar"</b> (cargando tus valores previos para <b>Guardar</b> o <b>Descartar</b>). Si tu iniciativa tiene varios puntos de acopio o sedes, usa <b>"📋 Duplicar"</b> para replicar la información en otra ubicación.
+            Puedes <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> una iniciativa en otro punto. Para confirmar los cambios o crear el nuevo punto deberás ingresar un PIN de 4 dígitos.
           </p>
         </div>
 
@@ -253,7 +253,7 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🥣 Alimentos y Agua Potable" class="chk-tipo accent-red-700"> 🥣 Alimentos y Agua Potable</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="💊 Insumos Médicos y Salud" class="chk-tipo accent-red-700"> 💊 Insumos Médicos y Salud</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
-            <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue, Carpas y Colchonetas</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
             
             <!-- OPCIÓN OTRO -->
@@ -292,10 +292,10 @@
           <input type="tel" id="campoContacto" placeholder="Ej: 3001234567 (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
         </div>
 
-        <!-- PIN de Autor -->
+        <!-- PIN de Autor (Sin Autocompletar) -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos para editar/borrar)</label>
-          <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Ej: 1234" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos requeridos para guardar)</label>
+          <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Escribe el PIN de 4 dígitos" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
         </div>
 
         <!-- Coordenadas asignadas automáticamente -->
@@ -531,6 +531,7 @@
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
       document.getElementById('btnEnviar').innerText = "Publicar Solicitud de Ayuda";
       document.getElementById('formularioAyuda').reset();
+      document.getElementById('campoPin').value = "";
       document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
       toggleOtroDetalle();
@@ -578,7 +579,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV18')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV19')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -783,34 +784,36 @@
       });
     }
 
-    // PRECARGA COMPLETA AL EDITAR
+    // PRECARGA COMPLETA AL EDITAR (PIN EN BLANCO)
     function editarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
 
-      const pin = prompt("Ingresa el PIN de 4 dígitos de esta publicación:");
-      if (!pin) return;
+      const pinPrompt = prompt("Ingresa el PIN de 4 dígitos para autorizar la edición:");
+      if (!pinPrompt) return;
 
-      if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
+      if (pinPrompt === String(item.pin) || pinPrompt === CLAVE_MAESTRA) {
         document.getElementById('editId').value = id;
         document.getElementById('tituloModal').innerText = "✏️ Modificar Publicación";
         document.getElementById('btnEnviar').innerText = "💾 Guardar Cambios";
 
-        // Cargar Modalidad (Radio)
+        // Cargar Modalidad
         const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
         radioMod.forEach(r => r.checked = (r.value === item.modalidad));
 
-        // Cargar campos de texto, prioridad, coordenadas y contacto
+        // Cargar campos
         document.getElementById('campoUbicacion').value = item.ubicacion || "";
         document.getElementById('campoPrioridad').value = item.prioridad || "Media";
         document.getElementById('campoDescripcion').value = item.descripcion || "";
         document.getElementById('campoLatitud').value = item.lat;
         document.getElementById('campoLongitud').value = item.lng;
         document.getElementById('campoContacto').value = item.contacto || "";
-        document.getElementById('campoPin').value = item.pin || "";
+        
+        // PIN EN BLANCO (Se exige ingresar/confirmar para guardar)
+        document.getElementById('campoPin').value = "";
         document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
-        // Cargar Checkboxes de ayuda
+        // Cargar Checkboxes
         const chks = document.querySelectorAll('.chk-tipo');
         const activos = item.tiposActivos || [];
         chks.forEach(c => {
@@ -835,12 +838,11 @@
       }
     }
 
-    // REPLICAR INFORMACIÓN EN OTRO PUNTO / SEGUNDA SEDE
+    // REPLICAR INFORMACIÓN EN OTRO PUNTO (PIN EN BLANCO)
     function duplicarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
 
-      // Se limpia editId para generar un nuevo registro independiente
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "📋 Duplicar Publicación en Nueva Ubicación";
       document.getElementById('btnEnviar').innerText = "📋 Publicar Nuevo Punto";
@@ -856,7 +858,9 @@
       document.getElementById('campoLatitud').value = item.lat;
       document.getElementById('campoLongitud').value = item.lng;
       document.getElementById('campoContacto').value = item.contacto || "";
-      document.getElementById('campoPin').value = item.pin || "";
+      
+      // PIN EN BLANCO (Obliga a asignar PIN para el nuevo punto)
+      document.getElementById('campoPin').value = "";
       document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
       // Copiar checkboxes de ayuda
@@ -879,7 +883,7 @@
       }
 
       abrirFormulario();
-      alert("📋 Se copiaron los datos de la iniciativa. Puedes modificar la dirección, el teléfono o hacer doble clic en el mapa para ubicar el nuevo punto.");
+      alert("📋 Se copiaron los datos. Define el PIN para el nuevo punto, modifica la dirección si lo deseas o haz doble clic en el mapa.");
     }
 
     function desactivarPublicacion(id) {
@@ -895,7 +899,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -920,7 +924,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -963,7 +967,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -986,7 +990,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1024,6 +1028,8 @@
         ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
       }
 
+      const pinIngresado = document.getElementById('campoPin').value.trim();
+
       const payload = {
         modalidad: modalidad,
         ubicacion: ubicacionTexto,
@@ -1033,19 +1039,28 @@
         lat: lat,
         lng: lng,
         contacto: document.getElementById('campoContacto').value.trim(),
-        pin: document.getElementById('campoPin').value,
+        pin: pinIngresado,
         imagen: imagenBase64Actual,
         otroDetalle: otroDetalle
       };
 
       if (editId) {
+        // Validación de PIN obligatorio para confirmar edición
+        const itemExistente = listaGlobalPublicaciones.find(p => String(p.id) === String(editId));
+        if (itemExistente && pinIngresado !== String(itemExistente.pin) && pinIngresado !== CLAVE_MAESTRA) {
+          alert("❌ El PIN ingresado no coincide con el PIN asignado a esta publicación.");
+          btn.disabled = false;
+          btn.innerText = "💾 Guardar Cambios";
+          return;
+        }
+
         if (firebaseActivo) {
           referenciaSolicitudes.child(editId).update(payload).then(() => finalizarConExito(lat, lng));
         } else {
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1070,7 +1085,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV18', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
@@ -1082,6 +1097,7 @@
 
       cerrarFormulario();
       document.getElementById('formularioAyuda').reset();
+      document.getElementById('campoPin').value = "";
       document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
       toggleOtroDetalle();
