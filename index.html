@@ -477,7 +477,7 @@
 
     try {
       firebase.initializeApp(firebaseConfig);
-      referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
+      referenciaSolicitudes = firebase.database().ref('solicitudes_pruebas');
       firebaseActivo = true;
 
       document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo (juntosayudamos-col)';
