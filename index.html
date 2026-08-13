@@ -204,25 +204,25 @@
 
       <div class="space-y-3 text-xs leading-relaxed text-slate-700">
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📊 1. Tabla de Google Sheets y Mapas de Referencia</p>
-          <p>Los datos en tiempo real de centros de acopio y voluntariado se alimentan colaborativamente desde la hoja de cálculo pública y listas coordinadas de lugares. Cualquier actualización en la tabla se refleja en este mapa (frecuencia de actualización:15 minutos):</p>
-          <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?gid=0#gid=0" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
-            🔗 Ver Lista y Tabla de Referencia en Google Maps &rarr;
+          <p class="font-bold text-slate-900 text-sm">📊 1. Hoja Pública de Google Sheets (Voluntariados)</p>
+          <p>Los datos de tareas de carga, inventario y voluntariado se integran en tiempo real mediante sincronización selectiva:</p>
+          <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
+            🔗 Ver Google Sheets de Referencia &rarr;
           </a>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario Validadas en Campo</p>
-          <p>Publicaciones hechas directamente por la comunidad sobre el mapa. El sistema integra verificación mediante GPS de alta precisión en terreno (< 50 metros) para confirmar la veracidad del punto de acopio o necesidad.</p>
+          <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario Validadas en Campo (Formulario normal)</p>
+          <p>Publicaciones y centros de acopio agregados directamente por la comunidad. El sistema protege estos registros y verifica la ubicación mediante GPS en terreno (< 50 metros).</p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Flyers y Posts de Redes Sociales</p>
-          <p>Información procesada y estructurada mediante inteligencia artificial multimodal desde afiches, piezas gráficas y publicaciones oficiales de redes sociales de organizaciones y colectivos.</p>
+          <p>Información procesada y estructurada mediante inteligencia artificial multimodal desde afiches, piezas gráficas y publicaciones oficiales.</p>
         </div>
 
         <div class="bg-red-50 p-3 rounded-xl border border-red-200 text-red-900 text-[11px] font-semibold">
-          ⚖️ <b>Código Abierto:</b> Este proyecto es un desarrollo sin fines de lucro bajo licencia libre <b>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</b>. Código disponible en GitHub: <a href="https://github.com/utopian-alien" target="_blank" class="underline font-bold">@utopian-alien</a>.
+          ⚖️ <b>Código Abierto:</b> Este proyecto es un desarrollo sin fines de lucro bajo licencia libre <b>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</b>. Desarrollado por <a href="https://github.com/utopian-alien" target="_blank" class="underline font-bold">@utopian-alien</a>.
         </div>
       </div>
 
@@ -453,8 +453,8 @@
     // 🔑 TOKEN OFICIAL DE MAPBOX INTEGRADO
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
     
-    // ID de Google Sheets para Sincronización Automática
-    const GOOGLE_SHEETS_ID = "XJQY-o3hsph0A1kkDaEESw";
+    // ID de la hoja de Google Sheets pública (Lector directo Frontend)
+    const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
 
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
@@ -547,22 +547,71 @@
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
     }
 
-    // LECTOR AUTOMÁTICO DE GOOGLE SHEETS (CSV STREAM)
+    // LECTOR DIRECTO Y SINCRONIZACIÓN SELECTIVA DE GOOGLE SHEETS
     async function sincronizarGoogleSheets() {
       const btn = event ? event.target : null;
-      if (btn) btn.innerText = "⏳ Leyendo Sheets...";
+      if (btn) btn.innerText = "⏳ Sincronizando Sheets...";
 
       try {
         const csvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv`;
-        const res = await fetch(csvUrl);
-        if (!res.ok) throw new Error("No se pudo obtener acceso directo al CSV público de Sheets.");
+        const response = await fetch(csvUrl);
+        if (!response.ok) throw new Error("No se pudo conectar con la hoja pública de Google Sheets.");
 
-        const textoCSV = await res.text();
-        const filas = textoCSV.split('\n').filter(f => f.trim().length > 0);
+        const csvText = await response.text();
+        const lineas = csvText.split('\n').map(l => l.trim()).filter(Boolean);
+        
+        if (lineas.length <= 1) {
+          alert("La hoja está vacía o no tiene contenido legible.");
+          return;
+        }
 
-        alert(`📊 Sincronización exitosa:\nSe leyeron ${filas.length} registros actualizados de la tabla pública de Google Sheets.`);
+        // 1. CONSERVAR TODOS LOS PUNTOS DE USUARIOS (Firebase / Formulario) y purgar solo los antiguos de Sheets
+        listaGlobalPublicaciones = listaGlobalPublicaciones.filter(p => p.origen !== "google_sheets_publico");
+
+        let contadorCargados = 0;
+
+        // 2. Parsear y cargar los elementos vigentes de la hoja pública
+        for (let i = 1; i < lineas.length; i++) {
+          const columnas = lineas[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          if (columnas.length < 1 || !columnas[0]) continue;
+
+          const titulo = columnas[0];
+          const detalle = columnas.slice(1).join(" ");
+          
+          const esOferta = detalle.includes("🟢") || detalle.toLowerCase().includes("sí voluntarios") || detalle.toLowerCase().includes("necesitan voluntarios");
+          
+          let lat = 4.6500;
+          let lng = -74.0800;
+
+          const puntoExterno = {
+            id: `sheet_external_${i}`,
+            modalidad: esOferta ? "ofrece" : "necesita",
+            ubicacion: `${titulo}, Colombia`,
+            tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
+            prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
+            descripcion: `[Hoja Pública] ${titulo} | ${detalle}`,
+            lat: lat,
+            lng: lng,
+            contacto: "",
+            pin: "2026",
+            imagen: null,
+            otroDetalle: detalle,
+            verificaciones: esOferta ? 3 : 1,
+            reportesCount: 0,
+            tiposInactivos: [],
+            origen: "google_sheets_publico"
+          };
+
+          listaGlobalPublicaciones.push(puntoExterno);
+          contadorCargados++;
+        }
+
+        aplicarFiltrosYOrden();
+        alert(`🔄 ¡Sincronización completada!\nSe actualizaron ${contadorCargados} puntos de la hoja pública. Los registros añadidos por los usuarios mediante el formulario del aplicativo se conservaron intactos.`);
+
       } catch (e) {
-        alert(`ℹ️ Estado de sincronización:\nLas listas públicas de Google Maps/Sheets están enlazadas. Puedes revisarlas detalladamente en la sección "Fuentes de Información".`);
+        console.error(e);
+        alert("⚠️ Hubo un error al leer la hoja pública de Google Sheets.");
       } finally {
         if (btn) btn.innerText = "📊 Sincronizar Sheets";
       }
@@ -789,12 +838,16 @@
 
       referenciaSolicitudes.on('value', snapshot => {
         const data = snapshot.val() || {};
-        listaGlobalPublicaciones = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        // Conservamos los elementos de Sheets que ya estaban cargados en memoria si los hay
+        const sheetItemsPrevios = listaGlobalPublicaciones.filter(p => p.origen === "google_sheets_publico");
+        const firebaseItems = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        
+        listaGlobalPublicaciones = [...firebaseItems, ...sheetItemsPrevios];
         aplicarFiltrosYOrden();
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV25')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV27')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -989,6 +1042,26 @@
           ? `<a href="https://wa.me/57${item.contacto.replace(/\D/g,'')}" target="_blank" class="text-green-700 font-bold hover:underline">💬 Contactar (${item.contacto})</a>`
           : `<span class="text-slate-400 font-semibold italic">Sin teléfono directo</span>`;
 
+        let btnAccionesExtras = '';
+        if (item.origen !== "google_sheets_publico") {
+          btnAccionesExtras = `
+            <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
+              <div class="flex gap-2 font-bold text-slate-600">
+                <button onclick="editarPublicacion('${id}')" class="hover:text-black">✏️ Editar</button>
+                <button onclick="duplicarPublicacion('${id}')" class="hover:text-blue-700 font-bold">📋 Duplicar</button>
+                <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
+              </div>
+              <button onclick="reportarFalsa('${id}', ${rCount}, ${item.lat}, ${item.lng})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
+            </div>
+          `;
+        } else {
+          btnAccionesExtras = `
+            <div class="pt-2 border-t border-slate-200 text-[11px] text-slate-400 italic text-center">
+              📌 Sincronizado desde Hoja Pública externa
+            </div>
+          `;
+        }
+
         const tarjetaHTML = `
           <div id="card-${id}" class="border ${totalmenteAtendido ? 'border-slate-300 bg-slate-100' : (item.modalidad === 'ofrece' ? 'border-emerald-300 bg-emerald-50/20' : 'border-red-200 bg-red-50/20')} p-4 rounded-xl shadow-sm flex flex-col justify-between transition">
             <div>
@@ -1030,14 +1103,7 @@
                 ${esVerificado ? '✅ Validado en terreno' : (yaVerifique ? '👍 Ya confirmaste' : '🙋‍♂️ Validar en terreno (< 50m)')}
               </button>
 
-              <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
-                <div class="flex gap-2 font-bold text-slate-600">
-                  <button onclick="editarPublicacion('${id}')" class="hover:text-black">✏️ Editar</button>
-                  <button onclick="duplicarPublicacion('${id}')" class="hover:text-blue-700 font-bold">📋 Duplicar</button>
-                  <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
-                </div>
-                <button onclick="reportarFalsa('${id}', ${rCount}, ${item.lat}, ${item.lng})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
-              </div>
+              ${btnAccionesExtras}
             </div>
           </div>
         `;
@@ -1184,7 +1250,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1209,7 +1275,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1252,7 +1318,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1275,7 +1341,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1344,7 +1410,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1369,7 +1435,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV25', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV27', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
