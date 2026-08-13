@@ -13,7 +13,6 @@
   <style>
     #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
     .custom-pin { display: flex; align-items: center; justify-content: center; }
-    .custom-nube { display: flex; align-items: center; justify-content: center; z-index: 500 !important; }
   </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
@@ -46,7 +45,6 @@
           <span class="font-semibold text-red-700">🔴 Necesidad</span>
           <span class="font-semibold text-emerald-700">🟢 Oferta</span>
           <span class="font-semibold text-slate-500">⚪ Atendido</span>
-          <span class="font-semibold text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">☁️ Resumen Municipio</span>
           <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">✅ Validado (3/3)</span>
         </div>
         <div id="estadoConexion" class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-xs">
@@ -72,11 +70,42 @@
 
     <!-- Indicador de acción sobre el mapa -->
     <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
-      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. Las <b>nubes ☁️</b> indican el resumen de cada municipio.
+      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. Usa la tabla lateral para ir a una ciudad o departamento.
     </div>
 
-    <!-- Mapa Interactivo -->
-    <div id="mapa" class="shadow-md border border-slate-200"></div>
+    <!-- Grilla del Mapa y Tabla Lateral -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Mapa Interactivo (2 columnas en pantallas grandes) -->
+      <div id="mapa" class="lg:col-span-2 shadow-md border border-slate-200"></div>
+
+      <!-- Tabla Resumen por Ciudad / Departamento (1 columna a la derecha) -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[500px]">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+          <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+            📍 Ciudades y Dptos Activos
+          </h3>
+          <span id="cantCiudadesBadge" class="bg-red-100 text-red-800 text-[11px] px-2 py-0.5 rounded-full font-extrabold">0</span>
+        </div>
+
+        <div class="overflow-y-auto flex-1 pr-1 text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 sticky top-0 border-b border-slate-200 text-[11px] font-bold text-slate-700 z-10">
+              <tr>
+                <th class="p-2">Ciudad / Dpto</th>
+                <th class="p-2 text-center" title="Solicitudes">🔴</th>
+                <th class="p-2 text-center" title="Ofertas">🟢</th>
+                <th class="p-2 text-center">Total</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCiudadesBody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="4" class="p-4 text-center text-slate-400 font-semibold text-xs">Cargando ubicaciones...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- Panel de Control y Filtros -->
     <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
@@ -158,10 +187,10 @@
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-            Doble Clic y Nubes ☁️
+            Doble Clic y Tabla Lateral 📍
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Haz <b>doble clic</b> para registrar un punto. Las <b>nubes ☁️</b> muestran el consolidado de solicitudes y ofertas por municipio; tócalas para hacer zoom directo.
+            Haz <b>doble clic</b> para registrar un punto. Consulta la <b>tabla a la derecha del mapa</b> para ver qué ciudades/departamentos tienen solicitudes u ofertas activas y haz clic sobre cualquiera para navegar directamente.
           </p>
         </div>
 
@@ -520,7 +549,11 @@
       } catch (e) { alert("Error al buscar."); }
     }
 
-    function centrarMapa(coords, zoom) { mapa.setView(coords, zoom); }
+    function centrarMapa(coords, zoom) { 
+      mapa.setView(coords, zoom); 
+      setTimeout(() => { mapa.invalidateSize(); }, 200);
+    }
+
     function abrirInstrucciones() { document.getElementById('modalInstrucciones').classList.remove('hidden'); }
     function cerrarInstrucciones() { document.getElementById('modalInstrucciones').classList.add('hidden'); }
     
@@ -559,7 +592,6 @@
     };
 
     const mapaMarcadores = {};
-    let marcadoresNubes = [];
     const misVerificaciones = JSON.parse(localStorage.getItem('misVerificaciones')) || [];
 
     let firebaseActivo = false;
@@ -582,7 +614,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV20')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV21')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -658,21 +690,21 @@
     }
 
     function renderizarContenedorYMapa(items) {
-      // Limpiar marcadores viejos
       Object.keys(mapaMarcadores).forEach(key => mapa.removeLayer(mapaMarcadores[key]));
-      marcadoresNubes.forEach(m => mapa.removeLayer(m));
-      marcadoresNubes = [];
 
       const contenedor = document.getElementById('contenedorTarjetas');
       contenedor.innerHTML = '';
 
       if (items.length === 0) {
         contenedor.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400 font-semibold text-xs">No hay publicaciones disponibles.</div>`;
+        const tablaBody = document.getElementById('tablaCiudadesBody');
+        if (tablaBody) tablaBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-semibold text-xs">Sin registros activos</td></tr>`;
+        document.getElementById('cantCiudadesBadge').innerText = "0";
         return;
       }
 
-      // Estructura para agrupar por Municipio y generar la Nube
-      const gruposMunicipios = {};
+      // Estructura para agrupar Ciudades y Departamentos
+      const gruposCiudades = {};
 
       items.forEach(item => {
         const id = item.id;
@@ -685,36 +717,49 @@
         const tiposInactivos = item.tiposInactivos || [];
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
-        // Extracción del Nombre del Municipio
+        // Parse de Ciudad y Departamento
         let partes = (item.ubicacion || '').split(',').map(s => s.trim()).filter(Boolean);
         partes = partes.filter(p => !p.toLowerCase().includes('colombia'));
-        let nombreCiudad = partes.length > 0 ? partes[partes.length - 1] : 'Zona';
-        if (nombreCiudad.startsWith('Punto en mapa')) nombreCiudad = 'Zona sin dirección';
 
-        const gridKey = `${item.lat.toFixed(1)}_${item.lng.toFixed(1)}`;
-        const keyGroup = `${nombreCiudad.toLowerCase()}_${gridKey}`;
+        let ciudad = 'Zona sin dirección';
+        let dpto = '';
 
-        if (!gruposMunicipios[keyGroup]) {
-          gruposMunicipios[keyGroup] = {
-            nombre: nombreCiudad,
-            latSum: 0,
-            lngSum: 0,
-            total: 0,
+        if (partes.length >= 2) {
+          ciudad = partes[partes.length - 2];
+          dpto = partes[partes.length - 1];
+        } else if (partes.length === 1) {
+          ciudad = partes[0];
+        }
+
+        if (ciudad.startsWith('Punto en mapa')) {
+          ciudad = 'Ubicación sin dirección';
+          dpto = '';
+        }
+
+        const claveGrupo = `${ciudad}_${dpto}`.toLowerCase();
+
+        if (!gruposCiudades[claveGrupo]) {
+          gruposCiudades[claveGrupo] = {
+            ciudad: ciudad,
+            dpto: dpto,
+            necesidades: 0,
             ofertas: 0,
-            necesidades: 0
+            total: 0,
+            latSum: 0,
+            lngSum: 0
           };
         }
 
-        gruposMunicipios[keyGroup].latSum += item.lat;
-        gruposMunicipios[keyGroup].lngSum += item.lng;
-        gruposMunicipios[keyGroup].total += 1;
+        gruposCiudades[claveGrupo].total += 1;
         if (item.modalidad === 'ofrece') {
-          gruposMunicipios[keyGroup].ofertas += 1;
+          gruposCiudades[claveGrupo].ofertas += 1;
         } else {
-          gruposMunicipios[keyGroup].necesidades += 1;
+          gruposCiudades[claveGrupo].necesidades += 1;
         }
+        gruposCiudades[claveGrupo].latSum += item.lat;
+        gruposCiudades[claveGrupo].lngSum += item.lng;
 
-        // Popup e icono individual
+        // Popup e Icono Leaflet
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
         let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
 
@@ -822,32 +867,39 @@
         contenedor.insertAdjacentHTML('beforeend', tarjetaHTML);
       });
 
-      // Renderizado de las Nubes Resumen por Municipio
-      Object.values(gruposMunicipios).forEach(g => {
-        const avgLat = g.latSum / g.total;
-        const avgLng = g.lngSum / g.total;
+      // RENDERIZADO DE LA TABLA LATERAL DE CIUDADES Y DEPARTAMENTOS
+      const tablaBody = document.getElementById('tablaCiudadesBody');
+      const cantBadge = document.getElementById('cantCiudadesBadge');
 
-        const iconoNube = L.divIcon({
-          className: 'custom-nube',
-          html: `
-            <div onclick="centrarMapa([${avgLat}, ${avgLng}], 14)" class="bg-white/95 backdrop-blur border border-sky-300 shadow-xl rounded-2xl p-2 text-center text-xs cursor-pointer hover:scale-105 transition transform flex flex-col items-center min-w-[130px] border-b-2 border-b-sky-500">
-              <div class="font-extrabold text-slate-800 text-[11px] flex items-center gap-1 border-b border-slate-200 pb-1 w-full justify-center">
-                <span>☁️</span> <span class="truncate max-w-[120px]">${g.nombre}</span>
-              </div>
-              <div class="flex items-center justify-center gap-2 mt-1 text-[10px] font-bold w-full">
-                <span class="text-slate-600" title="Total">📦 ${g.total}</span>
-                <span class="text-emerald-700" title="Ofertas">🟢 ${g.ofertas}</span>
-                <span class="text-red-700" title="Solicitudes">🔴 ${g.necesidades}</span>
-              </div>
-            </div>
-          `,
-          iconSize: [0, 0],
-          iconAnchor: [0, 0]
-        });
+      if (tablaBody) {
+        tablaBody.innerHTML = '';
+        const listaGrupos = Object.values(gruposCiudades);
+        if (cantBadge) cantBadge.innerText = listaGrupos.length;
 
-        const marcadorNube = L.marker([avgLat, avgLng], { icon: iconoNube, zIndexOffset: 1000 }).addTo(mapa);
-        marcadoresNubes.push(marcadorNube);
-      });
+        if (listaGrupos.length === 0) {
+          tablaBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-semibold text-xs">Sin ubicaciones activas</td></tr>`;
+        } else {
+          listaGrupos.sort((a, b) => b.total - a.total);
+          listaGrupos.forEach(g => {
+            const avgLat = g.latSum / g.total;
+            const avgLng = g.lngSum / g.total;
+            const dptoTexto = g.dpto ? `<span class="block text-[10px] text-slate-400 font-normal">${g.dpto}</span>` : '';
+
+            const filaHTML = `
+              <tr onclick="centrarMapa([${avgLat}, ${avgLng}], 14)" class="hover:bg-slate-100 cursor-pointer transition">
+                <td class="p-2 font-bold text-slate-800 leading-tight">
+                  ${g.ciudad}
+                  ${dptoTexto}
+                </td>
+                <td class="p-2 text-center text-red-700 font-bold">${g.necesidades}</td>
+                <td class="p-2 text-center text-emerald-700 font-bold">${g.ofertas}</td>
+                <td class="p-2 text-center font-extrabold text-slate-900 bg-slate-50 rounded">${g.total}</td>
+              </tr>
+            `;
+            tablaBody.insertAdjacentHTML('beforeend', filaHTML);
+          });
+        }
+      }
     }
 
     // PRECARGA COMPLETA AL EDITAR (PIN EN BLANCO)
@@ -965,7 +1017,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -990,7 +1042,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1033,7 +1085,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1056,7 +1108,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1125,7 +1177,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1150,7 +1202,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV21', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
