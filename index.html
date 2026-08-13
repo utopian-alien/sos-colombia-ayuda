@@ -13,6 +13,7 @@
   <style>
     #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
     .custom-pin { display: flex; align-items: center; justify-content: center; }
+    .custom-nube { display: flex; align-items: center; justify-content: center; z-index: 500 !important; }
   </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
@@ -45,6 +46,7 @@
           <span class="font-semibold text-red-700">🔴 Necesidad</span>
           <span class="font-semibold text-emerald-700">🟢 Oferta</span>
           <span class="font-semibold text-slate-500">⚪ Atendido</span>
+          <span class="font-semibold text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">☁️ Resumen Municipio</span>
           <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">✅ Validado (3/3)</span>
         </div>
         <div id="estadoConexion" class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-xs">
@@ -70,7 +72,7 @@
 
     <!-- Indicador de acción sobre el mapa -->
     <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
-      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte.
+      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. Las <b>nubes ☁️</b> indican el resumen de cada municipio.
     </div>
 
     <!-- Mapa Interactivo -->
@@ -156,10 +158,10 @@
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-            Doble Clic para Ubicar
+            Doble Clic y Nubes ☁️
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Navega por el mapa y haz <b>doble clic</b> sobre el punto exacto donde se necesita u ofrece la ayuda. Las coordenadas se asignarán automáticamente.
+            Haz <b>doble clic</b> para registrar un punto. Las <b>nubes ☁️</b> muestran el consolidado de solicitudes y ofertas por municipio; tócalas para hacer zoom directo.
           </p>
         </div>
 
@@ -557,6 +559,7 @@
     };
 
     const mapaMarcadores = {};
+    let marcadoresNubes = [];
     const misVerificaciones = JSON.parse(localStorage.getItem('misVerificaciones')) || [];
 
     let firebaseActivo = false;
@@ -579,7 +582,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV19')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV20')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -655,7 +658,10 @@
     }
 
     function renderizarContenedorYMapa(items) {
+      // Limpiar marcadores viejos
       Object.keys(mapaMarcadores).forEach(key => mapa.removeLayer(mapaMarcadores[key]));
+      marcadoresNubes.forEach(m => mapa.removeLayer(m));
+      marcadoresNubes = [];
 
       const contenedor = document.getElementById('contenedorTarjetas');
       contenedor.innerHTML = '';
@@ -664,6 +670,9 @@
         contenedor.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400 font-semibold text-xs">No hay publicaciones disponibles.</div>`;
         return;
       }
+
+      // Estructura para agrupar por Municipio y generar la Nube
+      const gruposMunicipios = {};
 
       items.forEach(item => {
         const id = item.id;
@@ -676,6 +685,36 @@
         const tiposInactivos = item.tiposInactivos || [];
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
+        // Extracción del Nombre del Municipio
+        let partes = (item.ubicacion || '').split(',').map(s => s.trim()).filter(Boolean);
+        partes = partes.filter(p => !p.toLowerCase().includes('colombia'));
+        let nombreCiudad = partes.length > 0 ? partes[partes.length - 1] : 'Zona';
+        if (nombreCiudad.startsWith('Punto en mapa')) nombreCiudad = 'Zona sin dirección';
+
+        const gridKey = `${item.lat.toFixed(1)}_${item.lng.toFixed(1)}`;
+        const keyGroup = `${nombreCiudad.toLowerCase()}_${gridKey}`;
+
+        if (!gruposMunicipios[keyGroup]) {
+          gruposMunicipios[keyGroup] = {
+            nombre: nombreCiudad,
+            latSum: 0,
+            lngSum: 0,
+            total: 0,
+            ofertas: 0,
+            necesidades: 0
+          };
+        }
+
+        gruposMunicipios[keyGroup].latSum += item.lat;
+        gruposMunicipios[keyGroup].lngSum += item.lng;
+        gruposMunicipios[keyGroup].total += 1;
+        if (item.modalidad === 'ofrece') {
+          gruposMunicipios[keyGroup].ofertas += 1;
+        } else {
+          gruposMunicipios[keyGroup].necesidades += 1;
+        }
+
+        // Popup e icono individual
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
         let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
 
@@ -782,6 +821,33 @@
         `;
         contenedor.insertAdjacentHTML('beforeend', tarjetaHTML);
       });
+
+      // Renderizado de las Nubes Resumen por Municipio
+      Object.values(gruposMunicipios).forEach(g => {
+        const avgLat = g.latSum / g.total;
+        const avgLng = g.lngSum / g.total;
+
+        const iconoNube = L.divIcon({
+          className: 'custom-nube',
+          html: `
+            <div onclick="centrarMapa([${avgLat}, ${avgLng}], 14)" class="bg-white/95 backdrop-blur border border-sky-300 shadow-xl rounded-2xl p-2 text-center text-xs cursor-pointer hover:scale-105 transition transform flex flex-col items-center min-w-[130px] border-b-2 border-b-sky-500">
+              <div class="font-extrabold text-slate-800 text-[11px] flex items-center gap-1 border-b border-slate-200 pb-1 w-full justify-center">
+                <span>☁️</span> <span class="truncate max-w-[120px]">${g.nombre}</span>
+              </div>
+              <div class="flex items-center justify-center gap-2 mt-1 text-[10px] font-bold w-full">
+                <span class="text-slate-600" title="Total">📦 ${g.total}</span>
+                <span class="text-emerald-700" title="Ofertas">🟢 ${g.ofertas}</span>
+                <span class="text-red-700" title="Solicitudes">🔴 ${g.necesidades}</span>
+              </div>
+            </div>
+          `,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        });
+
+        const marcadorNube = L.marker([avgLat, avgLng], { icon: iconoNube, zIndexOffset: 1000 }).addTo(mapa);
+        marcadoresNubes.push(marcadorNube);
+      });
     }
 
     // PRECARGA COMPLETA AL EDITAR (PIN EN BLANCO)
@@ -809,7 +875,7 @@
         document.getElementById('campoLongitud').value = item.lng;
         document.getElementById('campoContacto').value = item.contacto || "";
         
-        // PIN EN BLANCO (Se exige ingresar/confirmar para guardar)
+        // PIN EN BLANCO
         document.getElementById('campoPin').value = "";
         document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
@@ -859,7 +925,7 @@
       document.getElementById('campoLongitud').value = item.lng;
       document.getElementById('campoContacto').value = item.contacto || "";
       
-      // PIN EN BLANCO (Obliga a asignar PIN para el nuevo punto)
+      // PIN EN BLANCO
       document.getElementById('campoPin').value = "";
       document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
 
@@ -899,7 +965,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -924,7 +990,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -967,7 +1033,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -990,7 +1056,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1045,7 +1111,6 @@
       };
 
       if (editId) {
-        // Validación de PIN obligatorio para confirmar edición
         const itemExistente = listaGlobalPublicaciones.find(p => String(p.id) === String(editId));
         if (itemExistente && pinIngresado !== String(itemExistente.pin) && pinIngresado !== CLAVE_MAESTRA) {
           alert("❌ El PIN ingresado no coincide con el PIN asignado a esta publicación.");
@@ -1060,7 +1125,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1085,7 +1150,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV19', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV20', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
