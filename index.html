@@ -101,6 +101,7 @@
             <option value="🙋‍♂️ Trabajo Voluntario / Mano de Obra">🙋‍♂️ Trabajo Voluntario</option>
             <option value="⛺ Albergue, Carpas y Colchonetas">⛺ Albergue y Carpas</option>
             <option value="🚜 Herramientas y Remoción">🚜 Herramientas</option>
+            <option value="💡 Otro (Donaciones, Apoyo, etc.)">💡 Otro (Donaciones, Apoyo, etc.)</option>
           </select>
         </div>
 
@@ -168,7 +169,7 @@
             Publica con PIN de Control
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Completa la información requerida. Los datos de dirección y teléfono son <b>opcionales</b>. Define un <b>PIN personal de 4 dígitos</b> para editar o eliminar tu publicación cuando sea necesario.
+            Completa la información requerida. Los datos de dirección y teléfono son <b>opcionales</b>. Puedes solicitar/ofrecer categorías especiales (*Otro*) y definir un <b>PIN personal de 4 dígitos</b>.
           </p>
         </div>
 
@@ -254,6 +255,18 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue, Carpas y Colchonetas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
+            
+            <!-- OPCIÓN OTRO -->
+            <label class="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1 font-bold text-amber-800">
+              <input type="checkbox" id="chkOtro" name="tiposAyuda" value="💡 Otro (Donaciones, Apoyo, etc.)" onchange="toggleOtroDetalle()" class="chk-tipo accent-amber-600">
+              💡 Otro (Donaciones en dinero, apoyo psicosocial, etc.)
+            </label>
+          </div>
+
+          <!-- Cuadro de texto dinámico adicional para "Otro" -->
+          <div id="containerOtroDetalle" class="hidden mt-2 p-3 bg-amber-50 rounded-xl border border-amber-300 space-y-1.5 transition">
+            <label class="block text-xs font-bold text-amber-900 uppercase">Detalle de la ayuda "Otro" y/o contacto directo</label>
+            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Donación a N° Nequi/Ahorros 3001234567 / Atención psicológica gratuita vía WhatsApp al..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
           </div>
         </div>
 
@@ -267,9 +280,9 @@
           </select>
         </div>
 
-        <!-- Descripción -->
+        <!-- Descripción General -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico / Descripción</label>
           <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, necesidades puntuales o puntos de entrega..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
         </div>
 
@@ -346,6 +359,17 @@
           document.getElementById('campoUbicacion').value = data.display_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) {}
+    }
+
+    // Mostrar / Ocultar cuadro dinámico para "Otro"
+    function toggleOtroDetalle() {
+      const chk = document.getElementById('chkOtro');
+      const container = document.getElementById('containerOtroDetalle');
+      if (chk && chk.checked) {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
     }
 
     // Funciones del Visor de Imagen Full
@@ -472,7 +496,9 @@
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
       document.getElementById('formularioAyuda').reset();
+      document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
+      toggleOtroDetalle();
       abrirFormulario();
     }
 
@@ -480,6 +506,7 @@
     function cerrarFormulario() { document.getElementById('modalFormulario').classList.add('hidden'); }
     function marcarTodosTipos(valor) {
       document.querySelectorAll('.chk-tipo').forEach(c => c.checked = valor);
+      toggleOtroDetalle();
     }
 
     // 2. Configuración Firebase
@@ -516,7 +543,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV15')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV16')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -615,6 +642,9 @@
 
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
 
+        // Detalle de "Otro" en el popup del mapa
+        let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
+
         const icono = crearIcono(item.modalidad, esVerificado, totalmenteAtendido);
         const marcador = L.marker([item.lat, item.lng], { icon: icono }).addTo(mapa)
           .bindPopup(`
@@ -625,6 +655,7 @@
               <h4 class="font-bold text-slate-800 text-sm mt-1">${item.ubicacion}</h4>
               ${imgPopupHTML}
               <p class="text-xs text-slate-600 my-1">${item.descripcion}</p>
+              ${otroPopupHTML}
               ${item.contacto ? `<p class="text-xs font-mono font-bold text-slate-700 mb-2">Contacto: ${item.contacto}</p>` : ''}
               <button onclick="scrollACard('${id}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-[11px] py-1 px-2 rounded shadow transition">
                 👇 Ver detalle en el panel
@@ -633,7 +664,6 @@
           `);
         mapaMarcadores[id] = marcador;
 
-        // Foto interactiva en la tarjeta (Clic para ver en pantalla completa)
         let imgHTML = item.imagen ? `<img src="${item.imagen}" onclick="abrirImagenFull('${item.imagen}')" class="w-full h-36 object-cover rounded-lg my-2 border border-slate-200 cursor-pointer hover:opacity-90 transition shadow-sm" title="Haz clic para ampliar la imagen">` : '';
 
         let distHTML = '';
@@ -650,9 +680,17 @@
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
         });
 
+        // Bloque informativo destacado de "Otro" en la tarjeta
+        let otroCardHTML = item.otroDetalle ? `
+          <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xs text-amber-900 my-2 space-y-0.5">
+            <span class="font-bold block uppercase text-[10px] text-amber-800">💡 Especificación "Otro" / Contacto directo:</span>
+            <p class="leading-snug">${item.otroDetalle}</p>
+          </div>
+        ` : '';
+
         let contactoHTML = item.contacto 
           ? `<a href="https://wa.me/57${item.contacto.replace(/\D/g,'')}" target="_blank" class="text-green-700 font-bold hover:underline">💬 Contactar (${item.contacto})</a>`
-          : `<span class="text-slate-400 font-semibold italic">Sin teléfono de contacto</span>`;
+          : `<span class="text-slate-400 font-semibold italic">Sin teléfono directo</span>`;
 
         const tarjetaHTML = `
           <div id="card-${id}" class="border ${totalmenteAtendido ? 'border-slate-300 bg-slate-100' : (item.modalidad === 'ofrece' ? 'border-emerald-300 bg-emerald-50/20' : 'border-red-200 bg-red-50/20')} p-4 rounded-xl shadow-sm flex flex-col justify-between transition">
@@ -672,6 +710,7 @@
               <h3 class="font-bold text-slate-900 text-base">${item.ubicacion}</h3>
               ${imgHTML}
               <p class="text-xs text-slate-600 mt-1 mb-2 leading-relaxed">${item.descripcion}</p>
+              ${otroCardHTML}
 
               <div class="space-y-1 my-2">
                 <p class="text-[10px] font-bold text-slate-500 uppercase">Tipos de ayuda:</p>
@@ -725,6 +764,11 @@
         document.getElementById('campoLongitud').value = item.lng;
         document.getElementById('campoContacto').value = item.contacto || "";
         document.getElementById('campoPin').value = item.pin || "";
+        document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
+
+        const tieneOtro = (item.tiposActivos || []).includes('💡 Otro (Donaciones, Apoyo, etc.)') || (item.tiposInactivos || []).includes('💡 Otro (Donaciones, Apoyo, etc.)');
+        document.getElementById('chkOtro').checked = tieneOtro;
+        toggleOtroDetalle();
 
         if (item.imagen) {
           imagenBase64Actual = item.imagen;
@@ -753,7 +797,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -777,7 +821,7 @@
         if (item) {
           item.reportesCount = nuevoCount;
           if (nuevoCount >= 3) item.desactivado = true;
-          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -819,7 +863,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -840,7 +884,7 @@
           item.verificaciones = nuevaCantidad;
           misVerificaciones.push(String(id));
           localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-          localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -868,6 +912,9 @@
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
       const tiposActivos = chks.length > 0 ? chks : ["Varias Necesidades Generales"];
 
+      const chkOtro = document.getElementById('chkOtro');
+      const otroDetalle = (chkOtro && chkOtro.checked) ? document.getElementById('campoOtroDetalle').value.trim() : "";
+
       let ubicacionTexto = document.getElementById('campoUbicacion').value.trim();
       if (!ubicacionTexto) {
         ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
@@ -883,7 +930,8 @@
         lng: lng,
         contacto: document.getElementById('campoContacto').value.trim(),
         pin: document.getElementById('campoPin').value,
-        imagen: imagenBase64Actual
+        imagen: imagenBase64Actual,
+        otroDetalle: otroDetalle
       };
 
       if (editId) {
@@ -893,7 +941,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -918,7 +966,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV15', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
@@ -930,7 +978,9 @@
 
       cerrarFormulario();
       document.getElementById('formularioAyuda').reset();
+      document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
+      toggleOtroDetalle();
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
       centrarMapa([lat, lng], 16);
       alert("¡Publicación guardada con éxito!");
