@@ -71,7 +71,7 @@
     <!-- Mapa Interactivo -->
     <div id="mapa" class="shadow-md border border-slate-200"></div>
 
-    <!-- Panel de Control y Filtros de Reportes -->
+    <!-- Panel de Control y Filtros -->
     <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
       
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3 border-b border-slate-200">
@@ -124,7 +124,7 @@
 
   </main>
 
-  <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
+  <!-- VENTANA MODAL: INSTRUCCIONES DE USO ACTUALIZADAS -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarInstrucciones()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -133,52 +133,48 @@
         <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
           📖 ¿Cómo funciona la plataforma?
         </h3>
-        <p class="text-xs text-slate-500">Guía rápida para pedir ayuda, donar recursos y validar necesidades en terreno.</p>
+        <p class="text-xs text-slate-500">Guía rápida para pedir ayuda, adjuntar imágenes, donar y moderar información.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
         
-        <!-- Paso 1 -->
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
             Explora o Busca en el Mapa
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Navega por Colombia o usa el buscador superior para escribir un municipio, vereda o dirección (ej. <i>"Calle 13 # 4-25, Cali"</i>). Los pines 🔴 indican que se necesita ayuda y los 🟢 que hay donaciones disponibles.
+            Busca un municipio o dirección. Los pines 🔴 indican solicitudes, los 🟢 ofertas disponibles y los ⚪ ayudas completamente atendidas.
           </p>
         </div>
 
-        <!-- Paso 2 -->
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-            Publica una Necesidad u Oferta
+            Publica, Adjunta Foto y PIN
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Presiona el botón <b>"➕ Publicar"</b>. Elige si necesitas o donas ayuda, selecciona una o varias categorías (comida, medicinas, voluntariado), escribe el detalle y ubica el lugar exacto en el mapa.
+            Presiona <b>"➕ Publicar"</b>. Puedes subir una foto o flyer directamente desde tu celular y definir un <b>PIN personal de 4 dígitos</b> para editar o eliminar tu publicación cuando quieras.
           </p>
         </div>
 
-        <!-- Paso 3 -->
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
-            Validación de Terreno (3/3)
+            Validación en Terreno (3/3)
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Para evitar reportes falsos, cada publicación requiere 3 confirmaciones. Si estás en el lugar y confirmas que la ayuda es requerida, presiona el botón <b>"🙋‍♂️ Validar (+1)"</b>. Al llegar a 3/3 obtendrá la insignia verde <b>✅ Validado</b>.
+            Para validar necesidades reales, presiona <b>"🙋‍♂️ Validar (+1)"</b>. Al sumar 3 confirmaciones obtendrá la insignia <b>✅ Validado</b>.
           </p>
         </div>
 
-        <!-- Paso 4 -->
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
-            Actualiza o Atiende Insumos
+            Moderación Comunitario (Falsos)
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Puedes hacer clic sobre cualquier etiqueta de ayuda (ej. <i>"✓ 💊 Insumos Médicos"</i>) para marcarla como entregada/atendida. Si eres el autor de la publicación, verás los botones para <b>Editar</b> o <b>Desactivar</b>.
+            Si detectas una publicación falsa, presiona <b>"🚨 Reportar como falsa"</b>. Si acumula 3 reportes, la plataforma la ocultará automáticamente.
           </p>
         </div>
 
@@ -186,7 +182,7 @@
 
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
         <span>💡</span>
-        <p><b>Consejo de uso en celular:</b> Puedes presionar el botón <b>"📡 Activar Mi Ubicación GPS"</b> en el panel para ordenar todas las publicaciones desde la más cercana hasta la más lejana a donde te encuentres.</p>
+        <p><b>Moderación de equipo:</b> La Clave Maestra de moderación es <code>2026</code>. Permite eliminar cualquier punto dudoso o spam de forma inmediata.</p>
       </div>
 
       <button onclick="cerrarInstrucciones()" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 rounded-xl shadow transition text-xs">
@@ -195,12 +191,12 @@
     </div>
   </div>
 
-  <!-- Formulario Modal con Selector de Mapa Incorporado -->
+  <!-- Formulario Modal -->
   <div id="modalFormulario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
       <button onclick="cerrarFormulario()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
       <h3 id="tituloModal" class="text-xl font-bold text-red-700 mb-1">Registrar Publicación</h3>
-      <p class="text-xs text-slate-500 mb-4">Ingresa la ubicación exacta y selecciona los tipos de ayuda.</p>
+      <p class="text-xs text-slate-500 mb-4">Ingresa la ubicación exacta, adjunta foto opcional y crea tu PIN de seguridad.</p>
 
       <form id="formularioAyuda" onsubmit="guardarSolicitud(event)" class="space-y-4">
         <input type="hidden" id="editId" value="">
@@ -220,6 +216,16 @@
           </div>
         </div>
 
+        <!-- Foto o Flyer -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">📷 Adjuntar Foto o Flyer (Opcional)</label>
+          <input type="file" id="campoImagen" accept="image/*" onchange="procesarImagen(event)" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+          <div id="containerPreview" class="hidden mt-2 relative">
+            <img id="previewImagen" class="w-full h-32 object-cover rounded-lg border border-slate-200">
+            <button type="button" onclick="quitarImagen()" class="absolute top-1 right-1 bg-red-700 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
+          </div>
+        </div>
+
         <!-- Ubicación -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Dirección Exacta / Municipio / Vereda</label>
@@ -231,7 +237,7 @@
             </button>
           </div>
           <div class="flex justify-between items-center mt-1">
-            <p class="text-[11px] text-slate-500">💡 También puedes mover el pin azul en el mapa.</p>
+            <p class="text-[11px] text-slate-500">💡 Mueve el pin azul para afinar la ubicación.</p>
             <button type="button" onclick="activarModoSeleccionMapa()" class="text-[11px] font-bold text-red-700 hover:underline">🎯 Mover pin en mapa</button>
           </div>
         </div>
@@ -267,6 +273,12 @@
           <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, condiciones y punto de entrega..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
         </div>
 
+        <!-- PIN de Autor -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos para editar/borrar)</label>
+          <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Ej: 1234" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
+        </div>
+
         <!-- Coordenadas -->
         <div class="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
           <div>
@@ -299,6 +311,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
+    const CLAVE_MAESTRA = "2026";
+    let imagenBase64Actual = null;
+
     // 1. Inicializar Mapa Leaflet
     const mapa = L.map('mapa').setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -313,7 +328,7 @@
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
 
       marcadorPicker = L.marker([lat, lng], { draggable: true }).addTo(mapa)
-        .bindPopup("<b>📍 Arrastra este pin</b> hasta la puerta o punto exacto.")
+        .bindPopup("<b>📍 Arrastra este pin</b> hasta el punto exacto.")
         .openPopup();
 
       marcadorPicker.on('dragend', async function(e) {
@@ -340,7 +355,47 @@
       const lng = parseFloat(document.getElementById('campoLongitud').value) || -74.2973;
       centrarMapa([lat, lng], 16);
       activarMarcadorPicker(lat, lng);
-      alert("📍 Haz clic en el mapa o arrastra el pin azul para definir la ubicación exacta. Luego presiona el botón '➕ Publicar' para volver al formulario.");
+      alert("📍 Arrastra el pin azul. Luego presiona '➕ Publicar' para volver.");
+    }
+
+    // Compresión de Imagen a Base64
+    function procesarImagen(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+          } else {
+            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          imagenBase64Actual = canvas.toDataURL('image/jpeg', 0.6);
+          document.getElementById('previewImagen').src = imagenBase64Actual;
+          document.getElementById('containerPreview').classList.remove('hidden');
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function quitarImagen() {
+      imagenBase64Actual = null;
+      document.getElementById('campoImagen').value = '';
+      document.getElementById('containerPreview').classList.add('hidden');
     }
 
     // Autocompletado en vivo
@@ -378,7 +433,7 @@
 
     async function buscarMunicipioPrincipal() {
       const query = document.getElementById('buscadorPrincipal').value.trim();
-      if (!query) return alert("Escribe el nombre de una dirección, municipio o vereda.");
+      if (!query) return alert("Escribe una dirección, municipio o vereda.");
 
       let consulta = query;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
@@ -391,15 +446,15 @@
           const lon = parseFloat(data[0].lon);
           mapa.setView([lat, lon], 17);
         } else {
-          alert("No se encontró la nomenclatura o municipio especificado.");
+          alert("No se encontró el lugar.");
         }
-      } catch (e) { alert("Error al buscar lugar."); }
+      } catch (e) { alert("Error al buscar."); }
     }
 
     async function geocodificarDesdeFormulario() {
       const input = document.getElementById('campoUbicacion');
       let direccion = input.value.trim();
-      if (!direccion) return alert("Por favor ingresa una dirección o municipio.");
+      if (!direccion) return alert("Ingresa una dirección.");
 
       let consulta = direccion;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
@@ -421,14 +476,13 @@
 
           const nombreCorto = punto.display_name.split(',').slice(0, 3).join(',');
           input.value = nombreCorto;
-          alert(`📍 Ubicación localizada exactamente en:\n${nombreCorto}`);
+          alert(`📍 Ubicación localizada:\n${nombreCorto}`);
         } else {
-          alert("No se encontró la nomenclatura exacta. Intenta incluir la ciudad.");
+          alert("No se encontró la nomenclatura.");
         }
       } catch (e) { alert("Error al geocodificar."); }
     }
 
-    // Clic directo en mapa
     mapa.on('click', function(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
@@ -447,6 +501,7 @@
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
       document.getElementById('formularioAyuda').reset();
+      quitarImagen();
       abrirFormulario();
     }
     function abrirFormulario() { document.getElementById('modalFormulario').classList.remove('hidden'); }
@@ -455,7 +510,7 @@
       document.querySelectorAll('.chk-tipo').forEach(c => c.checked = valor);
     }
 
-    // 2. Configuración de Firebase y Estado Global
+    // 2. Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
       authDomain: "juntosayudamos-col.firebaseapp.com",
@@ -468,7 +523,6 @@
 
     const mapaMarcadores = {};
     const misVerificaciones = JSON.parse(localStorage.getItem('misVerificaciones')) || [];
-    const misPublicaciones = JSON.parse(localStorage.getItem('misPublicaciones')) || [];
 
     let firebaseActivo = false;
     let referenciaSolicitudes = null;
@@ -494,24 +548,19 @@
       aplicarFiltrosYOrden();
     }
 
-    // GPS Usuario
     function obtenerUbicacionUsuario() {
       const btn = document.getElementById('btnGPS');
-      btn.innerText = "⏳ Obteniendo GPS...";
+      btn.innerText = "⏳ GPS...";
 
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(pos => {
           ubicacionUsuarioGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           btn.innerText = "✅ GPS Activo";
           btn.className = "bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-lg text-xs border border-emerald-300";
-          
           document.getElementById('ordenamiento').value = "cercanos";
           centrarMapa([ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng], 13);
           aplicarFiltrosYOrden();
-        }, () => {
-          alert("No se pudo obtener la ubicación GPS.");
-          btn.innerText = "📡 Activar Mi Ubicación GPS";
-        });
+        }, () => { alert("No se obtuvo ubicación GPS."); btn.innerText = "📡 Activar GPS"; });
       }
     }
 
@@ -529,16 +578,12 @@
       let emoji = modalidad === 'ofrece' ? '🟢' : '🔴';
       let colorBg = modalidad === 'ofrece' ? '#10b981' : '#ef4444';
 
-      if (totalmenteAtendido) {
-        emoji = '⚪';
-        colorBg = '#6b7280';
-      }
+      if (totalmenteAtendido) { emoji = '⚪'; colorBg = '#6b7280'; }
 
       return L.divIcon({
         className: 'custom-pin',
         html: `<div style="background-color: ${colorBg}; color: white; border: 2px solid white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-weight: bold;">${emoji}</div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        iconSize: [34, 34], iconAnchor: [17, 17]
       });
     }
 
@@ -548,7 +593,6 @@
       const orden = document.getElementById('ordenamiento').value;
 
       let resultado = [...listaGlobalPublicaciones];
-
       resultado = resultado.filter(p => !p.desactivado);
 
       if (cat !== 'todos') {
@@ -582,16 +626,16 @@
       contenedor.innerHTML = '';
 
       if (items.length === 0) {
-        contenedor.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400 font-semibold text-xs">No se encontraron publicaciones con los filtros seleccionados.</div>`;
+        contenedor.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400 font-semibold text-xs">No hay publicaciones disponibles.</div>`;
         return;
       }
 
       items.forEach(item => {
         const id = item.id;
         const vCount = item.verificaciones || 1;
+        const rCount = item.reportesCount || 0;
         const esVerificado = vCount >= 3;
         const yaVerifique = misVerificaciones.includes(String(id));
-        const esMio = misPublicaciones.includes(String(id));
 
         const tiposActivos = item.tiposActivos || [];
         const tiposInactivos = item.tiposInactivos || [];
@@ -611,6 +655,8 @@
           `);
         mapaMarcadores[id] = marcador;
 
+        let imgHTML = item.imagen ? `<img src="${item.imagen}" class="w-full h-36 object-cover rounded-lg my-2 border border-slate-200">` : '';
+
         let distHTML = '';
         if (ubicacionUsuarioGPS) {
           const d = calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, item.lat, item.lng);
@@ -624,16 +670,6 @@
         tiposInactivos.forEach(t => {
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
         });
-
-        let controlesAutorHTML = '';
-        if (esMio) {
-          controlesAutorHTML = `
-            <div class="flex gap-2 pt-2 mt-2 border-t border-slate-200 text-xs font-bold">
-              <button onclick="editarPublicacion('${id}')" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-1 rounded">✏️ Editar</button>
-              <button onclick="desactivarPublicacion('${id}')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-800 py-1 rounded">🗑️ Desactivar</button>
-            </div>
-          `;
-        }
 
         const tarjetaHTML = `
           <div id="card-${id}" class="border ${totalmenteAtendido ? 'border-slate-300 bg-slate-100' : (item.modalidad === 'ofrece' ? 'border-emerald-300 bg-emerald-50/20' : 'border-red-200 bg-red-50/20')} p-4 rounded-xl shadow-sm flex flex-col justify-between transition">
@@ -649,8 +685,11 @@
                   </span>
                 </div>
               </div>
+
               <h3 class="font-bold text-slate-900 text-base">${item.ubicacion}</h3>
+              ${imgHTML}
               <p class="text-xs text-slate-600 mt-1 mb-2 leading-relaxed">${item.descripcion}</p>
+
               <div class="space-y-1 my-2">
                 <p class="text-[10px] font-bold text-slate-500 uppercase">Tipos de ayuda:</p>
                 <div class="flex flex-wrap gap-1">${badgesHTML}</div>
@@ -674,7 +713,13 @@
                 ${esVerificado ? '✅ Validado en terreno' : (yaVerifique ? '👍 Ya confirmaste' : '🙋‍♂️ Validar en terreno (+1)')}
               </button>
 
-              ${controlesAutorHTML}
+              <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
+                <div class="flex gap-2 font-bold text-slate-600">
+                  <button onclick="editarPublicacion('${id}')" class="hover:text-black">✏️ Editar</button>
+                  <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
+                </div>
+                <button onclick="reportarFalsa('${id}', ${rCount})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
+              </div>
             </div>
           </div>
         `;
@@ -686,31 +731,76 @@
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
 
-      document.getElementById('editId').value = id;
-      document.getElementById('tituloModal').innerText = "Modificar Publicación";
-      document.getElementById('campoUbicacion').value = item.ubicacion;
-      document.getElementById('campoPrioridad').value = item.prioridad || "Media";
-      document.getElementById('campoDescripcion').value = item.descripcion;
-      document.getElementById('campoLatitud').value = item.lat;
-      document.getElementById('campoLongitud').value = item.lng;
-      document.getElementById('campoContacto').value = item.contacto;
+      const pin = prompt("Ingresa el PIN de 4 dígitos (o la Clave Maestra) para editar:");
+      if (!pin) return;
 
-      abrirFormulario();
+      if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
+        document.getElementById('editId').value = id;
+        document.getElementById('tituloModal').innerText = "Modificar Publicación";
+        document.getElementById('campoUbicacion').value = item.ubicacion;
+        document.getElementById('campoPrioridad').value = item.prioridad || "Media";
+        document.getElementById('campoDescripcion').value = item.descripcion;
+        document.getElementById('campoLatitud').value = item.lat;
+        document.getElementById('campoLongitud').value = item.lng;
+        document.getElementById('campoContacto').value = item.contacto;
+        document.getElementById('campoPin').value = item.pin || "";
+
+        if (item.imagen) {
+          imagenBase64Actual = item.imagen;
+          document.getElementById('previewImagen').src = item.imagen;
+          document.getElementById('containerPreview').classList.remove('hidden');
+        } else {
+          quitarImagen();
+        }
+
+        abrirFormulario();
+      } else {
+        alert("❌ PIN incorrecto.");
+      }
     }
 
     function desactivarPublicacion(id) {
-      if (!confirm("¿Deseas desactivar esta publicación del mapa?")) return;
+      const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+      if (!item) return;
+
+      const pin = prompt("Ingresa el PIN de 4 dígitos (o la Clave Maestra) para borrar:");
+      if (!pin) return;
+
+      if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
+        if (confirm("¿Confirmas la eliminación de esta publicación?")) {
+          if (firebaseActivo) {
+            referenciaSolicitudes.child(id).update({ desactivado: true });
+          } else {
+            item.desactivado = true;
+            localStorage.setItem('solicitudesDemoV12', JSON.stringify(listaGlobalPublicaciones));
+            aplicarFiltrosYOrden();
+          }
+          alert("Publicación eliminada correctamente.");
+        }
+      } else {
+        alert("❌ PIN incorrecto.");
+      }
+    }
+
+    function reportarFalsa(id, rCount) {
+      if (!confirm("¿Deseas reportar esta publicación como falsa? Con 3 reportes se ocultará automáticamente.")) return;
+
+      const nuevoCount = rCount + 1;
+      const payload = { reportesCount: nuevoCount };
+      if (nuevoCount >= 3) payload.desactivado = true;
 
       if (firebaseActivo) {
-        referenciaSolicitudes.child(id).update({ desactivado: true });
+        referenciaSolicitudes.child(id).update(payload);
       } else {
         const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
         if (item) {
-          item.desactivado = true;
+          item.reportesCount = nuevoCount;
+          if (nuevoCount >= 3) item.desactivado = true;
           localStorage.setItem('solicitudesDemoV12', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
+      alert("Reporte registrado. ¡Gracias por mantener la red confiable!");
     }
 
     function alternarTipoAyuda(id, tipoTexto, estaActivo) {
@@ -805,6 +895,8 @@
         lat: lat,
         lng: lng,
         contacto: document.getElementById('campoContacto').value,
+        pin: document.getElementById('campoPin').value,
+        imagen: imagenBase64Actual
       };
 
       if (editId) {
@@ -821,17 +913,14 @@
         }
       } else {
         payload.verificaciones = 1;
+        payload.reportesCount = 0;
         payload.tiposInactivos = [];
         payload.fechaCreacion = Date.now();
 
         if (firebaseActivo && referenciaSolicitudes) {
           const nuevaRef = referenciaSolicitudes.push();
           nuevaRef.set(payload)
-            .then(() => {
-              misPublicaciones.push(String(nuevaRef.key));
-              localStorage.setItem('misPublicaciones', JSON.stringify(misPublicaciones));
-              finalizarConExito(lat, lng);
-            })
+            .then(() => finalizarConExito(lat, lng))
             .catch(() => guardarEnLocal(payload));
         } else {
           guardarEnLocal(payload);
@@ -842,8 +931,6 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      misPublicaciones.push(payload.id);
-      localStorage.setItem('misPublicaciones', JSON.stringify(misPublicaciones));
       localStorage.setItem('solicitudesDemoV12', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
@@ -856,6 +943,7 @@
 
       cerrarFormulario();
       document.getElementById('formularioAyuda').reset();
+      quitarImagen();
       centrarMapa([lat, lng], 17);
       alert("¡Publicación guardada con éxito!");
     }
