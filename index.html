@@ -143,10 +143,13 @@
             <option value="todos">Todas las categorías</option>
             <option value="🥣 Alimentos y Agua Potable">🥣 Alimentos y Agua</option>
             <option value="💊 Insumos Médicos y Salud">💊 Insumos Médicos</option>
+            <option value="🩸 Donación de Sangre">🩸 Donación de Sangre</option>
+            <option value="💸 Nequi / Colectas y Donaciones">💸 Nequi / Colectas y Donaciones</option>
+            <option value="🐾 Mascotas Perdidas y Encontradas">🐾 Mascotas Perdidas / Encontradas</option>
             <option value="🙋‍♂️ Trabajo Voluntario / Mano de Obra">🙋‍♂️ Trabajo Voluntario</option>
             <option value="⛺ Albergue, Carpas y Colchonetas">⛺ Albergue y Carpas</option>
             <option value="🚜 Herramientas y Remoción">🚜 Herramientas</option>
-            <option value="💡 Otro (Donaciones, Apoyo, etc.)">💡 Otro (Donaciones, Apoyo, etc.)</option>
+            <option value="💡 Otro (Donaciones, Apoyo, etc.)">💡 Otro (Apoyo, etc.)</option>
           </select>
         </div>
 
@@ -180,7 +183,7 @@
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
       <div>
         <p class="font-bold text-white text-sm">SOS Colombia: Red Humanitaria Comunitaria</p>
-        <p class="mt-1">Desarrollado de forma abierta por <a href="https://github.com/utopian-alien" target="_blank" class="text-red-400 font-bold hover:underline">@utopian-alien</a> en GitHub.</p>
+        <p class="mt-1">Desarrollado sin ánimo de lucro por la <b>Fundación Asimov</b>.</p>
       </div>
       <div class="flex items-center gap-3">
         <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="bg-slate-800 hover:bg-slate-800/80 p-2 rounded-lg border border-slate-700 text-slate-300 font-semibold flex items-center gap-2">
@@ -204,7 +207,7 @@
 
       <div class="space-y-3 text-xs leading-relaxed text-slate-700">
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets (Hoja 1 y Hoja 2 - Donaciones y Voluntariado)</p>
+          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets (Hojas de voluntariado, donaciones y sangre)</p>
           <p>Integración en tiempo real sincronizando las pestañas de la hoja de cálculo pública:</p>
           <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
             🔗 Ver Google Sheets de Referencia &rarr;
@@ -212,17 +215,20 @@
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario Validadas en Campo (Formulario normal)</p>
-          <p>Publicaciones agregadas por la comunidad protegidas y validadas mediante GPS en terreno (< 50 metros).</p>
+          <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario en Terreno</p>
+          <p>Publicaciones de ayuda, sangre, colectas Nequi y mascotas añadidas por la comunidad con validación GPS (< 50 metros).</p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Flyers y Redes Sociales</p>
-          <p>Información estructurada mediante IA multimodal desde afiches y publicaciones oficiales.</p>
+          <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Redes Sociales y Flyers</p>
+          <p>Información estructurada mediante IA desde afiches y publicaciones oficiales de colectivos.</p>
         </div>
 
-        <div class="bg-red-50 p-3 rounded-xl border border-red-200 text-red-900 text-[11px] font-semibold">
-          ⚖️ <b>Código Abierto:</b> Proyecto bajo licencia libre <b>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</b> por <a href="https://github.com/utopian-alien" target="_blank" class="underline font-bold">@utopian-alien</a>.
+        <!-- ATRIBUCIÓN FUNDACIÓN ASIMOV & GITHUB -->
+        <div class="bg-slate-100 p-3.5 rounded-xl border border-slate-300 text-slate-800 text-center space-y-1 font-medium">
+          <p>Desarrollado sin ánimo de lucro por la <b>Fundación Asimov</b>.</p>
+          <p>Mantenido y desarrollado de forma abierta por <a href="https://github.com/utopian-alien" target="_blank" class="text-red-700 font-bold underline">@utopian-alien</a>.</p>
+          <p class="text-[10px] text-slate-500 pt-1">Licencia Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</p>
         </div>
       </div>
 
@@ -241,7 +247,7 @@
     </div>
   </div>
 
-  <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
+  <!-- VENTANA MODAL: INSTRUCCIONES DE USO ("CÓMO FUNCIONA") -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarInstrucciones()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -250,7 +256,7 @@
         <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
           📖 ¿Cómo funciona la plataforma?
         </h3>
-        <p class="text-xs text-slate-500">Guía ágil para solicitar ayuda, donar e informar en situaciones de emergencia.</p>
+        <p class="text-xs text-slate-500">Guía ágil para solicitar ayuda, donar sangre, Nequi y mascotas extraviadas.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -258,20 +264,20 @@
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-            Doble Clic y Tabla Lateral 📍
+            Mapa, Doble Clic y Tabla 📍
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Haz <b>doble clic</b> para registrar un punto. Consulta la <b>tabla a la derecha del mapa</b> para ver qué ciudades/departamentos tienen solicitudes u ofertas activas.
+            Haz <b>doble clic</b> en cualquier punto del mapa para registrar una necesidad u oferta. Usa la tabla lateral para filtrar ciudades y departamentos activos.
           </p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-            Publica, Edita o Duplica
+            Sangre, Nequi y Mascotas 🩸💸🐾
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Al <b>"✏️ Editar"</b> o <b>"📋 Duplicar"</b> puedes buscar la nueva dirección con Mapbox o presionar <b>"📍 Señalar en mapa"</b>.
+            Puedes publicar y filtrar campañas de <b>donación de sangre</b>, cuentas de <b>Nequi / Colectas monetarias</b> y reportes de <b>mascotas perdidas o encontradas</b>.
           </p>
         </div>
 
@@ -281,17 +287,17 @@
             Validación GPS (< 50 metros)
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Para validar (3/3) o reportar un punto debes <b>estar en terreno</b> a menos de 50m del lugar. El sistema verifica tu ubicación GPS para evitar ataques o reportes lejanos.
+            Para validar (3/3) o reportar un punto debes estar en terreno a menos de 50 metros del lugar. Protege los datos con tu PIN de 4 dígitos.
           </p>
         </div>
 
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
-            Control de Contenido
+            Fuentes de Información ℹ️
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Si encuentras información falsa o desactualizada, presiona <b>"🚨 Reportar como falsa"</b> desde el lugar. Si suma 3 reportes comunitarios, se ocultará del mapa.
+            Consulta la pestaña superior <b>"ℹ️ Fuentes de Información"</b> para conocer en detalle cómo se integran las bases de datos y hojas de cálculo colaborativas.
           </p>
         </div>
 
@@ -372,6 +378,9 @@
           <div class="grid grid-cols-1 gap-1.5 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🥣 Alimentos y Agua Potable" class="chk-tipo accent-red-700"> 🥣 Alimentos y Agua Potable</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="💊 Insumos Médicos y Salud" class="chk-tipo accent-red-700"> 💊 Insumos Médicos y Salud</label>
+            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Campaña / Urgencia)</label>
+            <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
+            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
@@ -379,14 +388,14 @@
             <!-- OPCIÓN OTRO -->
             <label class="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1 font-bold text-amber-800">
               <input type="checkbox" id="chkOtro" name="tiposAyuda" value="💡 Otro (Donaciones, Apoyo, etc.)" onchange="toggleOtroDetalle()" class="chk-tipo accent-amber-600">
-              💡 Otro (Donaciones en dinero, apoyo psicosocial, etc.)
+              💡 Otro (Apoyo psicosocial, transporte, etc.)
             </label>
           </div>
 
           <!-- Cuadro de texto dinámico adicional para "Otro" -->
           <div id="containerOtroDetalle" class="hidden mt-2 p-3 bg-amber-50 rounded-xl border border-amber-300 space-y-1.5 transition">
-            <label class="block text-xs font-bold text-amber-900 uppercase">Detalle de la ayuda "Otro" y/o contacto directo</label>
-            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Donación a N° Nequi/Ahorros 3001234567 / Atención psicológica gratuita vía WhatsApp al..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
+            <label class="block text-xs font-bold text-amber-900 uppercase">Detalle de la ayuda "Otro", Nequi o especificaciones</label>
+            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Datos de la mascota perdida / Tipo de sangre O-..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
           </div>
         </div>
 
@@ -403,7 +412,7 @@
         <!-- Descripción General -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico / Descripción</label>
-          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, necesidades puntuales o puntos de entrega..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
+          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, datos de Nequi, raza de mascota o tipo de sangre..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
         </div>
 
         <!-- Contacto (OPCIONAL) -->
@@ -456,7 +465,7 @@
     // IDs de Google Sheets (Hoja 1 y Hoja 2)
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
     const GID_HOJA_1 = "0";             // Pestaña 1 (Voluntariados)
-    const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación)
+    const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación / Sangre / Colectas / Mascotas)
 
     const CLAVE_MAESTRA = "2026";
     let imagenBase64Actual = null;
@@ -599,7 +608,7 @@
           contadorTotal++;
         }
 
-        // --- PROCESAR HOJA 2 (Necesidades de Donación) ---
+        // --- PROCESAR HOJA 2 (Necesidades, Sangre, Nequi, Mascotas) ---
         if (text2) {
           const lineas2 = text2.split('\n').map(l => l.trim()).filter(Boolean);
           for (let i = 1; i < lineas2.length; i++) {
@@ -608,14 +617,20 @@
 
             const titulo = columnas[0];
             const detalle = columnas.slice(1).join(" ");
+            const detalleLower = detalle.toLowerCase();
+
+            let tipoAsignado = "🥣 Alimentos y Agua Potable";
+            if (detalleLower.includes("sangre") || detalleLower.includes("donacion de sangre")) tipoAsignado = "🩸 Donación de Sangre";
+            else if (detalleLower.includes("nequi") || detalleLower.includes("daviplata") || detalleLower.includes("cuenta") || detalleLower.includes("colecta") || detalleLower.includes("dinero")) tipoAsignado = "💸 Nequi / Colectas y Donaciones";
+            else if (detalleLower.includes("mascota") || detalleLower.includes("perro") || detalleLower.includes("gato") || detalleLower.includes("animal")) tipoAsignado = "🐾 Mascotas Perdidas y Encontradas";
 
             listaGlobalPublicaciones.push({
               id: `sheet2_node_${i}`,
               modalidad: "necesita",
               ubicacion: `${titulo}, Colombia`,
-              tiposActivos: ["🥣 Alimentos y Agua Potable"],
+              tiposActivos: [tipoAsignado],
               prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
-              descripcion: `[Hoja 2 - Donación] ${titulo} | ${detalle}`,
+              descripcion: `[Hoja 2] ${titulo} | ${detalle}`,
               lat: 4.6500, lng: -74.0800,
               contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
               verificaciones: 1, reportesCount: 0, tiposInactivos: [],
@@ -869,7 +884,7 @@
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV29')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV31')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -1013,7 +1028,7 @@
         gruposCiudades[claveGrupo].lngSum += item.lng;
 
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
-        let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
+        let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Detalle/Nequi:</b> ${item.otroDetalle}</div>` : '';
 
         const icono = crearIcono(item.modalidad, esVerificado, totalmenteAtendido);
         const marcador = L.marker([item.lat, item.lng], { icon: icono }).addTo(mapa)
@@ -1047,7 +1062,12 @@
 
         let badgesHTML = '';
         tiposActivos.forEach(t => {
-          badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', true)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-red-100 text-red-800 hover:bg-red-200 transition">✓ ${t}</span> `;
+          let badgeColor = "bg-red-100 text-red-800 hover:bg-red-200";
+          if (t.includes("Sangre")) badgeColor = "bg-rose-100 text-rose-800 hover:bg-rose-200";
+          if (t.includes("Nequi") || t.includes("Dinero")) badgeColor = "bg-emerald-100 text-emerald-800 hover:bg-emerald-200";
+          if (t.includes("Mascotas")) badgeColor = "bg-amber-100 text-amber-900 hover:bg-amber-200";
+
+          badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', true)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded ${badgeColor} transition">✓ ${t}</span> `;
         });
         tiposInactivos.forEach(t => {
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
@@ -1055,7 +1075,7 @@
 
         let otroCardHTML = item.otroDetalle ? `
           <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xs text-amber-900 my-2 space-y-0.5">
-            <span class="font-bold block uppercase text-[10px] text-amber-800">💡 Especificación "Otro" / Contacto directo:</span>
+            <span class="font-bold block uppercase text-[10px] text-amber-800">💡 Detalle / Datos de Nequi / Colecta:</span>
             <p class="leading-snug">${item.otroDetalle}</p>
           </div>
         ` : '';
@@ -1272,7 +1292,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -1297,7 +1317,7 @@
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1340,7 +1360,7 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
@@ -1363,7 +1383,7 @@
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
         }
@@ -1432,7 +1452,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -1457,7 +1477,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV29', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV31', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
