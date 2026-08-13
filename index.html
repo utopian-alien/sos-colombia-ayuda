@@ -176,10 +176,10 @@
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
           <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
             <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
-            Validación Comunitaria (3/3)
+            Validación GPS (< 50 metros)
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Cualquier persona en el territorio puede confirmar una necesidad presionando el botón <b>"🙋‍♂️ Validar (+1)"</b>. Al reunir 3 confirmaciones obtendrá la insignia <b>✅ Validado</b>.
+            Para validar (3/3) o reportar un punto debes **estar en terreno** a menos de 50m del lugar. El sistema verifica tu ubicación GPS para evitar ataques o reportes lejanos.
           </p>
         </div>
 
@@ -189,7 +189,7 @@
             Control de Contenido
           </div>
           <p class="text-slate-600 leading-relaxed">
-            Si encuentras información falsa o desactualizada, presiona <b>"🚨 Reportar como falsa"</b>. Si una tarjeta suma 3 reportes comunitarios, se ocultará del mapa.
+            Si encuentras información falsa o desactualizada, presiona <b>"🚨 Reportar como falsa"</b> desde el lugar. Si suma 3 reportes comunitarios, se ocultará del mapa.
           </p>
         </div>
 
@@ -359,6 +359,36 @@
           document.getElementById('campoUbicacion').value = data.display_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) {}
+    }
+
+    // VERIFICACIÓN DE PROXIMIDAD DE SEGURIDAD (MENOS DE 50 METROS)
+    function ejecutarAccionConGPS(targetLat, targetLng, callbackAccion) {
+      if (!("geolocation" in navigator)) {
+        alert("⚠️ Tu navegador o dispositivo no soporta geolocalización GPS necesaria para validar en terreno.");
+        return;
+      }
+
+      const confirmacion = confirm("📍 Para garantizar la autenticidad, la plataforma verificará que te encuentres a menos de 50 metros del lugar. ¿Deseas validar tu ubicación GPS actual?");
+      if (!confirmacion) return;
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const userLat = pos.coords.latitude;
+          const userLng = pos.coords.longitude;
+          const distKm = calcularDistanciaKm(userLat, userLng, targetLat, targetLng);
+          const distMetros = Math.round(distKm * 1000);
+
+          if (distMetros <= 50) {
+            callbackAccion();
+          } else {
+            alert(`🚫 ACCESO DENEGADO POR DISTANCIA:\n\nPara validar o reportar este punto debes estar en terreno (a menos de 50 metros).\n\n📍 Tu ubicación GPS actual está a aprox. ${distMetros} metros de este reporte.`);
+          }
+        },
+        (error) => {
+          alert("⚠️ No se pudo obtener tu ubicación GPS. Por favor habilita los permisos de localización en tu navegador/celular para validar en terreno.");
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      );
     }
 
     // Mostrar / Ocultar cuadro dinámico para "Otro"
@@ -543,7 +573,7 @@
       });
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV16')) || [];
+      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV17')) || [];
       aplicarFiltrosYOrden();
     }
 
@@ -641,8 +671,6 @@
         const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
 
         let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
-
-        // Detalle de "Otro" en el popup del mapa
         let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Otro:</b> ${item.otroDetalle}</div>` : '';
 
         const icono = crearIcono(item.modalidad, esVerificado, totalmenteAtendido);
@@ -680,7 +708,6 @@
           badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
         });
 
-        // Bloque informativo destacado de "Otro" en la tarjeta
         let otroCardHTML = item.otroDetalle ? `
           <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xs text-amber-900 my-2 space-y-0.5">
             <span class="font-bold block uppercase text-[10px] text-amber-800">💡 Especificación "Otro" / Contacto directo:</span>
@@ -727,10 +754,10 @@
               </div>
 
               <button 
-                onclick="verificarSolicitud('${id}', ${vCount})" 
+                onclick="verificarSolicitud('${id}', ${vCount}, ${item.lat}, ${item.lng})" 
                 ${(yaVerifique || esVerificado) ? 'disabled' : ''} 
                 class="w-full py-1.5 px-3 rounded-lg text-xs font-bold transition ${esVerificado ? 'bg-emerald-200 text-emerald-800 cursor-default' : (yaVerifique ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white')}">
-                ${esVerificado ? '✅ Validado en terreno' : (yaVerifique ? '👍 Ya confirmaste' : '🙋‍♂️ Validar en terreno (+1)')}
+                ${esVerificado ? '✅ Validado en terreno' : (yaVerifique ? '👍 Ya confirmaste' : '🙋‍♂️ Validar en terreno (< 50m)')}
               </button>
 
               <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
@@ -738,7 +765,7 @@
                   <button onclick="editarPublicacion('${id}')" class="hover:text-black">✏️ Editar</button>
                   <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
                 </div>
-                <button onclick="reportarFalsa('${id}', ${rCount})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
+                <button onclick="reportarFalsa('${id}', ${rCount}, ${item.lat}, ${item.lng})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
               </div>
             </div>
           </div>
@@ -797,7 +824,7 @@
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
           }
           alert("Publicación eliminada correctamente.");
@@ -807,25 +834,27 @@
       }
     }
 
-    function reportarFalsa(id, rCount) {
-      if (!confirm("¿Deseas reportar esta publicación como falsa? Con 3 reportes se ocultará automáticamente.")) return;
+    function reportarFalsa(id, rCount, targetLat, targetLng) {
+      if (!confirm("¿Deseas reportar esta publicación como falsa? Para confirmar debes estar a menos de 50m del lugar.")) return;
 
-      const nuevoCount = rCount + 1;
-      const payload = { reportesCount: nuevoCount };
-      if (nuevoCount >= 3) payload.desactivado = true;
+      ejecutarAccionConGPS(targetLat, targetLng, () => {
+        const nuevoCount = rCount + 1;
+        const payload = { reportesCount: nuevoCount };
+        if (nuevoCount >= 3) payload.desactivado = true;
 
-      if (firebaseActivo) {
-        referenciaSolicitudes.child(id).update(payload);
-      } else {
-        const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-        if (item) {
-          item.reportesCount = nuevoCount;
-          if (nuevoCount >= 3) item.desactivado = true;
-          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
-          aplicarFiltrosYOrden();
+        if (firebaseActivo) {
+          referenciaSolicitudes.child(id).update(payload);
+        } else {
+          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          if (item) {
+            item.reportesCount = nuevoCount;
+            if (nuevoCount >= 3) item.desactivado = true;
+            localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
+            aplicarFiltrosYOrden();
+          }
         }
-      }
-      alert("Reporte registrado. ¡Gracias por colaborar!");
+        alert("Reporte registrado. ¡Gracias por mantener limpia la información!");
+      });
     }
 
     function alternarTipoAyuda(id, tipoTexto, estaActivo) {
@@ -863,31 +892,35 @@
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
+          localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
           aplicarFiltrosYOrden();
         }
       }
     }
 
-    function verificarSolicitud(id, vCountActual) {
+    function verificarSolicitud(id, vCountActual, targetLat, targetLng) {
       if (misVerificaciones.includes(String(id))) return;
-      const nuevaCantidad = vCountActual + 1;
 
-      if (firebaseActivo) {
-        referenciaSolicitudes.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
-          misVerificaciones.push(String(id));
-          localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-        });
-      } else {
-        const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-        if (item) {
-          item.verificaciones = nuevaCantidad;
-          misVerificaciones.push(String(id));
-          localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-          localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
-          aplicarFiltrosYOrden();
+      ejecutarAccionConGPS(targetLat, targetLng, () => {
+        const nuevaCantidad = vCountActual + 1;
+
+        if (firebaseActivo) {
+          referenciaSolicitudes.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
+            misVerificaciones.push(String(id));
+            localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
+          });
+        } else {
+          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          if (item) {
+            item.verificaciones = nuevaCantidad;
+            misVerificaciones.push(String(id));
+            localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
+            localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
+            aplicarFiltrosYOrden();
+          }
         }
-      }
+        alert("✅ Verificación en terreno registrada con éxito.");
+      });
     }
 
     function guardarSolicitud(e) {
@@ -941,7 +974,7 @@
           const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
             listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
+            localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
             aplicarFiltrosYOrden();
             finalizarConExito(lat, lng);
           }
@@ -966,7 +999,7 @@
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
       listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV16', JSON.stringify(listaGlobalPublicaciones));
+      localStorage.setItem('solicitudesDemoV17', JSON.stringify(listaGlobalPublicaciones));
       aplicarFiltrosYOrden();
       finalizarConExito(payload.lat, payload.lng);
     }
