@@ -6,38 +6,31 @@ from firebase_admin import credentials, db
 from google.oauth2 import service_account
 import gspread
 
-# 1. Cargar credenciales desde la Variable de Entorno (GitHub Secret)
+# 1. Cargar credenciales
 service_account_raw = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 if not service_account_raw:
     raise ValueError("❌ Error: La variable de entorno FIREBASE_SERVICE_ACCOUNT no está configurada.")
 
 service_account_info = json.loads(service_account_raw)
 
-# 2. Inicializar Firebase para Realtime Database
+# 2. Inicializar Firebase
 cred = credentials.Certificate(service_account_info)
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://juntosayudamos-col-default-rtdb.firebaseio.com/'
     })
 
-# 3. Conectar a Google Sheets usando Google Auth
-scopes = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-]
-gspread_creds = service_account.Credentials.from_service_account_info(
-    service_account_info, scopes=scopes
-)
+# 3. Conectar a Google Sheets
+scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+gspread_creds = service_account.Credentials.from_service_account_info(service_account_info, scopes=scopes)
 gc = gspread.authorize(gspread_creds)
 
-# ID de tu Google Sheet
 SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
 sheet = gc.open_by_key(SHEET_ID).sheet1
 rows = sheet.get_all_records()
 
 print(f"📥 Sincronizando {len(rows)} registros a Realtime Database...")
 
-# Referencia a la carpeta 'ayudas' en tu base de datos
 ref = db.reference('ayudas')
 
 for row in rows:
@@ -45,10 +38,10 @@ for row in rows:
     if not lugar:
         continue
 
-    # Preparar los datos con Bogotá forzado
+    # Datos forzados a Bogotá
     data_to_upload = {
         "lugar": lugar,
-        "direccion": row.get("DIRECCIÓN", "Bogotá"),
+        "direccion": f"{row.get('DIRECCIÓN', '')}, Bogotá, Colombia", # Se asegura que el mapa sepa que es Bogotá
         "necesita": row.get("SE NECESITAN VOLUNTARIOS", row.get("SE NECESITAN DONACIONES", "")),
         "horarios": row.get("HORARIOS", ""),
         "actualizacion": row.get("HORA DE ACTUALIZACIÓN", ""),
@@ -64,13 +57,10 @@ for row in rows:
         "longitud": -74.0817,
     }
 
-    # Limpiar caracteres ilegales para Firebase (puntos, barras, comas, etc.)
-    # Esto convierte "C.C. Gran Plaza - Bosa" en "c_c_gran_plaza_-_bosa" de forma limpia
     doc_id = lugar.lower()
-    doc_id = re.sub(r'[\.\#\$\/\[\]]', '_', doc_id) # Elimina caracteres prohibidos por Firebase
+    doc_id = re.sub(r'[\.\#\$\/\[\]]', '_', doc_id)
     doc_id = doc_id.replace(" ", "_")
 
-    # Guardar en Realtime Database
     ref.child(doc_id).set(data_to_upload)
 
-print("✅ ¡Sincronización completada en Realtime Database con éxito!")
+print("✅ ¡Sincronización completada!")
