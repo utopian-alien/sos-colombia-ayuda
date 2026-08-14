@@ -1,106 +1,71 @@
-import os
 import json
-import csv
-import io
-import requests
+import os
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, firestore
+import gspread
 
-# Configuración de URLs y Constantes con tu ID real de Google Sheets
-SHEET_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8"
-MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
+# 1. Cargar credenciales de Firebase desde la Variable de Entorno (GitHub Secret)
+service_account_raw = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+if not service_account_raw:
+  raise ValueError(
+      "❌ Error: La variable de entorno FIREBASE_SERVICE_ACCOUNT no está"
+      " configurada."
+  )
 
-# Inicializar Firebase Admin usando el secreto de GitHub
+service_account_info = json.loads(service_account_raw)
+
+# 2. Inicializar Firebase
+cred = credentials.Certificate(service_account_info)
 if not firebase_admin._apps:
-    service_account_info = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
-    cred = credentials.Certificate(service_account_info)
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://juntosayudamos-col-default-rtdb.firebaseio.com'
-    })
+  firebase_admin.initialize_app(cred)
 
-def geocodificar(direccion):
-    if not direccion or direccion.strip() == "":
-        return 4.5709, -74.2973
-    consulta = f"{direccion}, Colombia"
-    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{requests.utils.quote(consulta)}.json?access_token={MAPBOX_TOKEN}&country=co&language=es&limit=1"
-    try:
-        res = requests.get(url).json()
-        if res.get('features'):
-            lon, lat = res['features'][0]['center']
-            return lat, lon
-    except Exception:
-        pass
-    return 4.5709, -74.2973
+db = firestore.client()
 
-def ejecutar_sincronizacion_espejo():
-    print("🔄 Iniciando sincronización espejo desde Google Sheets...")
-    
-    # 1. Descargar CSV de Google Sheets
-    csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
-    res_sheets = requests.get(csv_url)
-    if not res_sheets.ok:
-        print("⚠️ No se pudo obtener la hoja de cálculo de Google Sheets.")
-        return
+# 3. Conectar a Google Sheets usando la misma credencial
+gc = gspread.authorize(cred)
 
-    # 2. Parsear el CSV de manera segura con el módulo estándar de Python
-    f = io.StringIO(res_sheets.text)
-    lector = csv.reader(f)
-    filas = list(lector)
-    
-    if not filas:
-        print("⚠️ La hoja de Google Sheets está vacía.")
-        return
+# ID de tu Google Sheet complementario
+SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
+sheet = gc.open_by_key(SHEET_ID).sheet1  # O la pestaña correspondiente
 
-    print(f"📊 {len(filas) - 1} filas de datos leídas (ignorando encabezado).")
+# Obtener todos los registros del Excel
+rows = sheet.get_all_records()
 
-    # 3. Construir el nuevo estado basado en Sheets
-    nuevo_estado = {}
-    for idx, columnas in enumerate(filas[1:]): # Ignorar la primera fila (encabezado)
-        if not columnas or len(columnas) < 1:
-            continue
+print(f"📥 Sincronizando {len(rows)} registros desde Google Sheets a Firebase...")
 
-        titulo = columnas[0].strip()
-        detalle = " ".join([c.strip() for c in columnas[1:] if c.strip()])
-        
-        if not titulo:
-            continue
+for index, row in enumerate(rows):
+  # Extraemos los campos principales (ajusta los nombres según tus columnas exactas)
+  lugar = row.get("LUGAR", "").strip()
+  if not lugar:
+    continue  # Si no hay lugar, saltar fila vacía
 
-        is_oferta = "🟢" in detalle or "sí voluntarios" in detalle.lower() or "necesitan voluntarios" in detalle.lower()
-        lat, lng = geocodificar(titulo)
+  # --- FORZAR UBICACIÓN A BOGOTÁ ---
+  # Sobrescribimos o fijamos los datos geográficos para que el mapa los lea siempre en Bogotá
+  data_to_upload = {
+      "lugar": lugar,
+      "direccion": row.get("DIRECCIÓN", "Bogotá"),
+      "necesita": row.get(
+          "SE NECESITAN VOLUNTARIOS", row.get("SE NECESITAN DONACIONES", "")
+      ),
+      "horarios": row.get("HORARIOS", ""),
+      "actualizacion": row.get("HORA DE ACTUALIZACIÓN", ""),
+      "notas": row.get("NOTAS", ""),
+      "link": row.get("LINK DE INSCRIPCIÓN", row.get("Link de donaciones:", "")),
+      "contacto": row.get("CONTACTO CLAVE", ""),
+      "grupo": row.get("GRUPO DE WHATSAPP", ""),
+      "insta": row.get("INSTAGRAM", ""),
+      "funciones": row.get("FUNCIONES VOLUNTARIOS", ""),
+      # Coordenadas y ciudad fijas en Bogotá
+      "ciudad": "Bogotá",
+      "ubicacion_formateada": "Bogotá, Colombia",
+      "latitud": 4.6097,
+      "longitud": -74.0817,
+  }
 
-        key_id = f"sheet_node_{idx+1}"
-        nuevo_estado[key_id] = {
-            "modalidad": "ofrece" if is_oferta else "necesita",
-            "ubicacion": f"{titulo}, Colombia",
-            "tiposActivos": ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
-            "prioridad": "Alta" if "URGEN" in detalle else "Media",
-            "descripcion": f"{titulo} | {detalle}",
-            "lat": lat,
-            "lng": lng,
-            "contacto": "",
-            "pin": "2026",
-            "otroDetalle": detalle,
-            "verificaciones": 3 if is_oferta else 1,
-            "reportesCount": 0,
-            "tiposInactivos": [],
-            "origen": "google_sheets"
-        }
+  # Usar el nombre del lugar como ID único en Firebase (limpiando espacios/caracteres)
+  doc_id = lugar.lower().replace(" ", "_").replace("/", "_")
 
-    # 4. Conectar a Firebase
-    ref = db.reference('solicitudes_ayuda')
-    estado_actual = ref.get() or {}
+  # Subir o actualizar en la colección de Firestore (ej: 'ayudas')
+  db.collection("ayudas").document(doc_id).set(data_to_upload, merge=True)
 
-    # 5. Sincronización Espejo: Eliminar registros que ya no están en Sheets
-    for key, item in list(estado_actual.items()):
-        if isinstance(item, dict) and item.get("origen") == "google_sheets":
-            if key not in nuevo_estado:
-                print(f"🗑️ Eliminando registro borrado en Sheets: {key}")
-                ref.child(key).delete()
-
-    # 6. Actualizar o insertar los registros vigentes
-    ref.update(nuevo_estado)
-
-    print("✅ ¡Sincronización Espejo Completada con Éxito!")
-
-if __name__ == "__main__":
-    ejecutar_sincronizacion_espejo()
+print("✅ ¡Sincronización completada con éxito! Todo ubicado en Bogotá.")
