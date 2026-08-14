@@ -1,21 +1,103 @@
-try {
-      firebase.initializeApp(firebaseConfig);
-      referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
-      firebaseActivo = true;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOS Colombia: Red de Ayuda Humanitaria</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
+    .custom-pin { display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
-      document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo (juntosayudamos-col)';
-      document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
+  <header class="bg-red-700 text-white p-4 shadow-lg">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+      <div>
+        <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">SOS Colombia: Red de Ayuda Humanitaria</h1>
+        <p class="text-xs text-red-100 mt-0.5">Haz doble clic en el mapa para ubicar y publicar directamente</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="abrirFuentes()" class="bg-red-900 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
+          ℹ️ Fuentes de Información
+        </button>
+        <button onclick="abrirInstrucciones()" class="bg-red-800 hover:bg-red-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
+          ❓ ¿Cómo usar?
+        </button>
+        <button onclick="abrirFormularioNueva()" class="bg-white text-red-700 font-bold px-3 py-2 rounded-lg hover:bg-red-50 shadow text-xs md:text-sm transition flex items-center gap-1">
+          ➕ Publicar
+        </button>
+      </div>
+    </div>
+  </header>
 
-      referenciaSolicitudes.on('value', snapshot => {
-        const data = snapshot.val() || {};
-        const firebaseItems = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        
-        listaGlobalPublicaciones = firebaseItems;
-        aplicarFiltrosYOrden();
+  <main class="max-w-6xl mx-auto p-4 space-y-4 flex-1">
+    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 space-y-2">
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="font-bold text-slate-700">Iconos:</span>
+          <span class="font-semibold text-red-700">🔴 Necesidad</span>
+          <span class="font-semibold text-emerald-700">🟢 Oferta</span>
+          <span class="font-semibold text-slate-500">⚪ Atendido</span>
+        </div>
+        <div id="estadoConexion" class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-xs">
+          🟡 Conectando...
+        </div>
+      </div>
+    </div>
+
+    <div id="mapa" class="shadow-md border border-slate-200"></div>
+
+    <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+      <div id="contenedorTarjetas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <script>
+    const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
+    
+    // Inicialización Mapa
+    const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.6097, -74.0817], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap Colombia', maxZoom: 19
+    }).addTo(mapa);
+
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
+      authDomain: "juntosayudamos-col.firebaseapp.com",
+      databaseURL: "https://juntosayudamos-col-default-rtdb.firebaseio.com",
+      projectId: "juntosayudamos-col",
+      storageBucket: "juntosayudamos-col.firebasestorage.app",
+      messagingSenderId: "32757771591",
+      appId: "1:32757771591:web:9a44f7ae92f9605e5ab062"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const referenciaSolicitudes = firebase.database().ref('ayudas'); // Apuntamos a la carpeta 'ayudas' donde Python sube los datos
+
+    referenciaSolicitudes.on('value', snapshot => {
+      const data = snapshot.val() || {};
+      const items = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+      
+      // Limpiar mapa previo
+      mapa.eachLayer((layer) => { if (layer instanceof L.Marker) mapa.removeLayer(layer); });
+
+      items.forEach(item => {
+        if (item.latitud && item.longitud) {
+          L.marker([item.latitud, item.longitud])
+            .addTo(mapa)
+            .bindPopup(`<b>${item.lugar}</b><br>${item.direccion}<br>${item.necesita}`);
+        }
       });
-
-    } catch (e) {
-      document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
-      aplicarFiltrosYOrden();
-    }
+      console.log("Datos cargados desde Firebase:", items);
+    });
+  </script>
+</body>
+</html>
