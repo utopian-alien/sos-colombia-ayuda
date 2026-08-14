@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import firebase_admin
 from firebase_admin import credentials, db
 from google.oauth2 import service_account
@@ -63,10 +64,13 @@ for row in rows:
         "longitud": -74.0817,
     }
 
-    # Crear ID único basado en el nombre del lugar
-    doc_id = lugar.lower().replace(" ", "_").replace("/", "_")
+    # Limpiar caracteres ilegales para Firebase (puntos, barras, comas, etc.)
+    # Esto convierte "C.C. Gran Plaza - Bosa" en "c_c_gran_plaza_-_bosa" de forma limpia
+    doc_id = lugar.lower()
+    doc_id = re.sub(r'[\.\#\$\/\[\]]', '_', doc_id) # Elimina caracteres prohibidos por Firebase
+    doc_id = doc_id.replace(" ", "_")
 
     # Guardar en Realtime Database
     ref.child(doc_id).set(data_to_upload)
 
-print("✅ ¡Sincronización completada en Realtime Database!")
+print("✅ ¡Sincronización completada en Realtime Database con éxito!")
