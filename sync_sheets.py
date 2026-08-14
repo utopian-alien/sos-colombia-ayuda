@@ -1,6 +1,7 @@
 import json
 import os
-import re
+import urllib.request
+import urllib.parse
 import firebase_admin
 from firebase_admin import credentials, db
 from google.oauth2 import service_account
@@ -34,21 +35,51 @@ SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
 sheet = gc.open_by_key(SHEET_ID).sheet1
 rows = sheet.get_all_records()
 
-print(f"📥 Sincronizando registros desde Google Sheets...")
+# Referencias a ambos nodos en Firebase
+ref_ayudas = db.reference('ayudas')
+ref_solicitudes = db.reference('solicitudes_ayuda')
 
-ref = db.reference('solicitudes_ayuda')
+# Leer datos actuales de AMBAS rutas para no perder absolutamente nada
+data_ayudas = ref_ayudas.get() or {}
+data_solicitudes = ref_solicitudes.get() or {}
 
-# PASO CRUCIAL: Obtener datos actuales para CONSERVAR los aportes manuales de los usuarios
-current_data = ref.get() or {}
 user_data = {}
 
-if isinstance(current_data, dict):
-    for key, value in current_data.items():
-        if isinstance(value, dict) and value.get("origen") != "google_sheets":
+# Recopilar registros de 'ayudas'
+if isinstance(data_ayudas, dict):
+    for key, value in data_ayudas.items():
+        if isinstance(value, dict):
+            # Si no es de google sheets, lo guardamos con prefijo para evitar que se pisen
+            prefix = "" if value.get("origen") == "usuario" else "ayudas_"
+            user_data[f"{prefix}{key}"] = value
+
+# Recopilar registros de 'solicitudes_ayuda'
+if isinstance(data_solicitudes, dict):
+    for key, value in data_solicitudes.items():
+        if isinstance(value, dict):
             user_data[key] = value
+
+MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
+
+def obtener_coordenadas(direccion, lugar):
+    texto = f"{direccion}, {lugar}, Colombia"
+    encoded = urllib.parse.quote(texto)
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{encoded}.json?access_token={MAPBOX_TOKEN}&country=co&limit=1"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            if data.get("features"):
+                center = data["features"][0]["center"]
+                return float(center[1]), float(center[0])
+    except Exception:
+        pass
+    return 4.6097, -74.0817
 
 sheet_data = {}
 sincronizados = 0
+
+print("📥 Leyendo nodos 'ayudas' y 'solicitudes_ayuda' + procesando Excel...")
 
 for i, row in enumerate(rows):
     try:
@@ -58,41 +89,33 @@ for i, row in enumerate(rows):
         notas = str(row.get("NOTAS", "")).strip()
         contacto = str(row.get("CONTACTO CLAVE", "")).strip()
 
-        # Omitir filas vacías o con "N/A" en lugar o dirección
-        if not lugar or lugar.upper() == "N/A" or not direccion or direccion.upper() == "N/A":
+        if not lugar or lugar.upper() in ["N/A", "NA", "-"]:
             continue
 
-        # Estructura con doble clave para garantizar compatibilidad total con tu frontend
-        data_to_upload = {
+        lat, lng = obtener_coordenadas(direccion, lugar)
+
+        sheet_data[f"sheet_registro_{i}"] = {
             "modalidad": "necesita",
             "lugar": lugar,
-            "ubicacion": lugar,
+            "ubicacion": f"{lugar} ({direccion})",
             "direccion": direccion,
             "necesita": necesidad,
             "notas": notas,
             "descripcion": f"Dirección: {direccion} | Necesita: {necesidad} | Notas: {notas}",
-            "lat": 4.6097,
-            "latitud": 4.6097,
-            "lng": -74.0817,
-            "longitud": -74.0817,
+            "lat": lat,
+            "latitud": lat,
+            "lng": lng,
+            "longitud": lng,
             "contacto": contacto,
             "prioridad": "Media",
             "origen": "google_sheets"
         }
-
-        # ID único seguro para el registro de la hoja
-        doc_id = f"sheet_registro_{i}"
-        sheet_data[doc_id] = data_to_upload
         sincronizados += 1
-
     except Exception as e:
-        print(f"⚠️ Aviso en fila {i}: {e}")
         continue
 
-# Combinar datos manuales de usuarios + registros limpios del Excel
+# Unificar todo (Datos de ayudas + Datos de solicitudes_ayuda + Nuevos del Excel) en 'solicitudes_ayuda'
 combined_data = {**user_data, **sheet_data}
+ref_solicitudes.set(combined_data)
 
-# Actualizar Firebase de forma segura sin destruir nada
-ref.set(combined_data)
-
-print(f"✅ ¡Sincronización finalizada con éxito! Se conservaron los datos manuales y se actualizaron {sincronizados} registros válidos del Excel en 'solicitudes_ayuda'.")
+print(f"✅ ¡Sincronización completa! Se unificaron {len(user_data)} registros previos de ambos nodos y {sincronizados} del Excel en 'solicitudes_ayuda'.")
