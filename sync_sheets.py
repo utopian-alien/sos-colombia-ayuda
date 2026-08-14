@@ -2,9 +2,10 @@ import json
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
+from google.oauth2 import service_account
 import gspread
 
-# 1. Cargar credenciales de Firebase desde la Variable de Entorno (GitHub Secret)
+# 1. Cargar credenciales desde la Variable de Entorno (GitHub Secret)
 service_account_raw = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 if not service_account_raw:
   raise ValueError(
@@ -14,19 +15,26 @@ if not service_account_raw:
 
 service_account_info = json.loads(service_account_raw)
 
-# 2. Inicializar Firebase
+# 2. Inicializar Firebase (usa su propio formato)
 cred = credentials.Certificate(service_account_info)
 if not firebase_admin._apps:
   firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-# 3. Conectar a Google Sheets usando la misma credencial
-gc = gspread.authorize(cred)
+# 3. Conectar a Google Sheets usando Google Auth con los scopes correctos
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+gspread_creds = service_account.Credentials.from_service_account_info(
+    service_account_info, scopes=scopes
+)
+gc = gspread.authorize(gspread_creds)
 
 # ID de tu Google Sheet complementario
 SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
-sheet = gc.open_by_key(SHEET_ID).sheet1  # O la pestaña correspondiente
+sheet = gc.open_by_key(SHEET_ID).sheet1
 
 # Obtener todos los registros del Excel
 rows = sheet.get_all_records()
@@ -34,13 +42,11 @@ rows = sheet.get_all_records()
 print(f"📥 Sincronizando {len(rows)} registros desde Google Sheets a Firebase...")
 
 for index, row in enumerate(rows):
-  # Extraemos los campos principales (ajusta los nombres según tus columnas exactas)
   lugar = row.get("LUGAR", "").strip()
   if not lugar:
     continue  # Si no hay lugar, saltar fila vacía
 
   # --- FORZAR UBICACIÓN A BOGOTÁ ---
-  # Sobrescribimos o fijamos los datos geográficos para que el mapa los lea siempre en Bogotá
   data_to_upload = {
       "lugar": lugar,
       "direccion": row.get("DIRECCIÓN", "Bogotá"),
@@ -62,10 +68,10 @@ for index, row in enumerate(rows):
       "longitud": -74.0817,
   }
 
-  # Usar el nombre del lugar como ID único en Firebase (limpiando espacios/caracteres)
+  # Usar el nombre del lugar como ID único en Firebase
   doc_id = lugar.lower().replace(" ", "_").replace("/", "_")
 
-  # Subir o actualizar en la colección de Firestore (ej: 'ayudas')
+  # Subir o actualizar en Firestore
   db.collection("ayudas").document(doc_id).set(data_to_upload, merge=True)
 
 print("✅ ¡Sincronización completada con éxito! Todo ubicado en Bogotá.")
