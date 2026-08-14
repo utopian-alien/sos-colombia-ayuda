@@ -35,21 +35,29 @@ SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
 sheet = gc.open_by_key(SHEET_ID).sheet1
 rows = sheet.get_all_records()
 
-print(f"📥 Sincronizando {len(rows)} registros a la ruta 'solicitudes_ayuda'...")
+print(f"📥 Sincronizando registros válidos a la ruta 'solicitudes_ayuda'...")
 
 # Referencia exacta a la ruta que tu index.html original lee
 ref = db.reference('solicitudes_ayuda')
 
+# (Opcional) O puedes limpiar la ruta antes de meter lo nuevo para que se borren los N/A viejos
+ref.delete()
+
+sincronizados = 0
+
 for row in rows:
     lugar = str(row.get("LUGAR", "")).strip()
-    if not lugar:
+    direccion = str(row.get("DIRECCIÓN", "")).strip()
+
+    # Omitir si el lugar está vacío, o si es "N/A" (sin importar mayúsculas/minúsculas)
+    if not lugar or lugar.upper() == "N/A" or direccion.upper() == "N/A":
         continue
 
-    # Mapeo estructurado exactamente como tu frontend de 1500 líneas lo espera
+    # Mapeo estructurado para tu frontend
     data_to_upload = {
         "modalidad": "necesita",
         "ubicacion": f"{lugar}, Bogotá, Colombia",
-        "descripcion": f"Dirección: {row.get('DIRECCIÓN', 'Bogotá')} | Necesita: {row.get('SE NECESITAN VOLUNTARIOS', row.get('SE NECESITAN DONACIONES', ''))} | Notas: {row.get('NOTAS', '')}",
+        "descripcion": f"Dirección: {direccion} | Necesita: {row.get('SE NECESITAN VOLUNTARIOS', row.get('SE NECESITAN DONACIONES', ''))} | Notas: {row.get('NOTAS', '')}",
         "lat": 4.6097,
         "lng": -74.0817,
         "contacto": str(row.get("CONTACTO CLAVE", "")),
@@ -65,5 +73,6 @@ for row in rows:
 
     # Guardar en la base de datos
     ref.child(doc_id).set(data_to_upload)
+    sincronizados += 1
 
-print("✅ ¡Sincronización completada y adaptada para el mapa!")
+print(f"✅ ¡Sincronización completada! Se subieron {sincronizados} registros limpios (sin N/A).")
