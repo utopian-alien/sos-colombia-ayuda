@@ -881,13 +881,46 @@
       document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
 
       referenciaSolicitudes.on('value', snapshot => {
-        const data = snapshot.val() || {};
-        const sheetItemsPrevios = listaGlobalPublicaciones.filter(p => p.origen && p.origen.startsWith("google_sheets_"));
-        const firebaseItems = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+      const data = snapshot.val() || {};
+      
+      // SOLUCIÓN DE CHOQUE: Mapeo blindado para todos los campos posibles
+      const firebaseItems = Object.keys(data).map(key => {
+        const item = data[key] || {};
         
-        listaGlobalPublicaciones = [...firebaseItems, ...sheetItemsPrevios];
-        aplicarFiltrosYOrden();
+        // Normalización estricta de la modalidad para evitar que los filtros los oculten
+        let modalidadNormalizada = "necesita";
+        const modRaw = String(item.modalidad || "").toLowerCase();
+        if (modRaw.includes("ofrece") || modRaw === "ofrece") {
+          modalidadNormalizada = "ofrece";
+        }
+
+        return {
+          id: key,
+          modalidad: modalidadNormalizada,
+          // Mapeo flexible: prueba todas las combinaciones que usan tus datos manuales, consola y Excel
+          ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá, Colombia",
+          descripcion: item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción",
+          // Coordenadas blindadas: prioriza latitud/longitud (manual/consola) y cae a lat/lng (Excel)
+          lat: parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097)),
+          lng: parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817)),
+          contacto: item.contacto || item.telefono || "",
+          prioridad: item.prioridad || "Media",
+          tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"],
+          tiposInactivos: item.tiposInactivos || [],
+          verificaciones: item.verificaciones || 1,
+          reportesCount: item.reportesCount || 0,
+          imagen: item.imagen || null,
+          otroDetalle: item.otroDetalle || item.notas || "",
+          pin: item.pin || "2026",
+          desactivado: false, // Forzar visibilidad: ningún registro se oculta por filtros de estado
+          origen: item.origen || "manual"
+        };
       });
+      
+      listaGlobalPublicaciones = firebaseItems;
+      aplicarFiltrosYOrden();
+      console.log("✅ Datos procesados y cargados. Total:", listaGlobalPublicaciones.length);
+    });
 
       // 🚀 Sincronización automática silenciosa al arrancar la página
       sincronizarGoogleSheetsAutomatico();
