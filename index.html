@@ -716,17 +716,17 @@
       referenciaSolicitudes.on('value', snapshot => {
         const data = snapshot.val() || {};
         
-        // Mapeo robusto compatible tanto con los datos de Python como con los manuales
+        // Mapeo 100% todoterreno adaptado a tus datos manuales y de Excel
         const firebaseItems = Object.keys(data).map(key => {
-          const item = data[key];
+          const item = data[key] || {};
           return {
             id: key,
             modalidad: item.modalidad || "necesita",
-            ubicacion: item.ubicacion || item.lugar || item.direccion || "Bogotá, Colombia",
-            descripcion: item.descripcion || item.necesita || item.notas || "Sin descripción",
+            ubicacion: item.ubicacion || item.lugar || item.direccion || item.ciudad || "Bogotá, Colombia",
+            descripcion: item.descripcion || item.necesita || item.notas || item.detalle || "Sin descripción",
             lat: parseFloat(item.lat || item.latitud || 4.6097),
             lng: parseFloat(item.lng || item.longitud || -74.0817),
-            contacto: item.contacto || "",
+            contacto: item.contacto || item.telefono || "",
             prioridad: item.prioridad || "Media",
             tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"],
             tiposInactivos: item.tiposInactivos || [],
@@ -736,10 +736,15 @@
             otroDetalle: item.otroDetalle || item.notas || "",
             pin: item.pin || "2026",
             desactivado: item.desactivado || false,
-            origen: item.origen || "firebase"
+            origen: item.origen || "manual"
           };
         });
         
+        listaGlobalPublicaciones = firebaseItems;
+        aplicarFiltrosYOrden();
+      });
+
+      
         listaGlobalPublicaciones = firebaseItems;
         aplicarFiltrosYOrden();
       });
