@@ -880,27 +880,47 @@
       document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo (juntosayudamos-col)';
       document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
 
-      referenciaSolicitudes.on('value', snapshot => {
+referenciaSolicitudes.on('value', snapshot => {
       const data = snapshot.val() || {};
-      // Mapeo forzado: cualquier dato, manual o de Excel, se normaliza aquí
-      listaGlobalPublicaciones = Object.keys(data).map(key => {
+      console.log("🔥 LEYENDO FIREBASE - TOTAL:", Object.keys(data).length);
+      
+      // Mapeo blindado y total: normaliza CUALQUIER campo que traiga el objeto
+      const itemsProcesados = Object.keys(data).map(key => {
         const item = data[key] || {};
+        
+        // 1. Normalización de campos (Acepta inglés de Excel o español de tus registros manuales)
+        const lat = parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097));
+        const lng = parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817));
+        const ubicacion = item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá";
+        const descripcion = item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción";
+        
+        // 2. Normalización de modalidad
+        let mod = "necesita";
+        const modRaw = String(item.modalidad || "").toLowerCase();
+        if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
+
         return {
           id: key,
-          modalidad: (item.modalidad || "necesita").toLowerCase(),
-          ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Ubicación",
-          descripcion: item.descripcion || item.necesita || item.notas || item.detalle || "Sin descripción",
-          lat: parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097)),
-          lng: parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817)),
-          prioridad: item.prioridad || "Media",
-          // AQUÍ ESTÁ EL TRUCO: Si no tiene categoría, le asignamos una para que NO se borre
-          tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"],
-          tiposInactivos: item.tiposInactivos || [],
-          desactivado: item.desactivado || false
+          ...item, // Conserva todo lo original
+          lat: lat,
+          lng: lng,
+          ubicacion: ubicacion,
+          descripcion: descripcion,
+          modalidad: mod,
+          tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], // Si no tiene etiqueta, le pone una para que no se oculte
+          desactivado: false // Fuerza visibilidad
         };
       });
-      aplicarFiltrosYOrden();
+
+      // 3. Asignación a la lista global y renderizado forzado
+      listaGlobalPublicaciones = itemsProcesados;
+      console.log("✅ Carga completa. Registros en memoria:", listaGlobalPublicaciones.length);
+      
+      // Llamada directa al renderizado sin filtros restrictivos
+      renderizarContenedorYMapa(listaGlobalPublicaciones);
     });
+
+      
       // 🚀 Sincronización automática silenciosa al arrancar la página
      //  sincronizarGoogleSheetsAutomatico();
 
