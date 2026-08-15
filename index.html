@@ -73,7 +73,7 @@
 
     <!-- Indicador de acción sobre el mapa -->
     <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
-      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte. La tabla lateral agrupa automáticamente los puntos por proximidad espacial a los centros operativos (Bogotá, Istmina, etc.).
+      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte.
     </div>
 
     <!-- Banner Flotante para Selección en Mapa -->
@@ -84,38 +84,9 @@
       </button>
     </div>
 
-    <!-- Grilla del Mapa y Tabla Lateral -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Mapa Interactivo (2 columnas en pantallas grandes) -->
-      <div id="mapa" class="lg:col-span-2 shadow-md border border-slate-200"></div>
-
-      <!-- Tabla Resumen por Proximidad a Centros Clave -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[500px]">
-        <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
-          <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-            📍 Centros y Zonas Activas (Por Proximidad)
-          </h3>
-          <span id="cantCiudadesBadge" class="bg-red-100 text-red-800 text-[11px] px-2 py-0.5 rounded-full font-extrabold">0</span>
-        </div>
-
-        <div class="overflow-y-auto flex-1 pr-1 text-xs">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-100 sticky top-0 border-b border-slate-200 text-[11px] font-bold text-slate-700 z-10">
-              <tr>
-                <th class="p-2">Centro / Hub</th>
-                <th class="p-2 text-center" title="Solicitudes">🔴</th>
-                <th class="p-2 text-center" title="Ofertas">🟢</th>
-                <th class="p-2 text-center">Total</th>
-              </tr>
-            </thead>
-            <tbody id="tablaCiudadesBody" class="divide-y divide-slate-100">
-              <tr>
-                <td colspan="4" class="p-4 text-center text-slate-400 font-semibold text-xs">Cargando ubicaciones...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Mapa -->
+    <div class="w-full">
+      <div id="mapa" class="shadow-md border border-slate-200"></div>
     </div>
 
     <!-- Panel de Control y Filtros -->
@@ -175,7 +146,7 @@
 
   </main>
 
-  <!-- Pie de Página / Open Source & CC License -->
+  <!-- Pie de Página -->
   <footer class="bg-slate-900 text-slate-400 text-xs py-6 px-4 mt-auto border-t border-slate-800">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
       <div>
@@ -204,28 +175,10 @@
 
       <div class="space-y-3 text-xs leading-relaxed text-slate-700">
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets (Hojas de voluntariado, donaciones y sangre)</p>
-          <p>Integración en tiempo real sincronizando automáticamente las pestañas de la hoja de cálculo pública:</p>
+          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets</p>
           <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
             🔗 Ver Google Sheets de Referencia &rarr;
           </a>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📡 2. Cargas de Usuario en Terreno</p>
-          <p>Publicaciones de ayuda, sangre, colectas Nequi y mascotas añadidas por la comunidad con validación GPS (< 50 metros).</p>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📷 3. Procesamiento de Redes Sociales y Flyers</p>
-          <p>Información estructurada mediante IA desde afiches y publicaciones oficiales de colectivos.</p>
-        </div>
-
-        <!-- ATRIBUCIÓN FUNDACIÓN ASIMOV & GITHUB -->
-        <div class="bg-slate-100 p-3.5 rounded-xl border border-slate-300 text-slate-800 text-center space-y-1 font-medium">
-          <p>Desarrollado sin ánimo de lucro por la <b>Fundación Asimov</b>.</p>
-          <p>Mantenido y desarrollado de forma abierta por <a href="https://github.com/utopian-alien" target="_blank" class="text-red-700 font-bold underline">@utopian-alien</a>.</p>
-          <p class="text-[10px] text-slate-500 pt-1">Licencia Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</p>
         </div>
       </div>
 
@@ -244,7 +197,7 @@
     </div>
   </div>
 
-  <!-- VENTANA MODAL: INSTRUCCIONES DE USO ("CÓMO FUNCIONA") -->
+  <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarInstrucciones()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -253,51 +206,11 @@
         <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
           📖 ¿Cómo funciona la plataforma?
         </h3>
-        <p class="text-xs text-slate-500">Guía ágil para solicitar ayuda, donar sangre, Nequi y mascotas extraviadas.</p>
       </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
-            <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-            Mapa, Doble Clic y Tabla 📍
-          </div>
-          <p class="text-slate-600 leading-relaxed">
-            Haz <b>doble clic</b> en cualquier punto del mapa para registrar una necesidad u oferta. La tabla lateral agrupa automáticamente los puntos por cercanía espacial (Bogotá, Istmina, etc.).
-          </p>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
-            <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-            Sangre, Nequi y Mascotas 🩸💸🐾
-          </div>
-          <p class="text-slate-600 leading-relaxed">
-            Puedes publicar y filtrar campañas de <b>donación de sangre</b> (requiere foto/flyer), cuentas de <b>Nequi / Colectas monetarias</b> y reportes de <b>mascotas perdidas o encontradas</b> (requiere foto).
-          </p>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
-            <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
-            Validación GPS (< 50 metros)
-          </div>
-          <p class="text-slate-600 leading-relaxed">
-            Para validar (3/3) o reportar un punto debes estar en terreno a menos de 50 metros del lugar. Protege los datos con tu PIN de 4 dígitos.
-          </p>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
-            <span class="bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
-            Fuentes de Información ℹ️
-          </div>
-          <p class="text-slate-600 leading-relaxed">
-            Consulta la pestaña superior <b>"ℹ️ Fuentes de Información"</b> para conocer en detalle cómo se integran las bases de datos y hojas de cálculo colaborativas.
-          </p>
-        </div>
-
+        <p>1. Doble clic en el mapa para registrar.</p>
+        <p>2. Puedes publicar donaciones, Nequi y mascotas.</p>
+        <p>3. Validaciones requieren estar a menos de 50m (GPS).</p>
       </div>
 
       <button onclick="cerrarInstrucciones()" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 rounded-xl shadow transition text-xs">
@@ -311,9 +224,8 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
       <button onclick="cerrarFormulario()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
       <h3 id="tituloModal" class="text-xl font-bold text-red-700 mb-1">Registrar Publicación</h3>
-      <p class="text-xs text-slate-500 mb-4">Ubicación registrada desde el mapa. Completa los detalles a continuación.</p>
 
-      <form id="formularioAyuda" onsubmit="guardarSolicitud(event)" class="space-y-4">
+      <form id="formularioAyuda" onsubmit="guardarSolicitud(event)" class="space-y-4 mt-4">
         <input type="hidden" id="editId" value="">
 
         <!-- Modalidad -->
@@ -331,7 +243,7 @@
           </div>
         </div>
 
-        <!-- Foto o Flyer (Obligatoria para Sangre y Mascotas) -->
+        <!-- Foto o Flyer -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">📷 Adjuntar Foto o Flyer <span id="lblReqFoto" class="text-red-600 font-semibold">(Obligatorio para Sangre y Mascotas)</span></label>
           <input type="file" id="campoImagen" accept="image/*" onchange="procesarImagen(event)" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
@@ -343,33 +255,21 @@
 
         <!-- Ubicación / Referencia -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
-          
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia</label>
           <div class="flex gap-1.5">
-            <input 
-              type="text" 
-              id="campoUbicacion" 
-              list="sugerenciasFormulario" 
-              onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarDireccionEnFormulario(); }" 
-              placeholder="Ej: Calle 13 # 4-25 / Vereda El Tambo (opcional)" 
-              class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
-            >
-            <button type="button" onclick="buscarDireccionEnFormulario()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg text-xs transition shrink-0">
-              🔎 Ubicar
-            </button>
+            <input type="text" id="campoUbicacion" list="sugerenciasFormulario" onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarDireccionEnFormulario(); }" placeholder="Ej: Calle 13 # 4-25" class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
+            <button type="button" onclick="buscarDireccionEnFormulario()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg text-xs transition shrink-0">🔎 Ubicar</button>
           </div>
           <datalist id="sugerenciasFormulario"></datalist>
-
-          <!-- Botón de reubicación directa en el mapa -->
           <button type="button" onclick="seleccionarNuevaUbicacionEnMapa()" class="mt-2 w-full bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold py-2 px-3 rounded-lg border border-sky-300 text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
             📍 O señalar directamente en el mapa (Doble clic)
           </button>
         </div>
 
-        <!-- Tipos de Ayuda Múltiples -->
+        <!-- Tipos de Ayuda -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-bold text-slate-700 uppercase">Tipos de Ayuda (Selecciona varias)</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase">Tipos de Ayuda</label>
             <button type="button" onclick="marcarTodosTipos(true)" class="text-[11px] text-red-700 font-bold hover:underline">🚨 Seleccionar Todos</button>
           </div>
           <div class="grid grid-cols-1 gap-1.5 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
@@ -379,20 +279,17 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
             <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto/flyer)</label>
-            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas (Requiere foto)</label>
+            <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas</label>
             <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
-            
-            <!-- OPCIÓN OTRO -->
             <label class="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1 font-bold text-amber-800">
               <input type="checkbox" id="chkOtro" name="tiposAyuda" value="💡 Otro (Donaciones, Apoyo, etc.)" onchange="toggleOtroDetalle()" class="chk-tipo accent-amber-600">
               💡 Otro (Apoyo psicosocial, transporte, etc.)
             </label>
           </div>
 
-          <!-- Cuadro de texto dinámico adicional para "Otro" -->
           <div id="containerOtroDetalle" class="hidden mt-2 p-3 bg-amber-50 rounded-xl border border-amber-300 space-y-1.5 transition">
-            <label class="block text-xs font-bold text-amber-900 uppercase">Información adicional (Tipo de sangre, Nequi, descripción de mascota, etc.)</label>
-            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Tipo de sangre O- / Nombre y raza de mascota..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
+            <label class="block text-xs font-bold text-amber-900 uppercase">Información adicional</label>
+            <textarea id="campoOtroDetalle" rows="2" placeholder="Ej: Nequi 3001234567 / Tipo de sangre O-..." class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
           </div>
         </div>
 
@@ -409,22 +306,22 @@
         <!-- Descripción General -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico / Descripción</label>
-          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, datos de Nequi, raza de mascota o tipo de sangre..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
+          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, datos de Nequi, raza de mascota..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
         </div>
 
         <!-- Contacto (OPCIONAL) -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Teléfono / WhatsApp de Contacto <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
-          <input type="tel" id="campoContacto" placeholder="Ej: 3001234567 (opcional)" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Teléfono / WhatsApp de Contacto (opcional)</label>
+          <input type="tel" id="campoContacto" placeholder="Ej: 3001234567" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
         </div>
 
         <!-- PIN de Autor -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos requeridos para guardar)</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos requeridos)</label>
           <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Escribe el PIN de 4 dígitos" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
         </div>
 
-        <!-- Coordenadas asignadas automáticamente -->
+        <!-- Coordenadas -->
         <div class="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-0.5">Latitud</label>
@@ -436,14 +333,10 @@
           </div>
         </div>
 
-        <!-- Botones de Acción: Guardar y Descartar -->
+        <!-- Botones -->
         <div class="flex gap-2 pt-2">
-          <button type="button" onclick="cerrarFormulario()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-lg shadow-sm transition text-xs md:text-sm">
-            ❌ Descartar Cambios
-          </button>
-          <button type="submit" id="btnEnviar" class="w-1/2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg shadow-md transition text-xs md:text-sm">
-            Publicar Solicitud de Ayuda
-          </button>
+          <button type="button" onclick="cerrarFormulario()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-lg shadow-sm transition text-xs md:text-sm">❌ Descartar Cambios</button>
+          <button type="submit" id="btnEnviar" class="w-1/2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg shadow-md transition text-xs md:text-sm">Publicar Solicitud</button>
         </div>
       </form>
     </div>
@@ -456,48 +349,23 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
-    // 🔑 TOKEN OFICIAL DE MAPBOX INTEGRADO
+    // TOKEN MAPBOX
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
     
-    // IDs de Google Sheets
+    // IDs Google Sheets
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
-    const GID_HOJA_1 = "0";              // Pestaña 1 (Voluntariados)
-    const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación / Sangre / Colectas / Mascotas)
+    const GID_HOJA_1 = "0";              
+    const GID_HOJA_2 = "1994734491";    
 
-    // ESTRUCTURA PRINCIPAL DE DATOS: CAJAS SEPARADAS PARA EVITAR QUE SE BORREN
-    let datosFirebase = [];
+    // ESTRUCTURA PRINCIPAL DE DATOS: LEYENDO AMBOS NODOS
+    let datosAyudas = [];
+    let datosSolicitudes = [];
     let datosSheets = [];
     let listaGlobalPublicaciones = [];
 
-    // Esta función une ambas fuentes pacíficamente y actualiza la pantalla
     function unificarListasYRenderizar() {
-      listaGlobalPublicaciones = [...datosFirebase, ...datosSheets];
+      listaGlobalPublicaciones = [...datosAyudas, ...datosSolicitudes, ...datosSheets];
       aplicarFiltrosYOrden();
-    }
-
-    // 📍 Centros Clave de Referencia para Cálculo de Distancia Euclidiana
-    const CENTROS_REFERENCIA = [
-      { nombre: "Bogotá", dpto: "Cundinamarca", lat: 4.7110, lng: -74.0721 },
-      { nombre: "Istmina", dpto: "Chocó", lat: 5.1583, lng: -76.6972 },
-      { nombre: "Quibdó", dpto: "Chocó", lat: 5.6947, lng: -76.6611 },
-      { nombre: "Medellín", dpto: "Antioquia", lat: 6.2442, lng: -75.5812 },
-      { nombre: "Cali", dpto: "Valle del Cauca", lat: 3.4516, lng: -76.5320 },
-      { nombre: "Bucaramanga", dpto: "Santander", lat: 7.1193, lng: -73.1227 },
-      { nombre: "Cartagena", dpto: "Bolívar", lat: 10.3910, lng: -75.4794 },
-      { nombre: "Barranquilla", dpto: "Atlántico", lat: 10.9685, lng: -74.7813 }
-    ];
-
-    function encontrarCentroMasCercano(lat, lng) {
-      let masCercano = CENTROS_REFERENCIA[0];
-      let minDst = Infinity;
-      CENTROS_REFERENCIA.forEach(c => {
-        const dst = Math.sqrt(Math.pow(lat - c.lat, 2) + Math.pow(lng - c.lng, 2));
-        if (dst < minDst) {
-          minDst = dst;
-          masCercano = c;
-        }
-      });
-      return masCercano;
     }
 
     const CLAVE_MAESTRA = "2026";
@@ -505,25 +373,20 @@
     let marcadorPicker = null;
     let enModoSeleccionUbicacion = false;
 
-    // 1. Inicializar Mapa Leaflet
+    // Inicializar Mapa
     const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap Colombia | Mapbox Geocoding', maxZoom: 19
     }).addTo(mapa);
-
     setTimeout(() => { mapa.invalidateSize(); }, 300);
 
-    // DOBLE CLIC EN EL MAPA PARA ASIGNAR UBICACIÓN DIRECTA
     mapa.on('dblclick', function(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
-
       actualizarCoordenadasYMarcador(lat, lng);
       actualizarDireccionPorReverseMapbox(lat, lng);
-
       const banner = document.getElementById('bannerSeleccionMapa');
       if (banner) banner.classList.add('hidden');
-
       enModoSeleccionUbicacion = false;
       abrirFormulario();
     });
@@ -531,7 +394,6 @@
     function actualizarCoordenadasYMarcador(lat, lng) {
       document.getElementById('campoLatitud').value = parseFloat(lat).toFixed(5);
       document.getElementById('campoLongitud').value = parseFloat(lng).toFixed(5);
-
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
       marcadorPicker = L.marker([lat, lng]).addTo(mapa);
     }
@@ -539,10 +401,8 @@
     function seleccionarNuevaUbicacionEnMapa() {
       enModoSeleccionUbicacion = true;
       document.getElementById('modalFormulario').classList.add('hidden');
-
       const banner = document.getElementById('bannerSeleccionMapa');
       if (banner) banner.classList.remove('hidden');
-
       document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -553,45 +413,35 @@
       abrirFormulario();
     }
 
-    // Geocodificación por Texto desde el propio Formulario
     async function buscarDireccionEnFormulario() {
       const query = document.getElementById('campoUbicacion').value.trim();
       if (!query) return alert("Escribe una dirección o municipio para ubicar.");
-
       let consulta = query;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
-
       try {
         const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(consulta)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
         const data = await res.json();
         if (data && data.features && data.features.length > 0) {
           const lon = data.features[0].center[0];
           const lat = data.features[0].center[1];
-
           actualizarCoordenadasYMarcador(lat, lon);
           centrarMapa([lat, lon], 16);
-          alert(`✅ Ubicación encontrada en Mapbox:\n${data.features[0].place_name}`);
         } else {
           alert("No se encontraron coordenadas para esa dirección en Mapbox.");
         }
-      } catch (e) {
-        alert("Error al consultar la dirección en Mapbox.");
-      }
+      } catch (e) { alert("Error al consultar la dirección en Mapbox."); }
     }
 
-    // Reverse Geocoding usando Mapbox API
     async function actualizarDireccionPorReverseMapbox(lat, lng) {
       try {
         const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
         const data = await res.json();
         if (data && data.features && data.features.length > 0) {
-          const placeName = data.features[0].place_name;
-          document.getElementById('campoUbicacion').value = placeName.split(',').slice(0, 3).join(', ');
+          document.getElementById('campoUbicacion').value = data.features[0].place_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
     }
 
-    // LECTOR AUTOMÁTICO SILENCIOSO MULTI-HOJA EN SEGUNDO PLANO
     async function sincronizarGoogleSheetsAutomatico() {
       try {
         const urlHoja1 = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/export?format=csv&gid=${GID_HOJA_1}`;
@@ -601,46 +451,39 @@
           fetch(urlHoja1),
           fetch(urlHoja2).catch(() => null)
         ]);
-
         if (!res1.ok) return;
 
         const text1 = await res1.text();
         const text2 = res2 && res2.ok ? await res2.text() : "";
 
-        // CAJA TEMPORAL PARA GOOGLE SHEETS
         let nuevosDatosSheets = [];
 
-        // --- PROCESAR HOJA 1 ---
+        // Hoja 1
         const lineas1 = text1.split('\n').map(l => l.trim()).filter(Boolean);
         for (let i = 1; i < lineas1.length; i++) {
           const columnas = lineas1[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
           if (columnas.length < 1 || !columnas[0]) continue;
-
           const titulo = columnas[0];
           const detalle = columnas.slice(1).join(" ");
           const esOferta = detalle.includes("🟢") || detalle.toLowerCase().includes("sí voluntarios") || detalle.toLowerCase().includes("necesitan voluntarios");
 
           nuevosDatosSheets.push({
-            id: `sheet1_node_${i}`,
-            modalidad: esOferta ? "ofrece" : "necesita",
-            ubicacion: `${titulo}, Colombia`,
-            tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
+            id: `sheet1_node_${i}`, modalidad: esOferta ? "ofrece" : "necesita",
+            ubicacion: `${titulo}, Colombia`, tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
             prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
             descripcion: `[Hoja 1] ${titulo} | ${detalle}`,
-            lat: 4.6500, lng: -74.0800,
-            contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
+            lat: 4.6500, lng: -74.0800, contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
             verificaciones: esOferta ? 3 : 1, reportesCount: 0, tiposInactivos: [],
             origen: "google_sheets_hoja1"
           });
         }
 
-        // --- PROCESAR HOJA 2 ---
+        // Hoja 2
         if (text2) {
           const lineas2 = text2.split('\n').map(l => l.trim()).filter(Boolean);
           for (let i = 1; i < lineas2.length; i++) {
             const columnas = lineas2[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
             if (columnas.length < 1 || !columnas[0]) continue;
-
             const titulo = columnas[0];
             const detalle = columnas.slice(1).join(" ");
             const detalleLower = detalle.toLowerCase();
@@ -651,39 +494,27 @@
             else if (detalleLower.includes("mascota") || detalleLower.includes("perro") || detalleLower.includes("gato") || detalleLower.includes("animal")) tipoAsignado = "🐾 Mascotas Perdidas y Encontradas";
 
             nuevosDatosSheets.push({
-              id: `sheet2_node_${i}`,
-              modalidad: "necesita",
-              ubicacion: `${titulo}, Colombia`,
-              tiposActivos: [tipoAsignado],
-              prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
-              descripcion: `[Hoja 2] ${titulo} | ${detalle}`,
-              lat: 4.6500, lng: -74.0800,
+              id: `sheet2_node_${i}`, modalidad: "necesita", ubicacion: `${titulo}, Colombia`,
+              tiposActivos: [tipoAsignado], prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
+              descripcion: `[Hoja 2] ${titulo} | ${detalle}`, lat: 4.6500, lng: -74.0800,
               contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
-              verificaciones: 1, reportesCount: 0, tiposInactivos: [],
-              origen: "google_sheets_hoja2"
+              verificaciones: 1, reportesCount: 0, tiposInactivos: [], origen: "google_sheets_hoja2"
             });
           }
         }
-
-        // ASIGNAMOS LA NUEVA CARGA A LA CAJA DE SHEETS Y UNIMOS
         datosSheets = nuevosDatosSheets;
         unificarListasYRenderizar();
-      } catch (e) {
-        console.error("Error en sincronización automática de Google Sheets:", e);
-      }
+      } catch (e) { console.error("Error Sheets:", e); }
     }
 
-    // Autocompletado en Vivo usando Mapbox Geocoding API
     function activarAutocompletadoVivoMapbox(inputId, datalistId) {
       const input = document.getElementById(inputId);
       const datalist = document.getElementById(datalistId);
       let temporizador;
-
       input.addEventListener('input', function() {
         clearTimeout(temporizador);
         const texto = this.value.trim();
         if (texto.length < 3) return;
-
         temporizador = setTimeout(async () => {
           try {
             const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(texto)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&autocomplete=true&limit=5`);
@@ -691,15 +522,14 @@
             datalist.innerHTML = '';
             if (data && data.features) {
               data.features.forEach(f => {
-                const nombreLugar = f.place_name;
-                if (nombreLugar) {
+                if (f.place_name) {
                   const option = document.createElement('option');
-                  option.value = nombreLugar;
+                  option.value = f.place_name;
                   datalist.appendChild(option);
                 }
               });
             }
-          } catch (e) { console.error("Error Autocomplete Mapbox:", e); }
+          } catch (e) { }
         }, 300);
       });
     }
@@ -707,53 +537,41 @@
     activarAutocompletadoVivoMapbox('buscadorPrincipal', 'sugerenciasPrincipal');
     activarAutocompletadoVivoMapbox('campoUbicacion', 'sugerenciasFormulario');
 
-    // Buscador Principal con Mapbox
     async function buscarMunicipioPrincipal() {
       const query = document.getElementById('buscadorPrincipal').value.trim();
       if (!query) return alert("Escribe un municipio o dirección.");
-
       let consulta = query;
       if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
-
       try {
         const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(consulta)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
         const data = await res.json();
         if (data && data.features && data.features.length > 0) {
-          const lon = data.features[0].center[0];
-          const lat = data.features[0].center[1];
-          centrarMapa([lat, lon], 15);
+          centrarMapa([data.features[0].center[1], data.features[0].center[0]], 15);
         } else {
           alert("No se encontró la dirección en Mapbox.");
         }
       } catch (e) { alert("Error al buscar en Mapbox."); }
     }
 
-    // VERIFICACIÓN DE PROXIMIDAD DE SEGURIDAD (MENOS DE 50 METROS)
-    function ejecutarAccionConGPS(targetLat, targetLng, callbackAccion) {
-      if (!("geolocation" in navigator)) {
-        alert("⚠️ Tu navegador o dispositivo no soporta geolocalización GPS necesaria para validar en terreno.");
-        return;
-      }
+    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
 
-      const confirmacion = confirm("📍 Para garantizar la autenticidad, la plataforma verificará que te encuentres a menos de 50 metros del lugar. ¿Deseas validar tu ubicación GPS actual?");
-      if (!confirmacion) return;
+    function ejecutarAccionConGPS(targetLat, targetLng, callbackAccion) {
+      if (!("geolocation" in navigator)) return alert("⚠️ Dispositivo no soporta geolocalización GPS.");
+      if (!confirm("📍 La plataforma verificará que te encuentres a menos de 50 metros del lugar. ¿Deseas validar tu ubicación GPS actual?")) return;
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const userLat = pos.coords.latitude;
-          const userLng = pos.coords.longitude;
-          const distKm = calcularDistanciaKm(userLat, userLng, targetLat, targetLng);
-          const distMetros = Math.round(distKm * 1000);
-
-          if (distMetros <= 50) {
-            callbackAccion();
-          } else {
-            alert(`🚫 ACCESO DENEGADO POR DISTANCIA:\n\nPara validar o reportar este punto debes estar en terreno (a menos de 50 metros).\n\n📍 Tu ubicación GPS actual está a aprox. ${distMetros} metros de este reporte.`);
-          }
+          const distMetros = Math.round(calcularDistanciaKm(pos.coords.latitude, pos.coords.longitude, targetLat, targetLng) * 1000);
+          if (distMetros <= 50) callbackAccion();
+          else alert(`🚫 ACCESO DENEGADO:\nDebes estar a menos de 50 metros.\n📍 Estás a aprox. ${distMetros} metros.`);
         },
-        (error) => {
-          alert("⚠️ No se pudo obtener tu ubicación GPS. Por favor habilita los permisos de localización en tu navegador/celular para validar en terreno.");
-        },
+        () => alert("⚠️ No se pudo obtener ubicación GPS."),
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
       );
     }
@@ -761,11 +579,8 @@
     function toggleOtroDetalle() {
       const chk = document.getElementById('chkOtro');
       const container = document.getElementById('containerOtroDetalle');
-      if (chk && chk.checked) {
-        container.classList.remove('hidden');
-      } else {
-        container.classList.add('hidden');
-      }
+      if (chk && chk.checked) container.classList.remove('hidden');
+      else container.classList.add('hidden');
     }
 
     function abrirImagenFull(src) {
@@ -781,7 +596,7 @@
 
     function abrirFuentes() { document.getElementById('modalFuentes').classList.remove('hidden'); }
     function cerrarFuentes() { document.getElementById('modalFuentes').classList.add('hidden'); }
-
+    
     function scrollACard(id) {
       const tarjeta = document.getElementById(`card-${id}`);
       if (tarjeta) {
@@ -794,27 +609,18 @@
     function procesarImagen(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
           const MAX_SIZE = 600;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-          } else {
-            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
+          let width = img.width, height = img.height;
+          if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+          else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+          canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-
           imagenBase64Actual = canvas.toDataURL('image/jpeg', 0.6);
           document.getElementById('previewImagen').src = imagenBase64Actual;
           document.getElementById('containerPreview').classList.remove('hidden');
@@ -841,13 +647,10 @@
     function abrirFormularioNueva() {
       const centro = mapa.getCenter();
       actualizarCoordenadasYMarcador(centro.lat, centro.lng);
-
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
       document.getElementById('btnEnviar').innerText = "Publicar Solicitud de Ayuda";
       document.getElementById('formularioAyuda').reset();
-      document.getElementById('campoPin').value = "";
-      document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
       toggleOtroDetalle();
       abrirFormulario();
@@ -860,12 +663,13 @@
       if (banner) banner.classList.add('hidden');
       enModoSeleccionUbicacion = false;
     }
+
     function marcarTodosTipos(valor) {
       document.querySelectorAll('.chk-tipo').forEach(c => c.checked = valor);
       toggleOtroDetalle();
     }
 
-    // 2. Configuración Firebase
+    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
       authDomain: "juntosayudamos-col.firebaseapp.com",
@@ -881,65 +685,73 @@
 
     let firebaseActivo = false;
     let referenciaSolicitudes = null;
+    let referenciaAyudas = null;
     let ubicacionUsuarioGPS = null;
+
+    // --- RESTAURAR ICONOS ORIGINALES ---
+    function crearIcono(modalidad, esVerificado, totalmenteAtendido) {
+      let emoji = modalidad === 'ofrece' ? '🟢' : '🔴';
+      let colorBg = modalidad === 'ofrece' ? '#10b981' : '#ef4444';
+      if (totalmenteAtendido) { emoji = '⚪'; colorBg = '#6b7280'; }
+      return L.divIcon({
+        className: 'custom-pin',
+        html: `<div style="background-color: ${colorBg}; color: white; border: 2px solid white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-weight: bold;">${emoji}</div>`,
+        iconSize: [34, 34], iconAnchor: [17, 17]
+      });
+    }
 
     try {
       firebase.initializeApp(firebaseConfig);
       referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
+      referenciaAyudas = firebase.database().ref('ayudas'); // 👈 AQUÍ ESTÁN TUS DATOS DE ISTMINA
       firebaseActivo = true;
 
-      document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo (juntosayudamos-col)';
+      document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo';
       document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
 
-      referenciaSolicitudes.on('value', snapshot => {
+      function procesarSnapshot(snapshot, origenInfo) {
         const data = snapshot.val() || {};
-        console.log("🔥 LEYENDO FIREBASE - TOTAL:", Object.keys(data).length);
-        
-        const itemsProcesados = Object.keys(data).map(key => {
+        return Object.keys(data).map(key => {
           const item = data[key] || {};
-          
           const lat = parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097));
           const lng = parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817));
-          const ubicacion = item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá";
-          const descripcion = item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción";
-          
           let mod = "necesita";
           const modRaw = String(item.modalidad || "").toLowerCase();
           if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
 
           return {
-            id: key,
-            ...item, 
-            lat: lat,
-            lng: lng,
-            ubicacion: ubicacion,
-            descripcion: descripcion,
-            modalidad: mod,
-            tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], 
-            desactivado: false,
-            origen: 'firebase'
+            id: key, ...item, lat: lat, lng: lng,
+            ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Sin ubicación",
+            descripcion: item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción",
+            modalidad: mod, tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], 
+            desactivado: item.desactivado || false, origen: origenInfo
           };
         });
+      }
 
-        // VACIAR DATOS A LA CAJA DE FIREBASE Y UNIFICAR
-        datosFirebase = itemsProcesados;
+      // LECTURA SIMULTÁNEA DE AMBOS NODOS
+      referenciaSolicitudes.on('value', snapshot => {
+        datosSolicitudes = procesarSnapshot(snapshot, 'solicitudes');
         unificarListasYRenderizar();
       });
 
-      // 🚀 ACTIVAR SINCRONIZACIÓN GOOGLE SHEETS
+      referenciaAyudas.on('value', snapshot => {
+        datosAyudas = procesarSnapshot(snapshot, 'ayudas_manual');
+        unificarListasYRenderizar();
+      });
+
       sincronizarGoogleSheetsAutomatico();
-      setInterval(sincronizarGoogleSheetsAutomatico, 120000); // Refrescar Excel cada 2 minutos
+      setInterval(sincronizarGoogleSheetsAutomatico, 120000);
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      datosFirebase = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
+      datosSolicitudes = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
       unificarListasYRenderizar();
     }
 
     function obtenerUbicacionUsuario() {
       const btn = document.getElementById('btnGPS');
       btn.innerText = "⏳ GPS...";
-
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(pos => {
           ubicacionUsuarioGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -952,52 +764,23 @@
       }
     }
 
-    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function crearIcono(modalidad, esVerificado, totalmenteAtendido) {
-      let emoji = modalidad === 'ofrece' ? '🟢' : '🔴';
-      let colorBg = modalidad === 'ofrece' ? '#10b981' : '#ef4444';
-
-      if (totalmenteAtendido) { emoji = '⚪'; colorBg = '#6b7280'; }
-
-      return L.divIcon({
-        className: 'custom-pin',
-        html: `<div style="background-color: ${colorBg}; color: white; border: 2px solid white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-weight: bold;">${emoji}</div>`,
-        iconSize: [34, 34], iconAnchor: [17, 17]
-      });
-    }
-
     function aplicarFiltrosYOrden() {
       const cat = document.getElementById('filtroCategoria').value;
       const mod = document.getElementById('filtroModalidad').value;
-      
       let resultado = listaGlobalPublicaciones.filter(p => !p.desactivado);
 
-      // FILTRADO INCLUSIVO
       if (cat !== 'todos') {
         resultado = resultado.filter(p => {
           const categorias = p.tiposActivos || [];
           return categorias.includes(cat);
         });
       }
-
-      if (mod !== 'todos') {
-        resultado = resultado.filter(p => p.modalidad === mod);
-      }
-
+      if (mod !== 'todos') resultado = resultado.filter(p => p.modalidad === mod);
+      
       renderizarContenedorYMapa(resultado);
     }
 
-   function renderizarContenedorYMapa(items) {
-      console.log("🛠 Renderizando:", items.length, "registros.");
+    function renderizarContenedorYMapa(items) {
       const contenedor = document.getElementById('contenedorTarjetas');
       if (!contenedor) return;
       contenedor.innerHTML = '';
@@ -1009,23 +792,54 @@
       items.forEach(item => {
         const lat = parseFloat(item.lat || 4.6097);
         const lng = parseFloat(item.lng || -74.0817);
+        const atendido = item.desactivado || item.reportesCount >= 3;
+        const verificado = item.verificaciones >= 3;
 
+        // --- RESTAURAR ESTRUCTURA COMPLETA DE TARJETA ---
         const div = document.createElement('div');
-        div.className = "border p-4 rounded-xl bg-white shadow-sm";
+        div.className = "border p-4 rounded-xl bg-white shadow-sm flex flex-col h-full";
+        div.id = `card-${item.id}`;
         div.innerHTML = `
-          <h3 class="font-bold text-red-700">${item.ubicacion || 'Sin ubicación'}</h3>
-          <p class="text-sm mt-1 mb-2">${item.descripcion || 'Sin descripción'}</p>
-          <span class="text-[10px] bg-slate-200 p-1 rounded font-bold text-slate-700">Origen: ${item.origen || 'usuario'}</span>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1">
+                ${item.modalidad === 'ofrece' ? '🟢' : '🔴'} ${item.ubicacion}
+              </h3>
+              <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono border border-slate-200">
+                ${item.origen || 'web'}
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 mb-3 whitespace-pre-wrap">${item.descripcion}</p>
+            ${item.imagen ? `<img src="${item.imagen}" class="w-full h-32 object-cover rounded-lg mb-3 cursor-pointer border border-slate-200 shadow-sm hover:opacity-90 transition" onclick="abrirImagenFull('${item.imagen}')">` : ''}
+            
+            <div class="flex flex-wrap gap-1 mb-3">
+              ${(item.tiposActivos || []).map(t => `<span class="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">${t}</span>`).join('')}
+            </div>
+          </div>
+          
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-1.5 mt-auto">
+            <button onclick="verificarSolicitud('${item.id}', ${item.verificaciones || 0}, ${lat}, ${lng})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold py-1.5 rounded border border-emerald-200 transition flex items-center justify-center gap-1">
+              ✅ Validar (${item.verificaciones || 0}/3)
+            </button>
+            <button onclick="duplicarPublicacion('${item.id}')" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-bold py-1.5 rounded border border-sky-200 transition flex items-center justify-center gap-1">
+              📋 Duplicar
+            </button>
+            <button onclick="reportarFalsa('${item.id}', ${item.reportesCount || 0}, ${lat}, ${lng})" class="bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold py-1.5 rounded border border-amber-200 transition flex items-center justify-center gap-1">
+              ⚠️ Reportar
+            </button>
+            <button onclick="desactivarPublicacion('${item.id}')" class="bg-slate-50 hover:bg-slate-100 text-slate-700 text-[10px] font-bold py-1.5 rounded border border-slate-200 transition flex items-center justify-center gap-1">
+              🗑️ Borrar
+            </button>
+          </div>
         `;
         contenedor.appendChild(div);
 
         try {
-            const m = L.marker([lat, lng]).addTo(mapa)
-              .bindPopup(`<b>${item.ubicacion || 'Ubicación'}</b><br>${item.descripcion || ''}`);
-            mapaMarcadores[item.id || Math.random()] = m;
-        } catch(e) {
-            console.error("Error pintando marcador:", e);
-        }
+            const icono = crearIcono(item.modalidad, verificado, atendido);
+            const m = L.marker([lat, lng], { icon: icono }).addTo(mapa)
+              .bindPopup(`<b>${item.ubicacion}</b><br><span class="text-xs">${item.descripcion.substring(0, 60)}...</span><br><a href="#" onclick="scrollACard('${item.id}'); return false;" class="text-red-600 font-bold text-xs hover:underline mt-1 block">Ver detalles</a>`);
+            mapaMarcadores[item.id] = m;
+        } catch(e) { }
       });
     }
 
@@ -1044,141 +858,71 @@
       document.getElementById('campoPrioridad').value = item.prioridad || "Media";
       document.getElementById('campoDescripcion').value = item.descripcion || "";
       actualizarCoordenadasYMarcador(item.lat, item.lng);
-      document.getElementById('campoContacto').value = item.contacto || "";
       
-      document.getElementById('campoPin').value = "";
-      document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
-
       const chks = document.querySelectorAll('.chk-tipo');
       const activos = item.tiposActivos || [];
-      chks.forEach(c => {
-        c.checked = activos.includes(c.value);
-      });
-
-      const tieneOtro = activos.includes('💡 Otro (Donaciones, Apoyo, etc.)');
-      document.getElementById('chkOtro').checked = tieneOtro;
+      chks.forEach(c => c.checked = activos.includes(c.value));
+      document.getElementById('chkOtro').checked = activos.includes('💡 Otro (Donaciones, Apoyo, etc.)');
       toggleOtroDetalle();
 
       if (item.imagen) {
         imagenBase64Actual = item.imagen;
         document.getElementById('previewImagen').src = item.imagen;
         document.getElementById('containerPreview').classList.remove('hidden');
-      } else {
-        quitarImagen();
-      }
+      } else { quitarImagen(); }
 
       abrirFormulario();
-      alert("📋 Se copiaron los datos. Puedes buscar la nueva dirección con el botón '🔎 Ubicar' o presionar '📍 O señalar directamente en el mapa'.");
+      alert("📋 Se copiaron los datos para una nueva ubicación.");
     }
 
     function desactivarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
-
       const pin = prompt("Ingresa el PIN de 4 dígitos para borrar:");
       if (!pin) return;
 
       if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
         if (confirm("¿Confirmas la eliminación de esta publicación?")) {
           if (firebaseActivo) {
-            referenciaSolicitudes.child(id).update({ desactivado: true });
+            // Elimina del nodo correcto
+            if (item.origen === 'ayudas_manual') referenciaAyudas.child(id).update({ desactivado: true });
+            else referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
-            const p = datosFirebase.find(x => String(x.id) === String(id));
-            if(p) p.desactivado = true;
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+            item.desactivado = true;
             unificarListasYRenderizar();
           }
           alert("Publicación eliminada correctamente.");
         }
-      } else {
-        alert("❌ PIN incorrecto.");
-      }
+      } else { alert("❌ PIN incorrecto."); }
     }
 
     function reportarFalsa(id, rCount, targetLat, targetLng) {
       if (!confirm("¿Deseas reportar esta publicación como falsa? Para confirmar debes estar a menos de 50m del lugar.")) return;
-
       ejecutarAccionConGPS(targetLat, targetLng, () => {
         const nuevoCount = rCount + 1;
         const payload = { reportesCount: nuevoCount };
         if (nuevoCount >= 3) payload.desactivado = true;
 
         if (firebaseActivo) {
-          referenciaSolicitudes.child(id).update(payload);
-        } else {
-          const item = datosFirebase.find(p => String(p.id) === String(id));
-          if (item) {
-            item.reportesCount = nuevoCount;
-            if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
-            unificarListasYRenderizar();
-          }
+          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          if (item && item.origen === 'ayudas_manual') referenciaAyudas.child(id).update(payload);
+          else referenciaSolicitudes.child(id).update(payload);
         }
         alert("Reporte registrado. ¡Gracias por mantener limpia la información!");
       });
     }
 
-    function alternarTipoAyuda(id, tipoTexto, estaActivo) {
-      if (firebaseActivo) {
-        referenciaSolicitudes.child(id).once('value', snapshot => {
-          const data = snapshot.val();
-          if (!data) return;
-
-          let activos = data.tiposActivos || [];
-          let inactivos = data.tiposInactivos || [];
-
-          if (estaActivo) {
-            activos = activos.filter(t => t !== tipoTexto);
-            if (!inactivos.includes(tipoTexto)) inactivos.push(tipoTexto);
-          } else {
-            inactivos = inactivos.filter(t => t !== tipoTexto);
-            if (!activos.includes(tipoTexto)) activos.push(tipoTexto);
-          }
-
-          referenciaSolicitudes.child(id).update({ tiposActivos: activos, tiposInactivos: inactivos });
-        });
-      } else {
-        const item = datosFirebase.find(p => String(p.id) === String(id));
-        if (item) {
-          let activos = item.tiposActivos || [];
-          let inactivos = item.tiposInactivos || [];
-
-          if (estaActivo) {
-            activos = activos.filter(t => t !== tipoTexto);
-            if (!inactivos.includes(tipoTexto)) inactivos.push(tipoTexto);
-          } else {
-            inactivos = inactivos.filter(t => t !== tipoTexto);
-            if (!activos.includes(tipoTexto)) activos.push(tipoTexto);
-          }
-
-          item.tiposActivos = activos;
-          item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
-          unificarListasYRenderizar();
-        }
-      }
-    }
-
     function verificarSolicitud(id, vCountActual, targetLat, targetLng) {
       if (misVerificaciones.includes(String(id))) return;
-
       ejecutarAccionConGPS(targetLat, targetLng, () => {
         const nuevaCantidad = vCountActual + 1;
-
         if (firebaseActivo) {
-          referenciaSolicitudes.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
+          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          const ref = (item && item.origen === 'ayudas_manual') ? referenciaAyudas : referenciaSolicitudes;
+          ref.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
           });
-        } else {
-          const item = datosFirebase.find(p => String(p.id) === String(id));
-          if (item) {
-            item.verificaciones = nuevaCantidad;
-            misVerificaciones.push(String(id));
-            localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
-            unificarListasYRenderizar();
-          }
         }
         alert("✅ Verificación en terreno registrada con éxito.");
       });
@@ -1186,112 +930,69 @@
 
     function guardarSolicitud(e) {
       e.preventDefault();
-
       const btn = document.getElementById('btnEnviar');
       const editId = document.getElementById('editId').value;
       let lat = parseFloat(document.getElementById('campoLatitud').value);
       let lng = parseFloat(document.getElementById('campoLongitud').value);
 
-      if (isNaN(lat) || isNaN(lng)) {
-        alert("Haz doble clic sobre el mapa para indicar la ubicación.");
-        return;
-      }
+      if (isNaN(lat) || isNaN(lng)) return alert("Haz doble clic sobre el mapa para indicar la ubicación.");
 
       const modalidad = document.querySelector('input[name="campoModalidad"]:checked').value;
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
       
       const requiereFoto = chks.includes("🩸 Donación de Sangre") || chks.includes("🐾 Mascotas Perdidas y Encontradas");
-      if (requiereFoto && !imagenBase64Actual) {
-        alert("⚠️ Para reportes de 'Donación de Sangre' o 'Mascotas Perdidas y Encontradas' es obligatorio adjuntar una foto o flyer.");
-        return;
-      }
+      if (requiereFoto && !imagenBase64Actual) return alert("⚠️ Para este tipo de reporte es obligatorio adjuntar una foto o flyer.");
 
       btn.disabled = true;
       btn.innerText = "Guardando...";
 
-      const tiposActivos = chks.length > 0 ? chks : ["Varias Necesidades Generales"];
-
       const chkOtro = document.getElementById('chkOtro');
       const otroDetalle = (chkOtro && chkOtro.checked) ? document.getElementById('campoOtroDetalle').value.trim() : "";
-
       let ubicacionTexto = document.getElementById('campoUbicacion').value.trim();
-      if (!ubicacionTexto) {
-        ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
-      }
-
+      if (!ubicacionTexto) ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
       const pinIngresado = document.getElementById('campoPin').value.trim();
 
       const payload = {
-        modalidad: modalidad,
-        ubicacion: ubicacionTexto,
-        tiposActivos: tiposActivos,
+        modalidad: modalidad, ubicacion: ubicacionTexto,
+        tiposActivos: chks.length > 0 ? chks : ["Varias Necesidades Generales"],
         prioridad: document.getElementById('campoPrioridad').value,
         descripcion: document.getElementById('campoDescripcion').value,
-        lat: lat,
-        lng: lng,
-        contacto: document.getElementById('campoContacto').value.trim(),
-        pin: pinIngresado,
-        imagen: imagenBase64Actual,
-        otroDetalle: otroDetalle,
-        origen: 'firebase'
+        lat: lat, lng: lng, contacto: document.getElementById('campoContacto').value.trim(),
+        pin: pinIngresado, imagen: imagenBase64Actual, otroDetalle: otroDetalle,
       };
 
       if (editId) {
         const itemExistente = listaGlobalPublicaciones.find(p => String(p.id) === String(editId));
         if (itemExistente && pinIngresado !== String(itemExistente.pin) && pinIngresado !== CLAVE_MAESTRA) {
-          alert("❌ El PIN ingresado no coincide con el PIN asignado a esta publicación.");
+          alert("❌ El PIN ingresado no coincide con el original.");
           btn.disabled = false;
           btn.innerText = "💾 Guardar Cambios";
           return;
         }
 
         if (firebaseActivo) {
-          referenciaSolicitudes.child(editId).update(payload).then(() => finalizarConExito(lat, lng));
-        } else {
-          const idx = datosFirebase.findIndex(p => String(p.id) === String(editId));
-          if (idx !== -1) {
-            datosFirebase[idx] = { ...datosFirebase[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
-            unificarListasYRenderizar();
-            finalizarConExito(lat, lng);
-          }
+          const ref = (itemExistente.origen === 'ayudas_manual') ? referenciaAyudas : referenciaSolicitudes;
+          ref.child(editId).update(payload).then(() => finalizarConExito(lat, lng));
         }
       } else {
         payload.verificaciones = 1;
         payload.reportesCount = 0;
-        payload.tiposInactivos = [];
         payload.fechaCreacion = Date.now();
 
         if (firebaseActivo && referenciaSolicitudes) {
           const nuevaRef = referenciaSolicitudes.push();
-          nuevaRef.set(payload)
-            .then(() => finalizarConExito(lat, lng))
-            .catch(() => guardarEnLocal(payload));
-        } else {
-          guardarEnLocal(payload);
+          nuevaRef.set(payload).then(() => finalizarConExito(lat, lng));
         }
       }
-    }
-
-    function guardarEnLocal(payload) {
-      payload.id = String(Date.now());
-      datosFirebase.unshift(payload);
-      localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
-      unificarListasYRenderizar();
-      finalizarConExito(payload.lat, payload.lng);
     }
 
     function finalizarConExito(lat, lng) {
       const btn = document.getElementById('btnEnviar');
       btn.disabled = false;
       btn.innerText = "Publicar Solicitud de Ayuda";
-
       cerrarFormulario();
       document.getElementById('formularioAyuda').reset();
-      document.getElementById('campoPin').value = "";
-      document.getElementById('campoOtroDetalle').value = "";
       quitarImagen();
-      toggleOtroDetalle();
       if (marcadorPicker) mapa.removeLayer(marcadorPicker);
       centrarMapa([lat, lng], 16);
       alert("¡Publicación guardada con éxito!");
