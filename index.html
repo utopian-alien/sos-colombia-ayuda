@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    #mapa { height: 500px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
+    #mapa { height: 520px; width: 100%; border-radius: 12px; z-index: 1; cursor: pointer; }
     .custom-pin { display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
@@ -26,7 +26,7 @@
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <button onclick="abrirFuentes()" class="bg-red-900 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
-          ℹ️ Fuentes de Información
+          ℹ️ Fuentes
         </button>
         <button onclick="abrirInstrucciones()" class="bg-red-800 hover:bg-red-900 text-white font-bold px-3 py-2 rounded-lg border border-red-500 shadow text-xs md:text-sm transition flex items-center gap-1">
           ❓ ¿Cómo usar?
@@ -38,20 +38,20 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto p-4 space-y-4 flex-1">
+  <main class="max-w-6xl mx-auto p-4 space-y-4 flex-1 w-full">
 
     <!-- Buscador y Estado -->
     <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 space-y-2">
       <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex flex-wrap items-center gap-3">
-          <span class="font-bold text-slate-700">Iconos:</span>
+          <span class="font-bold text-slate-700">Convenciones:</span>
           <span class="font-semibold text-red-700">🔴 Necesidad</span>
           <span class="font-semibold text-emerald-700">🟢 Oferta</span>
           <span class="font-semibold text-slate-500">⚪ Atendido</span>
           <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">✅ Validado (3/3)</span>
         </div>
         <div id="estadoConexion" class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-xs">
-          🟡 Conectando...
+          🟡 Conectando con la base de datos...
         </div>
       </div>
 
@@ -61,7 +61,7 @@
           id="buscadorPrincipal" 
           list="sugerenciasPrincipal" 
           onkeypress="if(event.key==='Enter') buscarMunicipioPrincipal()" 
-          placeholder="🔍 Escribe dirección, barrio o municipio con tecnología Mapbox..." 
+          placeholder="🔍 Escribe dirección, barrio o municipio..." 
           class="flex-1 border border-slate-300 rounded-lg p-2 text-xs md:text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
         />
         <datalist id="sugerenciasPrincipal"></datalist>
@@ -69,11 +69,6 @@
           🔎 Buscar en Mapa
         </button>
       </div>
-    </div>
-
-    <!-- Indicador de acción sobre el mapa -->
-    <div class="bg-red-50 border border-red-200 text-red-900 text-xs p-2 rounded-lg text-center font-semibold">
-      💡 <b>Tip rápido:</b> Haz <u>doble clic</u> directamente sobre cualquier punto del mapa para seleccionar la ubicación e iniciar tu reporte.
     </div>
 
     <!-- Banner Flotante para Selección en Mapa -->
@@ -94,8 +89,8 @@
       
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3 border-b border-slate-200">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">Panel de Solicitudes y Ofertas</h2>
-          <p class="text-xs text-slate-500">Filtra y ordena según tus capacidades o ubicación</p>
+          <h2 class="text-lg font-bold text-slate-800">Panel de Solicitudes y Ofertas Comunitarias</h2>
+          <p class="text-xs text-slate-500">Visualiza en tiempo real los reportes en terreno y hojas de datos</p>
         </div>
 
         <button onclick="obtenerUbicacionUsuario()" id="btnGPS" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs transition border border-slate-300 flex items-center gap-1">
@@ -140,7 +135,7 @@
         </div>
       </div>
 
-      <!-- Tarjetas -->
+      <!-- Contenedor de Tarjetas -->
       <div id="contenedorTarjetas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
@@ -155,71 +150,45 @@
       </div>
       <div class="flex items-center gap-3">
         <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="bg-slate-800 hover:bg-slate-800/80 p-2 rounded-lg border border-slate-700 text-slate-300 font-semibold flex items-center gap-2">
-          <span>🔀 Licencia Creative Commons (CC BY-SA 4.0)</span>
+          <span>🔀 CC BY-SA 4.0</span>
         </a>
       </div>
     </div>
   </footer>
 
-  <!-- VENTANA MODAL: FUENTES DE INFORMACIÓN -->
+  <!-- MODAL: FUENTES DE INFORMACIÓN -->
   <div id="modalFuentes" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarFuentes()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
-      
-      <div class="border-b border-slate-200 pb-3">
-        <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
-          ℹ️ Fuentes de Información y Transparencia
-        </h3>
-        <p class="text-xs text-slate-500">Origen de los datos desplegados en la plataforma comunitaria.</p>
-      </div>
-
-      <div class="space-y-3 text-xs leading-relaxed text-slate-700">
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <p class="font-bold text-slate-900 text-sm">📊 1. Google Sheets</p>
-          <a href="https://docs.google.com/spreadsheets/d/1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8/edit?usp=sharing" target="_blank" class="text-blue-700 font-bold hover:underline block pt-1">
-            🔗 Ver Google Sheets de Referencia &rarr;
-          </a>
-        </div>
-      </div>
-
-      <button onclick="cerrarFuentes()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl shadow transition text-xs">
-        Cerrar Ventana
-      </button>
+      <h3 class="text-xl font-extrabold text-red-700">ℹ️ Fuentes de Información</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">Los datos se integran en tiempo real entre la base de datos comunitaria de Firebase y las hojas públicas colaborativas de Google Sheets.</p>
+      <button onclick="cerrarFuentes()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl shadow text-xs">Cerrar</button>
     </div>
   </div>
 
-  <!-- VENTANA MODAL: VISOR DE IMAGEN EN PANTALLA COMPLETA -->
+  <!-- MODAL: VISOR DE IMAGEN FULLSCREEN -->
   <div id="modalImagenFull" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex justify-center items-center p-4 z-[10000]" onclick="cerrarImagenFull()">
     <div class="relative max-w-4xl max-h-[90vh] flex flex-col justify-center items-center" onclick="event.stopPropagation()">
       <button onclick="cerrarImagenFull()" class="absolute -top-10 right-0 text-white hover:text-red-400 font-bold text-3xl transition">&times;</button>
       <img id="imgFullTarget" src="" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-slate-700">
-      <p class="text-xs text-slate-300 mt-2 font-semibold">Toca fuera de la imagen o la X para cerrar</p>
     </div>
   </div>
 
-  <!-- VENTANA MODAL: INSTRUCCIONES DE USO -->
+  <!-- MODAL: INSTRUCCIONES -->
   <div id="modalInstrucciones" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <button onclick="cerrarInstrucciones()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
-      
-      <div class="border-b border-slate-200 pb-3">
-        <h3 class="text-xl font-extrabold text-red-700 flex items-center gap-2">
-          📖 ¿Cómo funciona la plataforma?
-        </h3>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <p>1. Doble clic en el mapa para registrar.</p>
-        <p>2. Puedes publicar donaciones, Nequi y mascotas.</p>
-        <p>3. Validaciones requieren estar a menos de 50m (GPS).</p>
-      </div>
-
-      <button onclick="cerrarInstrucciones()" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 rounded-xl shadow transition text-xs">
-        ¡Entendido, ir al mapa!
-      </button>
+      <h3 class="text-xl font-extrabold text-red-700">📖 Instrucciones de Uso</h3>
+      <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+        <li><b>Publicar:</b> Haz doble clic en cualquier punto del mapa para abrir el formulario con las coordenadas ya fijadas.</li>
+        <li><b>Validación en terreno:</b> Puedes validar puntos usando tu GPS (requiere estar a menos de 50 metros del lugar).</li>
+        <li><b>Fotografías y Flyers:</b> Obligatorias para donaciones de sangre y mascotas perdidas/encontradas.</li>
+      </ul>
+      <button onclick="cerrarInstrucciones()" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 rounded-xl shadow text-xs">Entendido</button>
     </div>
   </div>
 
-  <!-- Formulario Modal -->
+  <!-- MODAL: FORMULARIO -->
   <div id="modalFormulario" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[9999]">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
       <button onclick="cerrarFormulario()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -253,11 +222,11 @@
           </div>
         </div>
 
-        <!-- Ubicación / Referencia -->
+        <!-- Ubicación -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ubicación / Dirección / Referencia</label>
           <div class="flex gap-1.5">
-            <input type="text" id="campoUbicacion" list="sugerenciasFormulario" onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarDireccionEnFormulario(); }" placeholder="Ej: Calle 13 # 4-25" class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
+            <input type="text" id="campoUbicacion" list="sugerenciasFormulario" onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarDireccionEnFormulario(); }" placeholder="Ej: Calle 13 # 4-25 o Istmina, Chocó" class="flex-1 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
             <button type="button" onclick="buscarDireccionEnFormulario()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg text-xs transition shrink-0">🔎 Ubicar</button>
           </div>
           <datalist id="sugerenciasFormulario"></datalist>
@@ -278,9 +247,9 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo accent-red-700"> 🙋‍♂️ Trabajo Voluntario / Mano de Obra</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo accent-red-700"> ⛺ Albergue y Carpas</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo accent-red-700"> 🚜 Herramientas y Remoción</label>
-            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto/flyer)</label>
+            <label class="flex items-center gap-2 font-bold text-rose-700"><input type="checkbox" name="tiposAyuda" value="🩸 Donación de Sangre" class="chk-tipo accent-rose-700"> 🩸 Donación de Sangre (Requiere foto)</label>
             <label class="flex items-center gap-2 font-bold text-amber-900"><input type="checkbox" name="tiposAyuda" value="🐾 Mascotas Perdidas y Encontradas" class="chk-tipo accent-amber-700"> 🐾 Mascotas Perdidas y Encontradas</label>
-            <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones en Dinero</label>
+            <label class="flex items-center gap-2 font-bold text-emerald-800"><input type="checkbox" name="tiposAyuda" value="💸 Nequi / Colectas y Donaciones" class="chk-tipo accent-emerald-700"> 💸 Nequi / Colectas y Donaciones</label>
             <label class="flex items-center gap-2 pt-1 border-t border-slate-200 mt-1 font-bold text-amber-800">
               <input type="checkbox" id="chkOtro" name="tiposAyuda" value="💡 Otro (Donaciones, Apoyo, etc.)" onchange="toggleOtroDetalle()" class="chk-tipo accent-amber-600">
               💡 Otro (Apoyo psicosocial, transporte, etc.)
@@ -295,7 +264,7 @@
 
         <!-- Prioridad -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nivel de Urgencia / Prioridad</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Prioridad</label>
           <select id="campoPrioridad" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
             <option value="Alta">🚨 Alta / Emergencia Crítica</option>
             <option value="Media" selected>🟧 Media / Requerido</option>
@@ -303,22 +272,22 @@
           </select>
         </div>
 
-        <!-- Descripción General -->
+        <!-- Descripción -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Detalle Específico / Descripción</label>
-          <textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, datos de Nequi, raza de mascota..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Descripción / Detalle</label>
+          <textarea id="campoDescripcion" rows="3" required placeholder="Detalla la solicitud o lo que se ofrece..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm"></textarea>
         </div>
 
-        <!-- Contacto (OPCIONAL) -->
+        <!-- Contacto -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Teléfono / WhatsApp de Contacto (opcional)</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contacto (Opcional)</label>
           <input type="tel" id="campoContacto" placeholder="Ej: 3001234567" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
         </div>
 
-        <!-- PIN de Autor -->
+        <!-- PIN -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos requeridos)</label>
-          <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Escribe el PIN de 4 dígitos" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">🔐 PIN de Seguridad (4 dígitos)</label>
+          <input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="4 dígitos" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono tracking-widest">
         </div>
 
         <!-- Coordenadas -->
@@ -335,8 +304,8 @@
 
         <!-- Botones -->
         <div class="flex gap-2 pt-2">
-          <button type="button" onclick="cerrarFormulario()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-lg shadow-sm transition text-xs md:text-sm">❌ Descartar Cambios</button>
-          <button type="submit" id="btnEnviar" class="w-1/2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg shadow-md transition text-xs md:text-sm">Publicar Solicitud</button>
+          <button type="button" onclick="cerrarFormulario()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-lg shadow-sm transition text-xs md:text-sm">❌ Cancelar</button>
+          <button type="submit" id="btnEnviar" class="w-1/2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg shadow-md transition text-xs md:text-sm">Publicar</button>
         </div>
       </form>
     </div>
@@ -349,31 +318,24 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
-    // TOKEN MAPBOX
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
-    
-    // IDs Google Sheets
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
     const GID_HOJA_1 = "0";              
     const GID_HOJA_2 = "1994734491";    
+    const CLAVE_MAESTRA = "2026";
 
-    // ESTRUCTURA PRINCIPAL DE DATOS: LEYENDO AMBOS NODOS
-    let datosAyudas = [];
-    let datosSolicitudes = [];
+    let datosFirebase = [];
     let datosSheets = [];
     let listaGlobalPublicaciones = [];
-
-    function unificarListasYRenderizar() {
-      listaGlobalPublicaciones = [...datosAyudas, ...datosSolicitudes, ...datosSheets];
-      aplicarFiltrosYOrden();
-    }
-
-    const CLAVE_MAESTRA = "2026";
+    let mapaMarcadores = {};
+    let misVerificaciones = JSON.parse(localStorage.getItem('misVerificaciones')) || [];
     let imagenBase64Actual = null;
     let marcadorPicker = null;
     let enModoSeleccionUbicacion = false;
+    let ubicacionUsuarioGPS = null;
+    let primeraCarga = true;
 
-    // Inicializar Mapa
+    // 1. Inicializar Mapa Leaflet
     const mapa = L.map('mapa', { doubleClickZoom: false }).setView([4.5709, -74.2973], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap Colombia | Mapbox Geocoding', maxZoom: 19
@@ -427,9 +389,9 @@
           actualizarCoordenadasYMarcador(lat, lon);
           centrarMapa([lat, lon], 16);
         } else {
-          alert("No se encontraron coordenadas para esa dirección en Mapbox.");
+          alert("No se encontraron coordenadas en Mapbox.");
         }
-      } catch (e) { alert("Error al consultar la dirección en Mapbox."); }
+      } catch (e) { alert("Error al consultar Mapbox."); }
     }
 
     async function actualizarDireccionPorReverseMapbox(lat, lng) {
@@ -440,6 +402,74 @@
           document.getElementById('campoUbicacion').value = data.features[0].place_name.split(',').slice(0, 3).join(', ');
         }
       } catch (e) { console.error("Error en Reverse Mapbox:", e); }
+    }
+
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
+      authDomain: "juntosayudamos-col.firebaseapp.com",
+      databaseURL: "https://juntosayudamos-col-default-rtdb.firebaseio.com",
+      projectId: "juntosayudamos-col",
+      storageBucket: "juntosayudamos-col.firebasestorage.app",
+      messagingSenderId: "32757771591",
+      appId: "1:32757771591:web:9a44f7ae92f9605e5ab062"
+    };
+
+    let firebaseActivo = false;
+    let referenciaSolicitudes = null;
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+      referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
+      firebaseActivo = true;
+
+      document.getElementById('estadoConexion').innerHTML = '🟢 Base de Datos Conectada';
+      document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
+
+      // LECTURA BLINDADA DE FIREBASE
+      referenciaSolicitudes.on('value', snapshot => {
+        const data = snapshot.val() || {};
+        datosFirebase = Object.keys(data).map(key => {
+          const item = data[key] || {};
+          
+          // Extracción flexible de coordenadas con reemplazo de comas
+          let rawLat = item.latitud ?? item.lat ?? item.Latitud ?? item.latitude ?? 4.6097;
+          let rawLng = item.longitud ?? item.lng ?? item.Longitud ?? item.longitude ?? -74.0817;
+          const lat = parseFloat(String(rawLat).replace(',', '.'));
+          const lng = parseFloat(String(rawLng).replace(',', '.'));
+
+          let mod = "necesita";
+          const modRaw = String(item.modalidad || "").toLowerCase();
+          if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
+
+          // Verificación segura de desactivación (evita error de string "false")
+          const estaDesactivado = (item.desactivado === true || item.desactivado === 'true');
+
+          return {
+            id: key,
+            ...item,
+            lat: isNaN(lat) ? 4.6097 : lat,
+            lng: isNaN(lng) ? -74.0817 : lng,
+            ubicacion: item.ubicacion || item.lugar || item.ciudad || item.municipio || "Colombia",
+            descripcion: item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción",
+            modalidad: mod,
+            tiposActivos: Array.isArray(item.tiposActivos) ? item.tiposActivos : ["🥣 Alimentos y Agua Potable"],
+            imagen: item.imagen || item.foto || item.flyer || null,
+            desactivado: estaDesactivado,
+            origen: item.origen || 'usuario_terreno'
+          };
+        });
+
+        unificarListasYRenderizar();
+      });
+
+      sincronizarGoogleSheetsAutomatico();
+      setInterval(sincronizarGoogleSheetsAutomatico, 120000);
+
+    } catch (e) {
+      document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
+      datosFirebase = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
+      unificarListasYRenderizar();
     }
 
     async function sincronizarGoogleSheetsAutomatico() {
@@ -468,12 +498,16 @@
           const esOferta = detalle.includes("🟢") || detalle.toLowerCase().includes("sí voluntarios") || detalle.toLowerCase().includes("necesitan voluntarios");
 
           nuevosDatosSheets.push({
-            id: `sheet1_node_${i}`, modalidad: esOferta ? "ofrece" : "necesita",
-            ubicacion: `${titulo}, Colombia`, tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
+            id: `sheet1_node_${i}`,
+            modalidad: esOferta ? "ofrece" : "necesita",
+            ubicacion: `${titulo}`,
+            tiposActivos: ["🙋‍♂️ Trabajo Voluntario / Mano de Obra"],
             prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
             descripcion: `[Hoja 1] ${titulo} | ${detalle}`,
-            lat: 4.6500, lng: -74.0800, contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
-            verificaciones: esOferta ? 3 : 1, reportesCount: 0, tiposInactivos: [],
+            lat: 4.6500, lng: -74.0800,
+            contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
+            verificaciones: esOferta ? 3 : 1, reportesCount: 0,
+            desactivado: false,
             origen: "google_sheets_hoja1"
           });
         }
@@ -494,93 +528,140 @@
             else if (detalleLower.includes("mascota") || detalleLower.includes("perro") || detalleLower.includes("gato") || detalleLower.includes("animal")) tipoAsignado = "🐾 Mascotas Perdidas y Encontradas";
 
             nuevosDatosSheets.push({
-              id: `sheet2_node_${i}`, modalidad: "necesita", ubicacion: `${titulo}, Colombia`,
-              tiposActivos: [tipoAsignado], prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
-              descripcion: `[Hoja 2] ${titulo} | ${detalle}`, lat: 4.6500, lng: -74.0800,
+              id: `sheet2_node_${i}`,
+              modalidad: "necesita",
+              ubicacion: `${titulo}`,
+              tiposActivos: [tipoAsignado],
+              prioridad: detalle.toUpperCase().includes("URGEN") ? "Alta" : "Media",
+              descripcion: `[Hoja 2] ${titulo} | ${detalle}`,
+              lat: 4.6500, lng: -74.0800,
               contacto: "", pin: "2026", imagen: null, otroDetalle: detalle,
-              verificaciones: 1, reportesCount: 0, tiposInactivos: [], origen: "google_sheets_hoja2"
+              verificaciones: 1, reportesCount: 0,
+              desactivado: false,
+              origen: "google_sheets_hoja2"
             });
           }
         }
         datosSheets = nuevosDatosSheets;
         unificarListasYRenderizar();
-      } catch (e) { console.error("Error Sheets:", e); }
+      } catch (e) { console.error("Error en sincronización Sheets:", e); }
     }
 
-    function activarAutocompletadoVivoMapbox(inputId, datalistId) {
-      const input = document.getElementById(inputId);
-      const datalist = document.getElementById(datalistId);
-      let temporizador;
-      input.addEventListener('input', function() {
-        clearTimeout(temporizador);
-        const texto = this.value.trim();
-        if (texto.length < 3) return;
-        temporizador = setTimeout(async () => {
-          try {
-            const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(texto)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&autocomplete=true&limit=5`);
-            const data = await res.json();
-            datalist.innerHTML = '';
-            if (data && data.features) {
-              data.features.forEach(f => {
-                if (f.place_name) {
-                  const option = document.createElement('option');
-                  option.value = f.place_name;
-                  datalist.appendChild(option);
-                }
-              });
-            }
-          } catch (e) { }
-        }, 300);
+    function unificarListasYRenderizar() {
+      listaGlobalPublicaciones = [...datosFirebase, ...datosSheets];
+      aplicarFiltrosYOrden();
+    }
+
+    function crearIcono(modalidad, esVerificado, totalmenteAtendido) {
+      let emoji = modalidad === 'ofrece' ? '🟢' : '🔴';
+      let colorBg = modalidad === 'ofrece' ? '#10b981' : '#ef4444';
+      if (totalmenteAtendido) { emoji = '⚪'; colorBg = '#6b7280'; }
+      return L.divIcon({
+        className: 'custom-pin',
+        html: `<div style="background-color: ${colorBg}; color: white; border: 2px solid white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-weight: bold;">${emoji}</div>`,
+        iconSize: [34, 34], iconAnchor: [17, 17]
       });
     }
 
-    activarAutocompletadoVivoMapbox('buscadorPrincipal', 'sugerenciasPrincipal');
-    activarAutocompletadoVivoMapbox('campoUbicacion', 'sugerenciasFormulario');
+    function aplicarFiltrosYOrden() {
+      const cat = document.getElementById('filtroCategoria').value;
+      const mod = document.getElementById('filtroModalidad').value;
+      
+      let resultado = listaGlobalPublicaciones.filter(p => !p.desactivado);
 
-    async function buscarMunicipioPrincipal() {
-      const query = document.getElementById('buscadorPrincipal').value.trim();
-      if (!query) return alert("Escribe un municipio o dirección.");
-      let consulta = query;
-      if (!consulta.toLowerCase().includes("colombia")) consulta += ", Colombia";
-      try {
-        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(consulta)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=co&language=es&limit=1`);
-        const data = await res.json();
-        if (data && data.features && data.features.length > 0) {
-          centrarMapa([data.features[0].center[1], data.features[0].center[0]], 15);
-        } else {
-          alert("No se encontró la dirección en Mapbox.");
-        }
-      } catch (e) { alert("Error al buscar en Mapbox."); }
+      if (cat !== 'todos') {
+        resultado = resultado.filter(p => (p.tiposActivos || []).includes(cat));
+      }
+      if (mod !== 'todos') {
+        resultado = resultado.filter(p => p.modalidad === mod);
+      }
+
+      renderizarContenedorYMapa(resultado);
     }
 
-    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    function renderizarContenedorYMapa(items) {
+      const contenedor = document.getElementById('contenedorTarjetas');
+      if (!contenedor) return;
+      contenedor.innerHTML = '';
+      
+      Object.keys(mapaMarcadores).forEach(k => {
+        if (mapaMarcadores[k]) mapa.removeLayer(mapaMarcadores[k]);
+      });
+
+      const coordenadasVisibles = [];
+
+      items.forEach(item => {
+        const lat = parseFloat(item.lat || 4.6097);
+        const lng = parseFloat(item.lng || -74.0817);
+        const atendido = item.desactivado || item.reportesCount >= 3;
+        const verificado = (item.verificaciones || 0) >= 3;
+
+        // Tarjeta
+        const div = document.createElement('div');
+        div.className = "border p-4 rounded-xl bg-white shadow-sm flex flex-col justify-between h-full";
+        div.id = `card-${item.id}`;
+        div.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1">
+                ${item.modalidad === 'ofrece' ? '🟢' : '🔴'} ${item.ubicacion}
+              </h3>
+              <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono border border-slate-200">
+                ${item.origen || 'terreno'}
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 mb-3 whitespace-pre-wrap">${item.descripcion}</p>
+            ${item.imagen ? `<img src="${item.imagen}" class="w-full h-32 object-cover rounded-lg mb-3 cursor-pointer border border-slate-200 shadow-sm hover:opacity-90 transition" onclick="abrirImagenFull('${item.imagen}')">` : ''}
+            
+            <div class="flex flex-wrap gap-1 mb-3">
+              ${(item.tiposActivos || []).map(t => `<span class="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">${t}</span>`).join('')}
+            </div>
+          </div>
+          
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-1.5 mt-auto">
+            <button onclick="verificarSolicitud('${item.id}', ${item.verificaciones || 0}, ${lat}, ${lng})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold py-1.5 rounded border border-emerald-200 transition flex items-center justify-center gap-1">
+              ✅ Validar (${item.verificaciones || 0}/3)
+            </button>
+            <button onclick="duplicarPublicacion('${item.id}')" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-bold py-1.5 rounded border border-sky-200 transition flex items-center justify-center gap-1">
+              📋 Duplicar
+            </button>
+            <button onclick="reportarFalsa('${item.id}', ${item.reportesCount || 0}, ${lat}, ${lng})" class="bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold py-1.5 rounded border border-amber-200 transition flex items-center justify-center gap-1">
+              ⚠️ Reportar
+            </button>
+            <button onclick="desactivarPublicacion('${item.id}')" class="bg-slate-50 hover:bg-slate-100 text-slate-700 text-[10px] font-bold py-1.5 rounded border border-slate-200 transition flex items-center justify-center gap-1">
+              🗑️ Borrar
+            </button>
+          </div>
+        `;
+        contenedor.appendChild(div);
+
+        // Marcador en Mapa
+        try {
+          const icono = crearIcono(item.modalidad, verificado, atendido);
+          const m = L.marker([lat, lng], { icon: icono }).addTo(mapa)
+            .bindPopup(`<b>${item.ubicacion}</b><br><span class="text-xs">${item.descripcion.substring(0, 70)}...</span><br><a href="#" onclick="scrollACard('${item.id}'); return false;" class="text-red-600 font-bold text-xs hover:underline mt-1 block">Ver en panel</a>`);
+          mapaMarcadores[item.id] = m;
+          coordenadasVisibles.push([lat, lng]);
+        } catch(e) { }
+      });
+
+      // Encuadre automático nacional para que todos los puntos (Chocó, Bogotá, etc.) queden a la vista
+      if (primeraCarga && coordenadasVisibles.length > 0) {
+        try {
+          const bounds = L.latLngBounds(coordenadasVisibles);
+          mapa.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+          primeraCarga = false;
+        } catch(e) { }
+      }
     }
 
-    function ejecutarAccionConGPS(targetLat, targetLng, callbackAccion) {
-      if (!("geolocation" in navigator)) return alert("⚠️ Dispositivo no soporta geolocalización GPS.");
-      if (!confirm("📍 La plataforma verificará que te encuentres a menos de 50 metros del lugar. ¿Deseas validar tu ubicación GPS actual?")) return;
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const distMetros = Math.round(calcularDistanciaKm(pos.coords.latitude, pos.coords.longitude, targetLat, targetLng) * 1000);
-          if (distMetros <= 50) callbackAccion();
-          else alert(`🚫 ACCESO DENEGADO:\nDebes estar a menos de 50 metros.\n📍 Estás a aprox. ${distMetros} metros.`);
-        },
-        () => alert("⚠️ No se pudo obtener ubicación GPS."),
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-      );
-    }
-
-    function toggleOtroDetalle() {
-      const chk = document.getElementById('chkOtro');
-      const container = document.getElementById('containerOtroDetalle');
-      if (chk && chk.checked) container.classList.remove('hidden');
-      else container.classList.add('hidden');
+    function scrollACard(id) {
+      const tarjeta = document.getElementById(`card-${id}`);
+      if (tarjeta) {
+        tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        tarjeta.classList.add('ring-4', 'ring-red-500');
+        setTimeout(() => { tarjeta.classList.remove('ring-4', 'ring-red-500'); }, 2500);
+      }
     }
 
     function abrirImagenFull(src) {
@@ -596,15 +677,8 @@
 
     function abrirFuentes() { document.getElementById('modalFuentes').classList.remove('hidden'); }
     function cerrarFuentes() { document.getElementById('modalFuentes').classList.add('hidden'); }
-    
-    function scrollACard(id) {
-      const tarjeta = document.getElementById(`card-${id}`);
-      if (tarjeta) {
-        tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        tarjeta.classList.add('ring-4', 'ring-red-500');
-        setTimeout(() => { tarjeta.classList.remove('ring-4', 'ring-red-500'); }, 2500);
-      }
-    }
+    function abrirInstrucciones() { document.getElementById('modalInstrucciones').classList.remove('hidden'); }
+    function cerrarInstrucciones() { document.getElementById('modalInstrucciones').classList.add('hidden'); }
 
     function procesarImagen(e) {
       const file = e.target.files[0];
@@ -641,15 +715,12 @@
       setTimeout(() => { mapa.invalidateSize(); }, 200);
     }
 
-    function abrirInstrucciones() { document.getElementById('modalInstrucciones').classList.remove('hidden'); }
-    function cerrarInstrucciones() { document.getElementById('modalInstrucciones').classList.add('hidden'); }
-    
     function abrirFormularioNueva() {
       const centro = mapa.getCenter();
       actualizarCoordenadasYMarcador(centro.lat, centro.lng);
       document.getElementById('editId').value = "";
       document.getElementById('tituloModal').innerText = "Registrar Publicación";
-      document.getElementById('btnEnviar').innerText = "Publicar Solicitud de Ayuda";
+      document.getElementById('btnEnviar').innerText = "Publicar";
       document.getElementById('formularioAyuda').reset();
       quitarImagen();
       toggleOtroDetalle();
@@ -669,84 +740,34 @@
       toggleOtroDetalle();
     }
 
-    // Configuración Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
-      authDomain: "juntosayudamos-col.firebaseapp.com",
-      databaseURL: "https://juntosayudamos-col-default-rtdb.firebaseio.com",
-      projectId: "juntosayudamos-col",
-      storageBucket: "juntosayudamos-col.firebasestorage.app",
-      messagingSenderId: "32757771591",
-      appId: "1:32757771591:web:9a44f7ae92f9605e5ab062"
-    };
-
-    const mapaMarcadores = {};
-    const misVerificaciones = JSON.parse(localStorage.getItem('misVerificaciones')) || [];
-
-    let firebaseActivo = false;
-    let referenciaSolicitudes = null;
-    let referenciaAyudas = null;
-    let ubicacionUsuarioGPS = null;
-
-    // --- RESTAURAR ICONOS ORIGINALES ---
-    function crearIcono(modalidad, esVerificado, totalmenteAtendido) {
-      let emoji = modalidad === 'ofrece' ? '🟢' : '🔴';
-      let colorBg = modalidad === 'ofrece' ? '#10b981' : '#ef4444';
-      if (totalmenteAtendido) { emoji = '⚪'; colorBg = '#6b7280'; }
-      return L.divIcon({
-        className: 'custom-pin',
-        html: `<div style="background-color: ${colorBg}; color: white; border: 2px solid white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-weight: bold;">${emoji}</div>`,
-        iconSize: [34, 34], iconAnchor: [17, 17]
-      });
+    function toggleOtroDetalle() {
+      const chk = document.getElementById('chkOtro');
+      const container = document.getElementById('containerOtroDetalle');
+      if (chk && chk.checked) container.classList.remove('hidden');
+      else container.classList.add('hidden');
     }
 
-    try {
-      firebase.initializeApp(firebaseConfig);
-      referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
-      referenciaAyudas = firebase.database().ref('ayudas'); // 👈 AQUÍ ESTÁN TUS DATOS DE ISTMINA
-      firebaseActivo = true;
+    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
 
-      document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo';
-      document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
+    function ejecutarAccionConGPS(targetLat, targetLng, callbackAccion) {
+      if (!("geolocation" in navigator)) return alert("⚠️ Tu dispositivo no soporta GPS.");
+      if (!confirm("📍 Se verificará que te encuentres a menos de 50 metros del lugar. ¿Deseas validar tu GPS?")) return;
 
-      function procesarSnapshot(snapshot, origenInfo) {
-        const data = snapshot.val() || {};
-        return Object.keys(data).map(key => {
-          const item = data[key] || {};
-          const lat = parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097));
-          const lng = parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817));
-          let mod = "necesita";
-          const modRaw = String(item.modalidad || "").toLowerCase();
-          if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
-
-          return {
-            id: key, ...item, lat: lat, lng: lng,
-            ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Sin ubicación",
-            descripcion: item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción",
-            modalidad: mod, tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], 
-            desactivado: item.desactivado || false, origen: origenInfo
-          };
-        });
-      }
-
-      // LECTURA SIMULTÁNEA DE AMBOS NODOS
-      referenciaSolicitudes.on('value', snapshot => {
-        datosSolicitudes = procesarSnapshot(snapshot, 'solicitudes');
-        unificarListasYRenderizar();
-      });
-
-      referenciaAyudas.on('value', snapshot => {
-        datosAyudas = procesarSnapshot(snapshot, 'ayudas_manual');
-        unificarListasYRenderizar();
-      });
-
-      sincronizarGoogleSheetsAutomatico();
-      setInterval(sincronizarGoogleSheetsAutomatico, 120000);
-
-    } catch (e) {
-      document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      datosSolicitudes = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
-      unificarListasYRenderizar();
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const distMetros = Math.round(calcularDistanciaKm(pos.coords.latitude, pos.coords.longitude, targetLat, targetLng) * 1000);
+          if (distMetros <= 50) callbackAccion();
+          else alert(`🚫 ACCESO DENEGADO:\nDebes estar a menos de 50 metros.\n📍 Estás a aprox. ${distMetros} metros.`);
+        },
+        () => alert("⚠️ No se pudo obtener ubicación GPS."),
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      );
     }
 
     function obtenerUbicacionUsuario() {
@@ -764,117 +785,6 @@
       }
     }
 
-    function aplicarFiltrosYOrden() {
-      const cat = document.getElementById('filtroCategoria').value;
-      const mod = document.getElementById('filtroModalidad').value;
-      let resultado = listaGlobalPublicaciones.filter(p => !p.desactivado);
-
-      if (cat !== 'todos') {
-        resultado = resultado.filter(p => {
-          const categorias = p.tiposActivos || [];
-          return categorias.includes(cat);
-        });
-      }
-      if (mod !== 'todos') resultado = resultado.filter(p => p.modalidad === mod);
-      
-      renderizarContenedorYMapa(resultado);
-    }
-
-    function renderizarContenedorYMapa(items) {
-      const contenedor = document.getElementById('contenedorTarjetas');
-      if (!contenedor) return;
-      contenedor.innerHTML = '';
-      
-      Object.keys(mapaMarcadores).forEach(k => {
-        if (mapaMarcadores[k]) mapa.removeLayer(mapaMarcadores[k]);
-      });
-
-      items.forEach(item => {
-        const lat = parseFloat(item.lat || 4.6097);
-        const lng = parseFloat(item.lng || -74.0817);
-        const atendido = item.desactivado || item.reportesCount >= 3;
-        const verificado = item.verificaciones >= 3;
-
-        // --- RESTAURAR ESTRUCTURA COMPLETA DE TARJETA ---
-        const div = document.createElement('div');
-        div.className = "border p-4 rounded-xl bg-white shadow-sm flex flex-col h-full";
-        div.id = `card-${item.id}`;
-        div.innerHTML = `
-          <div class="flex-1">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1">
-                ${item.modalidad === 'ofrece' ? '🟢' : '🔴'} ${item.ubicacion}
-              </h3>
-              <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono border border-slate-200">
-                ${item.origen || 'web'}
-              </span>
-            </div>
-            <p class="text-xs text-slate-600 mb-3 whitespace-pre-wrap">${item.descripcion}</p>
-            ${item.imagen ? `<img src="${item.imagen}" class="w-full h-32 object-cover rounded-lg mb-3 cursor-pointer border border-slate-200 shadow-sm hover:opacity-90 transition" onclick="abrirImagenFull('${item.imagen}')">` : ''}
-            
-            <div class="flex flex-wrap gap-1 mb-3">
-              ${(item.tiposActivos || []).map(t => `<span class="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">${t}</span>`).join('')}
-            </div>
-          </div>
-          
-          <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-1.5 mt-auto">
-            <button onclick="verificarSolicitud('${item.id}', ${item.verificaciones || 0}, ${lat}, ${lng})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold py-1.5 rounded border border-emerald-200 transition flex items-center justify-center gap-1">
-              ✅ Validar (${item.verificaciones || 0}/3)
-            </button>
-            <button onclick="duplicarPublicacion('${item.id}')" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-bold py-1.5 rounded border border-sky-200 transition flex items-center justify-center gap-1">
-              📋 Duplicar
-            </button>
-            <button onclick="reportarFalsa('${item.id}', ${item.reportesCount || 0}, ${lat}, ${lng})" class="bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold py-1.5 rounded border border-amber-200 transition flex items-center justify-center gap-1">
-              ⚠️ Reportar
-            </button>
-            <button onclick="desactivarPublicacion('${item.id}')" class="bg-slate-50 hover:bg-slate-100 text-slate-700 text-[10px] font-bold py-1.5 rounded border border-slate-200 transition flex items-center justify-center gap-1">
-              🗑️ Borrar
-            </button>
-          </div>
-        `;
-        contenedor.appendChild(div);
-
-        try {
-            const icono = crearIcono(item.modalidad, verificado, atendido);
-            const m = L.marker([lat, lng], { icon: icono }).addTo(mapa)
-              .bindPopup(`<b>${item.ubicacion}</b><br><span class="text-xs">${item.descripcion.substring(0, 60)}...</span><br><a href="#" onclick="scrollACard('${item.id}'); return false;" class="text-red-600 font-bold text-xs hover:underline mt-1 block">Ver detalles</a>`);
-            mapaMarcadores[item.id] = m;
-        } catch(e) { }
-      });
-    }
-
-    function duplicarPublicacion(id) {
-      const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-      if (!item) return;
-
-      document.getElementById('editId').value = "";
-      document.getElementById('tituloModal').innerText = "📋 Duplicar Publicación en Nueva Ubicación";
-      document.getElementById('btnEnviar').innerText = "📋 Publicar Nuevo Punto";
-
-      const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
-      radioMod.forEach(r => r.checked = (r.value === item.modalidad));
-
-      document.getElementById('campoUbicacion').value = item.ubicacion ? `${item.ubicacion} (Punto Adicional)` : "";
-      document.getElementById('campoPrioridad').value = item.prioridad || "Media";
-      document.getElementById('campoDescripcion').value = item.descripcion || "";
-      actualizarCoordenadasYMarcador(item.lat, item.lng);
-      
-      const chks = document.querySelectorAll('.chk-tipo');
-      const activos = item.tiposActivos || [];
-      chks.forEach(c => c.checked = activos.includes(c.value));
-      document.getElementById('chkOtro').checked = activos.includes('💡 Otro (Donaciones, Apoyo, etc.)');
-      toggleOtroDetalle();
-
-      if (item.imagen) {
-        imagenBase64Actual = item.imagen;
-        document.getElementById('previewImagen').src = item.imagen;
-        document.getElementById('containerPreview').classList.remove('hidden');
-      } else { quitarImagen(); }
-
-      abrirFormulario();
-      alert("📋 Se copiaron los datos para una nueva ubicación.");
-    }
-
     function desactivarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
@@ -883,10 +793,8 @@
 
       if (pin === String(item.pin) || pin === CLAVE_MAESTRA) {
         if (confirm("¿Confirmas la eliminación de esta publicación?")) {
-          if (firebaseActivo) {
-            // Elimina del nodo correcto
-            if (item.origen === 'ayudas_manual') referenciaAyudas.child(id).update({ desactivado: true });
-            else referenciaSolicitudes.child(id).update({ desactivado: true });
+          if (firebaseActivo && !String(id).startsWith('sheet')) {
+            referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
             item.desactivado = true;
             unificarListasYRenderizar();
@@ -897,35 +805,60 @@
     }
 
     function reportarFalsa(id, rCount, targetLat, targetLng) {
-      if (!confirm("¿Deseas reportar esta publicación como falsa? Para confirmar debes estar a menos de 50m del lugar.")) return;
+      if (!confirm("¿Deseas reportar esta publicación? Debes estar en terreno.")) return;
       ejecutarAccionConGPS(targetLat, targetLng, () => {
         const nuevoCount = rCount + 1;
         const payload = { reportesCount: nuevoCount };
         if (nuevoCount >= 3) payload.desactivado = true;
 
-        if (firebaseActivo) {
-          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-          if (item && item.origen === 'ayudas_manual') referenciaAyudas.child(id).update(payload);
-          else referenciaSolicitudes.child(id).update(payload);
+        if (firebaseActivo && !String(id).startsWith('sheet')) {
+          referenciaSolicitudes.child(id).update(payload);
         }
-        alert("Reporte registrado. ¡Gracias por mantener limpia la información!");
+        alert("Reporte registrado.");
       });
     }
 
     function verificarSolicitud(id, vCountActual, targetLat, targetLng) {
-      if (misVerificaciones.includes(String(id))) return;
+      if (misVerificaciones.includes(String(id))) return alert("Ya validaste este punto.");
       ejecutarAccionConGPS(targetLat, targetLng, () => {
         const nuevaCantidad = vCountActual + 1;
-        if (firebaseActivo) {
-          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-          const ref = (item && item.origen === 'ayudas_manual') ? referenciaAyudas : referenciaSolicitudes;
-          ref.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
+        if (firebaseActivo && !String(id).startsWith('sheet')) {
+          referenciaSolicitudes.child(`${id}/verificaciones`).set(nuevaCantidad).then(() => {
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
           });
         }
-        alert("✅ Verificación en terreno registrada con éxito.");
+        alert("✅ Verificación registrada.");
       });
+    }
+
+    function duplicarPublicacion(id) {
+      const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+      if (!item) return;
+
+      document.getElementById('editId').value = "";
+      document.getElementById('tituloModal').innerText = "📋 Duplicar Publicación";
+      document.getElementById('btnEnviar').innerText = "Publicar";
+
+      const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
+      radioMod.forEach(r => r.checked = (r.value === item.modalidad));
+
+      document.getElementById('campoUbicacion').value = item.ubicacion ? `${item.ubicacion} (Punto adicional)` : "";
+      document.getElementById('campoPrioridad').value = item.prioridad || "Media";
+      document.getElementById('campoDescripcion').value = item.descripcion || "";
+      actualizarCoordenadasYMarcador(item.lat, item.lng);
+      
+      const chks = document.querySelectorAll('.chk-tipo');
+      const activos = item.tiposActivos || [];
+      chks.forEach(c => { chks.checked = activos.includes(c.value); });
+
+      if (item.imagen) {
+        imagenBase64Actual = item.imagen;
+        document.getElementById('previewImagen').src = item.imagen;
+        document.getElementById('containerPreview').classList.remove('hidden');
+      } else { quitarImagen(); }
+
+      abrirFormulario();
     }
 
     function guardarSolicitud(e) {
@@ -941,61 +874,47 @@
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
       
       const requiereFoto = chks.includes("🩸 Donación de Sangre") || chks.includes("🐾 Mascotas Perdidas y Encontradas");
-      if (requiereFoto && !imagenBase64Actual) return alert("⚠️ Para este tipo de reporte es obligatorio adjuntar una foto o flyer.");
+      if (requiereFoto && !imagenBase64Actual) return alert("⚠️ Es obligatorio adjuntar foto o flyer para sangre o mascotas.");
 
       btn.disabled = true;
       btn.innerText = "Guardando...";
 
       const chkOtro = document.getElementById('chkOtro');
       const otroDetalle = (chkOtro && chkOtro.checked) ? document.getElementById('campoOtroDetalle').value.trim() : "";
-      let ubicacionTexto = document.getElementById('campoUbicacion').value.trim();
-      if (!ubicacionTexto) ubicacionTexto = `Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+      let ubicacionTexto = document.getElementById('campoUbicacion').value.trim() || `Punto (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
       const pinIngresado = document.getElementById('campoPin').value.trim();
 
       const payload = {
-        modalidad: modalidad, ubicacion: ubicacionTexto,
+        modalidad: modalidad,
+        ubicacion: ubicacionTexto,
         tiposActivos: chks.length > 0 ? chks : ["Varias Necesidades Generales"],
         prioridad: document.getElementById('campoPrioridad').value,
         descripcion: document.getElementById('campoDescripcion').value,
-        lat: lat, lng: lng, contacto: document.getElementById('campoContacto').value.trim(),
-        pin: pinIngresado, imagen: imagenBase64Actual, otroDetalle: otroDetalle,
+        lat: lat,
+        lng: lng,
+        contacto: document.getElementById('campoContacto').value.trim(),
+        pin: pinIngresado,
+        imagen: imagenBase64Actual,
+        otroDetalle: otroDetalle,
+        verificaciones: 1,
+        reportesCount: 0,
+        desactivado: false,
+        fechaCreacion: Date.now()
       };
 
-      if (editId) {
-        const itemExistente = listaGlobalPublicaciones.find(p => String(p.id) === String(editId));
-        if (itemExistente && pinIngresado !== String(itemExistente.pin) && pinIngresado !== CLAVE_MAESTRA) {
-          alert("❌ El PIN ingresado no coincide con el original.");
+      if (firebaseActivo && referenciaSolicitudes) {
+        const nuevaRef = referenciaSolicitudes.push();
+        nuevaRef.set(payload).then(() => {
           btn.disabled = false;
-          btn.innerText = "💾 Guardar Cambios";
-          return;
-        }
-
-        if (firebaseActivo) {
-          const ref = (itemExistente.origen === 'ayudas_manual') ? referenciaAyudas : referenciaSolicitudes;
-          ref.child(editId).update(payload).then(() => finalizarConExito(lat, lng));
-        }
-      } else {
-        payload.verificaciones = 1;
-        payload.reportesCount = 0;
-        payload.fechaCreacion = Date.now();
-
-        if (firebaseActivo && referenciaSolicitudes) {
-          const nuevaRef = referenciaSolicitudes.push();
-          nuevaRef.set(payload).then(() => finalizarConExito(lat, lng));
-        }
+          btn.innerText = "Publicar";
+          cerrarFormulario();
+          document.getElementById('formularioAyuda').reset();
+          quitarImagen();
+          if (marcadorPicker) mapa.removeLayer(marcadorPicker);
+          centrarMapa([lat, lng], 15);
+          alert("¡Publicación guardada con éxito!");
+        });
       }
-    }
-
-    function finalizarConExito(lat, lng) {
-      const btn = document.getElementById('btnEnviar');
-      btn.disabled = false;
-      btn.innerText = "Publicar Solicitud de Ayuda";
-      cerrarFormulario();
-      document.getElementById('formularioAyuda').reset();
-      quitarImagen();
-      if (marcadorPicker) mapa.removeLayer(marcadorPicker);
-      centrarMapa([lat, lng], 16);
-      alert("¡Publicación guardada con éxito!");
     }
   </script>
 </body>
