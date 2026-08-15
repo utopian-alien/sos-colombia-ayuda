@@ -26,44 +26,60 @@ rows = sheet.get_all_records()
 ref_ayudas = db.reference('ayudas')
 ref_solicitudes = db.reference('solicitudes_ayuda')
 
-# RESCATE TOTAL: Leer absolutamente todo lo que existe antes de tocar nada
-all_manual_data = {}
-for data in [ref_ayudas.get(), ref_solicitudes.get()]:
+# RESCATE TOTAL: Leer nodos y combinarlos en un diccionario local
+combined_data = {}
+
+def load_and_merge(ref, label):
+    data = ref.get()
+    count = 0
     if isinstance(data, dict):
         for k, v in data.items():
-            if isinstance(v, dict): all_manual_data[k] = v
+            if isinstance(v, dict):
+                # Usamos una clave única para que no se pisen
+                combined_data[f"{label}_{k}"] = v
+                count += 1
+    print(f"📥 Cargados {count} registros desde {label}")
 
+load_and_merge(ref_ayudas, "manual_ayudas")
+load_and_merge(ref_solicitudes, "manual_solic")
+
+print(f"✅ Total registros manuales rescatados: {len(combined_data)}")
+
+# Mapbox
 MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
 
 def get_coords(direccion, lugar):
-    # Intentar búsqueda combinada
-    queries = [f"{direccion}, {lugar}, Bogotá, Colombia", f"{lugar}, Bogotá, Colombia"]
-    for q in queries:
-        url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{urllib.parse.quote(q)}.json?access_token={MAPBOX_TOKEN}&country=co&limit=1"
-        try:
-            with urllib.request.urlopen(url, timeout=5) as resp:
-                data = json.loads(resp.read().decode())
-                if data.get("features"):
-                    center = data["features"][0]["center"]
-                    return float(center[1]), float(center[0])
-        except: continue
-    return 4.6097, -74.0817 # Bogotá central
+    # Consulta optimizada para lugares o direcciones
+    query = f"{direccion}, {lugar}, Bogotá, Colombia"
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{urllib.parse.quote(query)}.json?access_token={MAPBOX_TOKEN}&country=co&limit=1"
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            if data.get("features"):
+                center = data["features"][0]["center"]
+                return float(center[1]), float(center[0])
+    except: pass
+    return 4.6097, -74.0817
 
-final_data = all_manual_data.copy()
-
+# Procesar Excel
+excel_count = 0
 for i, row in enumerate(rows):
     lugar = str(row.get("LUGAR", "")).strip()
     if not lugar or lugar.upper() in ["N/A", "NA", "-"]: continue
     
     lat, lng = get_coords(str(row.get("DIRECCIÓN", "")), lugar)
     
-    final_data[f"sheet_{i}"] = {
+    # Estructura que tu JS espera
+    combined_data[f"sheet_registro_{i}"] = {
         "modalidad": "necesita",
         "ubicacion": lugar,
-        "lat": lat, "lng": lng,
         "descripcion": f"Dirección: {row.get('DIRECCIÓN')} | Notas: {row.get('NOTAS')}",
+        "lat": lat,
+        "lng": lng,
         "origen": "google_sheets"
     }
+    excel_count += 1
 
-ref_solicitudes.set(final_data)
-print(f"✅ Sincronizado. Total registros: {len(final_data)}")
+# GUARDAR TODO
+ref_solicitudes.set(combined_data)
+print(f"🚀 Subidos {excel_count} registros de Excel. Total final en Firebase: {len(combined_data)}")
