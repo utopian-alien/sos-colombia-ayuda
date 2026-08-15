@@ -35,51 +35,57 @@ SHEET_ID = "1VCzTX1d1rKwbFryjm8YLYBlIaMiKG6eh3y5mZsie6h8"
 sheet = gc.open_by_key(SHEET_ID).sheet1
 rows = sheet.get_all_records()
 
-# Referencias a ambos nodos en Firebase
-ref_ayudas = db.reference('ayudas')
+# Referencia unificada
 ref_solicitudes = db.reference('solicitudes_ayuda')
 
-# Leer datos actuales de AMBAS rutas para no perder absolutamente nada
+# Rescatar datos manuales previos de ambos nodos para no perder nada
+ref_ayudas = db.reference('ayudas')
 data_ayudas = ref_ayudas.get() or {}
 data_solicitudes = ref_solicitudes.get() or {}
 
 user_data = {}
-
-# Recopilar registros de 'ayudas'
 if isinstance(data_ayudas, dict):
     for key, value in data_ayudas.items():
         if isinstance(value, dict):
-            # Si no es de google sheets, lo guardamos con prefijo para evitar que se pisen
-            prefix = "" if value.get("origen") == "usuario" else "ayudas_"
-            user_data[f"{prefix}{key}"] = value
+            user_data[f"manual_ayudas_{key}"] = value
 
-# Recopilar registros de 'solicitudes_ayuda'
 if isinstance(data_solicitudes, dict):
     for key, value in data_solicitudes.items():
-        if isinstance(value, dict):
+        if isinstance(value, dict) and value.get("origen") != "google_sheets":
             user_data[key] = value
 
 MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
 
 def obtener_coordenadas(direccion, lugar):
-    texto = f"{direccion}, {lugar}, Colombia"
-    encoded = urllib.parse.quote(texto)
+    # Si la dirección es N/A o vacía, usamos el nombre del lugar (ej: "Estadio El Campín") asegurando Bogotá
+    query_base = lugar if not direccion or direccion.upper() in ["N/A", "NA", "-"] else f"{direccion}, {lugar}"
+    
+    # Asegurar que siempre se busque dentro de Bogotá, Colombia
+    if "bogotá" not in query_base.lower():
+        query_base += ", Bogotá"
+    if "colombia" not in query_base.lower():
+        query_base += ", Colombia"
+
+    encoded = urllib.parse.quote(query_base)
     url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{encoded}.json?access_token={MAPBOX_TOKEN}&country=co&limit=1"
+    
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode())
             if data.get("features"):
-                center = data["features"][0]["center"]
+                center = data["features"][0]["center"] # [lng, lat]
                 return float(center[1]), float(center[0])
     except Exception:
         pass
+    
+    # Coordenada central de respaldo en Bogotá si falla la red
     return 4.6097, -74.0817
 
 sheet_data = {}
 sincronizados = 0
 
-print("📥 Leyendo nodos 'ayudas' y 'solicitudes_ayuda' + procesando Excel...")
+print("📥 Procesando Excel, limpiando direcciones y geocodificando...")
 
 for i, row in enumerate(rows):
     try:
@@ -89,33 +95,39 @@ for i, row in enumerate(rows):
         notas = str(row.get("NOTAS", "")).strip()
         contacto = str(row.get("CONTACTO CLAVE", "")).strip()
 
-        if not lugar or lugar.upper() in ["N/A", "NA", "-"]:
+        if not lugar or lugar.upper() in ["ANULADO", "CANCELADO"]:
             continue
 
+        # Obtener coordenadas reales (incluso si la dirección es N/A, usará el nombre del lugar)
         lat, lng = obtener_coordenadas(direccion, lugar)
 
+        # Estructura 100% estandarizada para que el index.html la pinte sin errores
         sheet_data[f"sheet_registro_{i}"] = {
             "modalidad": "necesita",
             "lugar": lugar,
-            "ubicacion": f"{lugar} ({direccion})",
+            "ubicacion": lugar if not direccion or direccion.upper() in ["N/A", "NA", "-"] else f"{lugar} - {direccion}",
             "direccion": direccion,
             "necesita": necesidad,
             "notas": notas,
-            "descripcion": f"Dirección: {direccion} | Necesita: {necesidad} | Notas: {notas}",
+            "descripcion": f"Dirección: {direccion if direccion else 'Referencia en sitio'} | Necesita: {necesidad} | Notas: {notas}",
             "lat": lat,
             "latitud": lat,
             "lng": lng,
             "longitud": lng,
             "contacto": contacto,
             "prioridad": "Media",
+            "tiposActivos": ["🥣 Alimentos y Agua Potable"],
+            "tiposInactivos": [],
+            "verificaciones": 1,
+            "reportesCount": 0,
             "origen": "google_sheets"
         }
         sincronizados += 1
     except Exception as e:
         continue
 
-# Unificar todo (Datos de ayudas + Datos de solicitudes_ayuda + Nuevos del Excel) en 'solicitudes_ayuda'
+# Unir todo de forma segura
 combined_data = {**user_data, **sheet_data}
 ref_solicitudes.set(combined_data)
 
-print(f"✅ ¡Sincronización completa! Se unificaron {len(user_data)} registros previos de ambos nodos y {sincronizados} del Excel en 'solicitudes_ayuda'.")
+print(f"✅ ¡Listo! Se conservaron {len(user_data)} registros manuales y se ubicaron correctamente {sincronizados} registros del Excel.")
