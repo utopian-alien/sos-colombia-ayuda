@@ -459,10 +459,21 @@
     // 🔑 TOKEN OFICIAL DE MAPBOX INTEGRADO
     const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q";
     
-    // IDs de Google Sheets (Hoja 1 y Hoja 2)
+    // IDs de Google Sheets
     const GOOGLE_SHEETS_ID = "1-hMGwC0XaSu5ddZ896gYyVRpmbPkVYg3NJ_6rSxK4Y8";
-    const GID_HOJA_1 = "0";             // Pestaña 1 (Voluntariados)
+    const GID_HOJA_1 = "0";              // Pestaña 1 (Voluntariados)
     const GID_HOJA_2 = "1994734491";    // Pestaña 2 (Necesidades de donación / Sangre / Colectas / Mascotas)
+
+    // ESTRUCTURA PRINCIPAL DE DATOS: CAJAS SEPARADAS PARA EVITAR QUE SE BORREN
+    let datosFirebase = [];
+    let datosSheets = [];
+    let listaGlobalPublicaciones = [];
+
+    // Esta función une ambas fuentes pacíficamente y actualiza la pantalla
+    function unificarListasYRenderizar() {
+      listaGlobalPublicaciones = [...datosFirebase, ...datosSheets];
+      aplicarFiltrosYOrden();
+    }
 
     // 📍 Centros Clave de Referencia para Cálculo de Distancia Euclidiana
     const CENTROS_REFERENCIA = [
@@ -480,7 +491,6 @@
       let masCercano = CENTROS_REFERENCIA[0];
       let minDst = Infinity;
       CENTROS_REFERENCIA.forEach(c => {
-        // Distancia euclidiana simple en grados de coordenadas
         const dst = Math.sqrt(Math.pow(lat - c.lat, 2) + Math.pow(lng - c.lng, 2));
         if (dst < minDst) {
           minDst = dst;
@@ -597,8 +607,8 @@
         const text1 = await res1.text();
         const text2 = res2 && res2.ok ? await res2.text() : "";
 
-        // Conservar los datos de Firebase/Usuarios y purgar solo los antiguos de Google Sheets
-        listaGlobalPublicaciones = listaGlobalPublicaciones.filter(p => !p.origen || !p.origen.startsWith("google_sheets_"));
+        // CAJA TEMPORAL PARA GOOGLE SHEETS
+        let nuevosDatosSheets = [];
 
         // --- PROCESAR HOJA 1 ---
         const lineas1 = text1.split('\n').map(l => l.trim()).filter(Boolean);
@@ -610,7 +620,7 @@
           const detalle = columnas.slice(1).join(" ");
           const esOferta = detalle.includes("🟢") || detalle.toLowerCase().includes("sí voluntarios") || detalle.toLowerCase().includes("necesitan voluntarios");
 
-          listaGlobalPublicaciones.push({
+          nuevosDatosSheets.push({
             id: `sheet1_node_${i}`,
             modalidad: esOferta ? "ofrece" : "necesita",
             ubicacion: `${titulo}, Colombia`,
@@ -640,7 +650,7 @@
             else if (detalleLower.includes("nequi") || detalleLower.includes("daviplata") || detalleLower.includes("cuenta") || detalleLower.includes("colecta") || detalleLower.includes("dinero")) tipoAsignado = "💸 Nequi / Colectas y Donaciones";
             else if (detalleLower.includes("mascota") || detalleLower.includes("perro") || detalleLower.includes("gato") || detalleLower.includes("animal")) tipoAsignado = "🐾 Mascotas Perdidas y Encontradas";
 
-            listaGlobalPublicaciones.push({
+            nuevosDatosSheets.push({
               id: `sheet2_node_${i}`,
               modalidad: "necesita",
               ubicacion: `${titulo}, Colombia`,
@@ -655,9 +665,11 @@
           }
         }
 
-        aplicarFiltrosYOrden();
+        // ASIGNAMOS LA NUEVA CARGA A LA CAJA DE SHEETS Y UNIMOS
+        datosSheets = nuevosDatosSheets;
+        unificarListasYRenderizar();
       } catch (e) {
-        console.error("Sincronización automática silenciosa en segundo plano:", e);
+        console.error("Error en sincronización automática de Google Sheets:", e);
       }
     }
 
@@ -869,7 +881,6 @@
 
     let firebaseActivo = false;
     let referenciaSolicitudes = null;
-    let listaGlobalPublicaciones = [];
     let ubicacionUsuarioGPS = null;
 
     try {
@@ -880,54 +891,49 @@
       document.getElementById('estadoConexion').innerHTML = '🟢 Conectado en Vivo (juntosayudamos-col)';
       document.getElementById('estadoConexion').className = 'bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-bold text-xs';
 
-referenciaSolicitudes.on('value', snapshot => {
-      const data = snapshot.val() || {};
-      console.log("🔥 LEYENDO FIREBASE - TOTAL:", Object.keys(data).length);
-      
-      // Mapeo blindado y total: normaliza CUALQUIER campo que traiga el objeto
-      const itemsProcesados = Object.keys(data).map(key => {
-        const item = data[key] || {};
+      referenciaSolicitudes.on('value', snapshot => {
+        const data = snapshot.val() || {};
+        console.log("🔥 LEYENDO FIREBASE - TOTAL:", Object.keys(data).length);
         
-        // 1. Normalización de campos (Acepta inglés de Excel o español de tus registros manuales)
-        const lat = parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097));
-        const lng = parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817));
-        const ubicacion = item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá";
-        const descripcion = item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción";
-        
-        // 2. Normalización de modalidad
-        let mod = "necesita";
-        const modRaw = String(item.modalidad || "").toLowerCase();
-        if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
+        const itemsProcesados = Object.keys(data).map(key => {
+          const item = data[key] || {};
+          
+          const lat = parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097));
+          const lng = parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817));
+          const ubicacion = item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá";
+          const descripcion = item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción";
+          
+          let mod = "necesita";
+          const modRaw = String(item.modalidad || "").toLowerCase();
+          if (modRaw.includes("ofrece") || modRaw === "ofrece") mod = "ofrece";
 
-        return {
-          id: key,
-          ...item, // Conserva todo lo original
-          lat: lat,
-          lng: lng,
-          ubicacion: ubicacion,
-          descripcion: descripcion,
-          modalidad: mod,
-          tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], // Si no tiene etiqueta, le pone una para que no se oculte
-          desactivado: false // Fuerza visibilidad
-        };
+          return {
+            id: key,
+            ...item, 
+            lat: lat,
+            lng: lng,
+            ubicacion: ubicacion,
+            descripcion: descripcion,
+            modalidad: mod,
+            tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"], 
+            desactivado: false,
+            origen: 'firebase'
+          };
+        });
+
+        // VACIAR DATOS A LA CAJA DE FIREBASE Y UNIFICAR
+        datosFirebase = itemsProcesados;
+        unificarListasYRenderizar();
       });
 
-      // 3. Asignación a la lista global y renderizado forzado
-      listaGlobalPublicaciones = itemsProcesados;
-      console.log("✅ Carga completa. Registros en memoria:", listaGlobalPublicaciones.length);
-      
-      // Llamada directa al renderizado sin filtros restrictivos
-      renderizarContenedorYMapa(listaGlobalPublicaciones);
-    });
-
-      
-      // 🚀 Sincronización automática silenciosa al arrancar la página
-     //  sincronizarGoogleSheetsAutomatico();
+      // 🚀 ACTIVAR SINCRONIZACIÓN GOOGLE SHEETS
+      sincronizarGoogleSheetsAutomatico();
+      setInterval(sincronizarGoogleSheetsAutomatico, 120000); // Refrescar Excel cada 2 minutos
 
     } catch (e) {
       document.getElementById('estadoConexion').innerHTML = '🟡 Modo Local';
-      listaGlobalPublicaciones = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
-      aplicarFiltrosYOrden();
+      datosFirebase = JSON.parse(localStorage.getItem('solicitudesDemoV36')) || [];
+      unificarListasYRenderizar();
     }
 
     function obtenerUbicacionUsuario() {
@@ -975,7 +981,7 @@ referenciaSolicitudes.on('value', snapshot => {
       
       let resultado = listaGlobalPublicaciones.filter(p => !p.desactivado);
 
-      // FILTRADO INCLUSIVO: Si es 'todos', no filtramos nada, mostramos todo
+      // FILTRADO INCLUSIVO
       if (cat !== 'todos') {
         resultado = resultado.filter(p => {
           const categorias = p.tiposActivos || [];
@@ -987,7 +993,6 @@ referenciaSolicitudes.on('value', snapshot => {
         resultado = resultado.filter(p => p.modalidad === mod);
       }
 
-      // Renderizado directo
       renderizarContenedorYMapa(resultado);
     }
 
@@ -997,27 +1002,23 @@ referenciaSolicitudes.on('value', snapshot => {
       if (!contenedor) return;
       contenedor.innerHTML = '';
       
-      // Limpiar mapa de forma segura
       Object.keys(mapaMarcadores).forEach(k => {
         if (mapaMarcadores[k]) mapa.removeLayer(mapaMarcadores[k]);
       });
 
       items.forEach(item => {
-        // SEGURIDAD: Si no tiene coordenadas, ignora o pone Bogotá para no romper el mapa
         const lat = parseFloat(item.lat || 4.6097);
         const lng = parseFloat(item.lng || -74.0817);
 
-        // Crear Tarjeta con valores por defecto para que NUNCA sea undefined
         const div = document.createElement('div');
         div.className = "border p-4 rounded-xl bg-white shadow-sm";
         div.innerHTML = `
           <h3 class="font-bold text-red-700">${item.ubicacion || 'Sin ubicación'}</h3>
-          <p class="text-sm">${item.descripcion || 'Sin descripción'}</p>
-          <span class="text-[10px] bg-slate-200 p-1">Origen: ${item.origen || 'manual'}</span>
+          <p class="text-sm mt-1 mb-2">${item.descripcion || 'Sin descripción'}</p>
+          <span class="text-[10px] bg-slate-200 p-1 rounded font-bold text-slate-700">Origen: ${item.origen || 'usuario'}</span>
         `;
         contenedor.appendChild(div);
 
-        // Crear Marcador sin filtrar
         try {
             const m = L.marker([lat, lng]).addTo(mapa)
               .bindPopup(`<b>${item.ubicacion || 'Ubicación'}</b><br>${item.descripcion || ''}`);
@@ -1026,9 +1027,8 @@ referenciaSolicitudes.on('value', snapshot => {
             console.error("Error pintando marcador:", e);
         }
       });
-      console.log("✅ Renderizado completado.");
     }
-    // REPLICAR INFORMACIÓN EN OTRO PUNTO (PIN EN BLANCO)
+
     function duplicarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
       if (!item) return;
@@ -1083,9 +1083,10 @@ referenciaSolicitudes.on('value', snapshot => {
           if (firebaseActivo) {
             referenciaSolicitudes.child(id).update({ desactivado: true });
           } else {
-            item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-            aplicarFiltrosYOrden();
+            const p = datosFirebase.find(x => String(x.id) === String(id));
+            if(p) p.desactivado = true;
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+            unificarListasYRenderizar();
           }
           alert("Publicación eliminada correctamente.");
         }
@@ -1105,12 +1106,12 @@ referenciaSolicitudes.on('value', snapshot => {
         if (firebaseActivo) {
           referenciaSolicitudes.child(id).update(payload);
         } else {
-          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          const item = datosFirebase.find(p => String(p.id) === String(id));
           if (item) {
             item.reportesCount = nuevoCount;
             if (nuevoCount >= 3) item.desactivado = true;
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-            aplicarFiltrosYOrden();
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+            unificarListasYRenderizar();
           }
         }
         alert("Reporte registrado. ¡Gracias por mantener limpia la información!");
@@ -1137,7 +1138,7 @@ referenciaSolicitudes.on('value', snapshot => {
           referenciaSolicitudes.child(id).update({ tiposActivos: activos, tiposInactivos: inactivos });
         });
       } else {
-        const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+        const item = datosFirebase.find(p => String(p.id) === String(id));
         if (item) {
           let activos = item.tiposActivos || [];
           let inactivos = item.tiposInactivos || [];
@@ -1152,8 +1153,8 @@ referenciaSolicitudes.on('value', snapshot => {
 
           item.tiposActivos = activos;
           item.tiposInactivos = inactivos;
-          localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-          aplicarFiltrosYOrden();
+          localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+          unificarListasYRenderizar();
         }
       }
     }
@@ -1170,13 +1171,13 @@ referenciaSolicitudes.on('value', snapshot => {
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
           });
         } else {
-          const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
+          const item = datosFirebase.find(p => String(p.id) === String(id));
           if (item) {
             item.verificaciones = nuevaCantidad;
             misVerificaciones.push(String(id));
             localStorage.setItem('misVerificaciones', JSON.stringify(misVerificaciones));
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-            aplicarFiltrosYOrden();
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+            unificarListasYRenderizar();
           }
         }
         alert("✅ Verificación en terreno registrada con éxito.");
@@ -1199,7 +1200,6 @@ referenciaSolicitudes.on('value', snapshot => {
       const modalidad = document.querySelector('input[name="campoModalidad"]:checked').value;
       const chks = Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c => c.value);
       
-      // VALIDACIÓN OBLIGATORIA DE FOTO PARA SANGRE O MASCOTAS
       const requiereFoto = chks.includes("🩸 Donación de Sangre") || chks.includes("🐾 Mascotas Perdidas y Encontradas");
       if (requiereFoto && !imagenBase64Actual) {
         alert("⚠️ Para reportes de 'Donación de Sangre' o 'Mascotas Perdidas y Encontradas' es obligatorio adjuntar una foto o flyer.");
@@ -1232,7 +1232,8 @@ referenciaSolicitudes.on('value', snapshot => {
         contacto: document.getElementById('campoContacto').value.trim(),
         pin: pinIngresado,
         imagen: imagenBase64Actual,
-        otroDetalle: otroDetalle
+        otroDetalle: otroDetalle,
+        origen: 'firebase'
       };
 
       if (editId) {
@@ -1247,11 +1248,11 @@ referenciaSolicitudes.on('value', snapshot => {
         if (firebaseActivo) {
           referenciaSolicitudes.child(editId).update(payload).then(() => finalizarConExito(lat, lng));
         } else {
-          const idx = listaGlobalPublicaciones.findIndex(p => String(p.id) === String(editId));
+          const idx = datosFirebase.findIndex(p => String(p.id) === String(editId));
           if (idx !== -1) {
-            listaGlobalPublicaciones[idx] = { ...listaGlobalPublicaciones[idx], ...payload };
-            localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-            aplicarFiltrosYOrden();
+            datosFirebase[idx] = { ...datosFirebase[idx], ...payload };
+            localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+            unificarListasYRenderizar();
             finalizarConExito(lat, lng);
           }
         }
@@ -1274,9 +1275,9 @@ referenciaSolicitudes.on('value', snapshot => {
 
     function guardarEnLocal(payload) {
       payload.id = String(Date.now());
-      listaGlobalPublicaciones.unshift(payload);
-      localStorage.setItem('solicitudesDemoV36', JSON.stringify(listaGlobalPublicaciones));
-      aplicarFiltrosYOrden();
+      datosFirebase.unshift(payload);
+      localStorage.setItem('solicitudesDemoV36', JSON.stringify(datosFirebase));
+      unificarListasYRenderizar();
       finalizarConExito(payload.lat, payload.lng);
     }
 
