@@ -991,263 +991,43 @@ referenciaSolicitudes.on('value', snapshot => {
       renderizarContenedorYMapa(resultado);
     }
 
-    function renderizarContenedorYMapa(items) {
-      Object.keys(mapaMarcadores).forEach(key => mapa.removeLayer(mapaMarcadores[key]));
-
+   function renderizarContenedorYMapa(items) {
+      console.log("🛠 Renderizando:", items.length, "registros.");
       const contenedor = document.getElementById('contenedorTarjetas');
+      if (!contenedor) return;
       contenedor.innerHTML = '';
-
-      if (items.length === 0) {
-        contenedor.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400 font-semibold text-xs">No hay publicaciones disponibles.</div>`;
-        const tablaBody = document.getElementById('tablaCiudadesBody');
-        if (tablaBody) tablaBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-semibold text-xs">Sin registros activos</td></tr>`;
-        document.getElementById('cantCiudadesBadge').innerText = "0";
-        return;
-      }
-
-      const gruposCentros = {};
-
-      items.forEach(item => {
-        const id = item.id;
-        const vCount = item.verificaciones || 1;
-        const rCount = item.reportesCount || 0;
-        const esVerificado = vCount >= 3;
-        const yaVerifique = misVerificaciones.includes(String(id));
-
-        const tiposActivos = item.tiposActivos || [];
-        const tiposInactivos = item.tiposInactivos || [];
-        const totalmenteAtendido = tiposActivos.length === 0 && tiposInactivos.length > 0;
-
-        // Calcular centro o hub más cercano usando distancia euclidiana
-        const centroCercano = encontrarCentroMasCercano(item.lat, item.lng);
-        const claveGrupo = centroCercano.nombre.toLowerCase();
-
-        if (!gruposCentros[claveGrupo]) {
-          gruposCentros[claveGrupo] = {
-            ciudad: centroCercano.nombre,
-            dpto: centroCercano.dpto,
-            necesidades: 0,
-            ofertas: 0,
-            total: 0,
-            latRef: centroCercano.lat,
-            lngRef: centroCercano.lng
-          };
-        }
-
-        gruposCentros[claveGrupo].total += 1;
-        if (item.modalidad === 'ofrece') {
-          gruposCentros[claveGrupo].ofertas += 1;
-        } else {
-          gruposCentros[claveGrupo].necesidades += 1;
-        }
-
-        let imgPopupHTML = item.imagen ? `<img src="${item.imagen}" onclick="scrollACard('${id}')" class="w-full h-24 object-cover rounded my-1.5 border border-slate-200 cursor-pointer" title="Haz clic para ver en el panel">` : '';
-        let otroPopupHTML = item.otroDetalle ? `<div class="bg-amber-50 p-1.5 rounded border border-amber-200 text-[11px] text-amber-900 my-1 font-semibold"><b>💡 Detalle/Nequi:</b> ${item.otroDetalle}</div>` : '';
-
-        const icono = crearIcono(item.modalidad, esVerificado, totalmenteAtendido);
-        const marcador = L.marker([item.lat, item.lng], { icon: icono }).addTo(mapa)
-          .bindPopup(`
-            <div class="font-sans">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${item.modalidad === 'ofrece' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                ${item.modalidad === 'ofrece' ? '🟢 OFERTA' : '🔴 SOLICITUD'}
-              </span>
-              <h4 class="font-bold text-slate-800 text-sm mt-1">${item.ubicacion}</h4>
-              ${imgPopupHTML}
-              <p class="text-xs text-slate-600 my-1">${item.descripcion}</p>
-              ${otroPopupHTML}
-              ${item.contacto ? `<p class="text-xs font-mono font-bold text-slate-700 mb-2">Contacto: ${item.contacto}</p>` : ''}
-              <button onclick="scrollACard('${id}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-[11px] py-1 px-2 rounded shadow transition mb-1">
-                👇 Ver detalle en el panel
-              </button>
-              <button onclick="duplicarPublicacion('${id}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold text-[11px] py-1 px-2 rounded border border-blue-300 transition">
-                📋 Duplicar en otra ubicación
-              </button>
-            </div>
-          `);
-        mapaMarcadores[id] = marcador;
-
-        let imgHTML = item.imagen ? `<img src="${item.imagen}" onclick="abrirImagenFull('${item.imagen}')" class="w-full h-36 object-cover rounded-lg my-2 border border-slate-200 cursor-pointer hover:opacity-90 transition shadow-sm" title="Haz clic para ampliar la imagen">` : '';
-
-        let distHTML = '';
-        if (ubicacionUsuarioGPS) {
-          const d = calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, item.lat, item.lng);
-          distHTML = `<span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">📏 a ${d.toFixed(1)} km</span>`;
-        }
-
-        let badgesHTML = '';
-        tiposActivos.forEach(t => {
-          let badgeColor = "bg-red-100 text-red-800 hover:bg-red-200";
-          if (t.includes("Sangre")) badgeColor = "bg-rose-100 text-rose-800 hover:bg-rose-200";
-          if (t.includes("Nequi") || t.includes("Dinero")) badgeColor = "bg-emerald-100 text-emerald-800 hover:bg-emerald-200";
-          if (t.includes("Mascotas")) badgeColor = "bg-amber-100 text-amber-900 hover:bg-amber-200";
-
-          badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', true)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded ${badgeColor} transition">✓ ${t}</span> `;
-        });
-        tiposInactivos.forEach(t => {
-          badgesHTML += `<span onclick="alternarTipoAyuda('${id}', '${t}', false)" class="cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-500 line-through hover:bg-slate-300 transition">⚙️ ${t} (Atendido)</span> `;
-        });
-
-        let otroCardHTML = item.otroDetalle ? `
-          <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xs text-amber-900 my-2 space-y-0.5">
-            <span class="font-bold block uppercase text-[10px] text-amber-800">💡 Detalle / Datos de Nequi / Colecta:</span>
-            <p class="leading-snug">${item.otroDetalle}</p>
-          </div>
-        ` : '';
-
-        let contactoHTML = item.contacto 
-          ? `<a href="https://wa.me/57${item.contacto.replace(/\D/g,'')}" target="_blank" class="text-green-700 font-bold hover:underline">💬 Contactar (${item.contacto})</a>`
-          : `<span class="text-slate-400 font-semibold italic">Sin teléfono directo</span>`;
-
-        let btnAccionesExtras = '';
-        if (item.origen && item.origen.startsWith("google_sheets_")) {
-          btnAccionesExtras = `
-            <div class="pt-2 border-t border-slate-200 text-[11px] text-slate-400 italic text-center">
-              📌 Sincronizado desde Hoja Pública externa
-            </div>
-          `;
-        } else {
-          btnAccionesExtras = `
-            <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-[11px]">
-              <div class="flex gap-2 font-bold text-slate-600">
-                <button onclick="editarPublicacion('${id}')" class="hover:text-black">✏️ Editar</button>
-                <button onclick="duplicarPublicacion('${id}')" class="hover:text-blue-700 font-bold">📋 Duplicar</button>
-                <button onclick="desactivarPublicacion('${id}')" class="hover:text-red-700">🗑️ Borrar</button>
-              </div>
-              <button onclick="reportarFalsa('${id}', ${rCount}, ${item.lat}, ${item.lng})" class="text-slate-400 hover:text-red-600 font-semibold">🚨 Reportar (${rCount}/3)</button>
-            </div>
-          `;
-        }
-
-        const tarjetaHTML = `
-          <div id="card-${id}" class="border ${totalmenteAtendido ? 'border-slate-300 bg-slate-100' : (item.modalidad === 'ofrece' ? 'border-emerald-300 bg-emerald-50/20' : 'border-red-200 bg-red-50/20')} p-4 rounded-xl shadow-sm flex flex-col justify-between transition">
-            <div>
-              <div class="flex justify-between items-start mb-2">
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.modalidad === 'ofrece' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                  ${item.modalidad === 'ofrece' ? '🟢 OFERTA' : '🔴 SOLICITUD'} (${item.prioridad || 'Media'})
-                </span>
-                <div class="flex gap-1 items-center">
-                  ${distHTML}
-                  <span class="text-xs font-bold px-2 py-0.5 rounded ${esVerificado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                    ${esVerificado ? '✅ Validado' : `⚠️ (${vCount}/3)`}
-                  </span>
-                </div>
-              </div>
-
-              <h3 class="font-bold text-slate-900 text-base">${item.ubicacion}</h3>
-              ${imgHTML}
-              <p class="text-xs text-slate-600 mt-1 mb-2 leading-relaxed">${item.descripcion}</p>
-              ${otroCardHTML}
-
-              <div class="space-y-1 my-2">
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Tipos de ayuda:</p>
-                <div class="flex flex-wrap gap-1">${badgesHTML}</div>
-              </div>
-            </div>
-
-            <div class="mt-3 pt-2 border-t border-slate-200 space-y-2">
-              <div class="flex justify-between items-center text-xs">
-                ${contactoHTML}
-                <button onclick="centrarMapa([${item.lat}, ${item.lng}], 17)" class="text-red-700 font-semibold hover:underline">
-                  Ver en mapa &rarr;
-                </button>
-              </div>
-
-              <button 
-                onclick="verificarSolicitud('${id}', ${vCount}, ${item.lat}, ${item.lng})" 
-                ${(yaVerifique || esVerificado) ? 'disabled' : ''} 
-                class="w-full py-1.5 px-3 rounded-lg text-xs font-bold transition ${esVerificado ? 'bg-emerald-200 text-emerald-800 cursor-default' : (yaVerifique ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white')}">
-                ${esVerificado ? '✅ Validado en terreno' : (yaVerifique ? '👍 Ya confirmaste' : '🙋‍♂️ Validar en terreno (< 50m)')}
-              </button>
-
-              ${btnAccionesExtras}
-            </div>
-          </div>
-        `;
-        contenedor.insertAdjacentHTML('beforeend', tarjetaHTML);
+      
+      // Limpiar mapa de forma segura
+      Object.keys(mapaMarcadores).forEach(k => {
+        if (mapaMarcadores[k]) mapa.removeLayer(mapaMarcadores[k]);
       });
 
-      // TABLA LATERAL DE CENTROS / HUBS POR PROXIMIDAD
-      const tablaBody = document.getElementById('tablaCiudadesBody');
-      const cantBadge = document.getElementById('cantCiudadesBadge');
+      items.forEach(item => {
+        // SEGURIDAD: Si no tiene coordenadas, ignora o pone Bogotá para no romper el mapa
+        const lat = parseFloat(item.lat || 4.6097);
+        const lng = parseFloat(item.lng || -74.0817);
 
-      if (tablaBody) {
-        tablaBody.innerHTML = '';
-        const listaGrupos = Object.values(gruposCentros);
-        if (cantBadge) cantBadge.innerText = listaGrupos.length;
+        // Crear Tarjeta con valores por defecto para que NUNCA sea undefined
+        const div = document.createElement('div');
+        div.className = "border p-4 rounded-xl bg-white shadow-sm";
+        div.innerHTML = `
+          <h3 class="font-bold text-red-700">${item.ubicacion || 'Sin ubicación'}</h3>
+          <p class="text-sm">${item.descripcion || 'Sin descripción'}</p>
+          <span class="text-[10px] bg-slate-200 p-1">Origen: ${item.origen || 'manual'}</span>
+        `;
+        contenedor.appendChild(div);
 
-        if (listaGrupos.length === 0) {
-          tablaBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-semibold text-xs">Sin ubicaciones activas</td></tr>`;
-        } else {
-          listaGrupos.sort((a, b) => b.total - a.total);
-          listaGrupos.forEach(g => {
-            const dptoTexto = g.dpto ? `<span class="block text-[10px] text-slate-400 font-normal">${g.dpto}</span>` : '';
-
-            const filaHTML = `
-              <tr onclick="centrarMapa([${g.latRef}, ${g.lngRef}], 12)" class="hover:bg-slate-100 cursor-pointer transition">
-                <td class="p-2 font-bold text-slate-800 leading-tight">
-                  📍 ${g.ciudad}
-                  ${dptoTexto}
-                </td>
-                <td class="p-2 text-center text-red-700 font-bold">${g.necesidades}</td>
-                <td class="p-2 text-center text-emerald-700 font-bold">${g.ofertas}</td>
-                <td class="p-2 text-center font-extrabold text-slate-900 bg-slate-50 rounded">${g.total}</td>
-              </tr>
-            `;
-            tablaBody.insertAdjacentHTML('beforeend', filaHTML);
-          });
+        // Crear Marcador sin filtrar
+        try {
+            const m = L.marker([lat, lng]).addTo(mapa)
+              .bindPopup(`<b>${item.ubicacion || 'Ubicación'}</b><br>${item.descripcion || ''}`);
+            mapaMarcadores[item.id || Math.random()] = m;
+        } catch(e) {
+            console.error("Error pintando marcador:", e);
         }
-      }
+      });
+      console.log("✅ Renderizado completado.");
     }
-
-    // PRECARGA COMPLETA AL EDITAR (PIN EN BLANCO)
-    function editarPublicacion(id) {
-      const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
-      if (!item) return;
-
-      const pinPrompt = prompt("Ingresa el PIN de 4 dígitos para autorizar la edición:");
-      if (!pinPrompt) return;
-
-      if (pinPrompt === String(item.pin) || pinPrompt === CLAVE_MAESTRA) {
-        document.getElementById('editId').value = id;
-        document.getElementById('tituloModal').innerText = "✏️ Modificar Publicación";
-        document.getElementById('btnEnviar').innerText = "💾 Guardar Cambios";
-
-        const radioMod = document.querySelectorAll('input[name="campoModalidad"]');
-        radioMod.forEach(r => r.checked = (r.value === item.modalidad));
-
-        document.getElementById('campoUbicacion').value = item.ubicacion || "";
-        document.getElementById('campoPrioridad').value = item.prioridad || "Media";
-        document.getElementById('campoDescripcion').value = item.descripcion || "";
-        actualizarCoordenadasYMarcador(item.lat, item.lng);
-        document.getElementById('campoContacto').value = item.contacto || "";
-        
-        document.getElementById('campoPin').value = "";
-        document.getElementById('campoOtroDetalle').value = item.otroDetalle || "";
-
-        const chks = document.querySelectorAll('.chk-tipo');
-        const activos = item.tiposActivos || [];
-        chks.forEach(c => {
-          c.checked = activos.includes(c.value);
-        });
-
-        const tieneOtro = activos.includes('💡 Otro (Donaciones, Apoyo, etc.)') || (item.tiposInactivos || []).includes('💡 Otro (Donaciones, Apoyo, etc.)');
-        document.getElementById('chkOtro').checked = tieneOtro;
-        toggleOtroDetalle();
-
-        if (item.imagen) {
-          imagenBase64Actual = item.imagen;
-          document.getElementById('previewImagen').src = item.imagen;
-          document.getElementById('containerPreview').classList.remove('hidden');
-        } else {
-          quitarImagen();
-        }
-
-        abrirFormulario();
-      } else {
-        alert("❌ PIN incorrecto.");
-      }
-    }
-
     // REPLICAR INFORMACIÓN EN OTRO PUNTO (PIN EN BLANCO)
     function duplicarPublicacion(id) {
       const item = listaGlobalPublicaciones.find(p => String(p.id) === String(id));
