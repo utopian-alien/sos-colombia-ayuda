@@ -26,31 +26,22 @@ rows = sheet.get_all_records()
 ref_ayudas = db.reference('ayudas')
 ref_solicitudes = db.reference('solicitudes_ayuda')
 
-# RESCATE TOTAL: Leer nodos y combinarlos en un diccionario local
-combined_data = {}
+# DICCIONARIO SEGURO: Solo agregaremos cosas nuevas o actualizaremos, sin borrar lo viejo.
+datos_a_subir = {}
 
-def load_and_merge(ref, label):
-    data = ref.get()
-    count = 0
-    if isinstance(data, dict):
-        for k, v in data.items():
-            if isinstance(v, dict):
-                # Usamos una clave única para que no se pisen
-                combined_data[f"{label}_{k}"] = v
-                count += 1
-    print(f"📥 Cargados {count} registros desde {label}")
-
-load_and_merge(ref_ayudas, "manual_ayudas")
-load_and_merge(ref_solicitudes, "manual_solic")
-
-print(f"✅ Total registros manuales rescatados: {len(combined_data)}")
+# 1. RESCATE SEGURO: Mover lo de 'ayudas' a 'solicitudes_ayuda' SIN CAMBIAR SUS IDs
+ayudas_data = ref_ayudas.get()
+if isinstance(ayudas_data, dict):
+    for k, v in ayudas_data.items():
+        datos_a_subir[k] = v  # Mantiene el ID intacto (Ej: Istmina o Capilla UNAL)
+    print(f"📥 Rescatados {len(ayudas_data)} registros del nodo 'ayudas'")
 
 # Mapbox
 MAPBOX_TOKEN = "pk.eyJ1IjoidXRvcGlhbmFsaWVuIiwiYSI6ImNtc3J2cDUwYjAxZmMyeHB6c2c1enc2YnMifQ.KKhtf-Di1JSIhY5jxF0k1Q"
 
 def get_coords(direccion, lugar):
-    # Consulta optimizada para lugares o direcciones
-    query = f"{direccion}, {lugar}, Bogotá, Colombia"
+    # CORRECCIÓN: Se quitó el "Bogotá" quemado para que busque en toda Colombia.
+    query = f"{direccion}, {lugar}, Colombia"
     url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{urllib.parse.quote(query)}.json?access_token={MAPBOX_TOKEN}&country=co&limit=1"
     try:
         with urllib.request.urlopen(url, timeout=5) as resp:
@@ -61,7 +52,7 @@ def get_coords(direccion, lugar):
     except: pass
     return 4.6097, -74.0817
 
-# Procesar Excel
+# 2. Procesar Excel
 excel_count = 0
 for i, row in enumerate(rows):
     lugar = str(row.get("LUGAR", "")).strip()
@@ -70,7 +61,7 @@ for i, row in enumerate(rows):
     lat, lng = get_coords(str(row.get("DIRECCIÓN", "")), lugar)
     
     # Estructura que tu JS espera
-    combined_data[f"sheet_registro_{i}"] = {
+    datos_a_subir[f"sheet_registro_{i}"] = {
         "modalidad": "necesita",
         "ubicacion": lugar,
         "descripcion": f"Dirección: {row.get('DIRECCIÓN')} | Notas: {row.get('NOTAS')}",
@@ -80,6 +71,9 @@ for i, row in enumerate(rows):
     }
     excel_count += 1
 
-# GUARDAR TODO
-ref_solicitudes.set(combined_data)
-print(f"🚀 Subidos {excel_count} registros de Excel. Total final en Firebase: {len(combined_data)}")
+# 3. LA SALVACIÓN: UPDATE EN LUGAR DE SET
+# update() inyecta el Excel y los rescates al lado de lo que ya exista. NO BORRA NADA.
+if datos_a_subir:
+    ref_solicitudes.update(datos_a_subir)
+
+print(f"🚀 ÉXITO: Inyectados {excel_count} registros de Excel a Firebase sin borrar los datos manuales.")
