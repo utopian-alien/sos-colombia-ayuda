@@ -882,46 +882,25 @@
 
       referenciaSolicitudes.on('value', snapshot => {
       const data = snapshot.val() || {};
-      
-      // SOLUCIÓN DE CHOQUE: Mapeo blindado para todos los campos posibles
-      const firebaseItems = Object.keys(data).map(key => {
+      // Mapeo forzado: cualquier dato, manual o de Excel, se normaliza aquí
+      listaGlobalPublicaciones = Object.keys(data).map(key => {
         const item = data[key] || {};
-        
-        // Normalización estricta de la modalidad para evitar que los filtros los oculten
-        let modalidadNormalizada = "necesita";
-        const modRaw = String(item.modalidad || "").toLowerCase();
-        if (modRaw.includes("ofrece") || modRaw === "ofrece") {
-          modalidadNormalizada = "ofrece";
-        }
-
         return {
           id: key,
-          modalidad: modalidadNormalizada,
-          // Mapeo flexible: prueba todas las combinaciones que usan tus datos manuales, consola y Excel
-          ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Bogotá, Colombia",
-          descripcion: item.descripcion || item.necesita || item.notas || item.detalle || item.mensaje || "Sin descripción",
-          // Coordenadas blindadas: prioriza latitud/longitud (manual/consola) y cae a lat/lng (Excel)
+          modalidad: (item.modalidad || "necesita").toLowerCase(),
+          ubicacion: item.ubicacion || item.lugar || item.ciudad || item.direccion || "Ubicación",
+          descripcion: item.descripcion || item.necesita || item.notas || item.detalle || "Sin descripción",
           lat: parseFloat(item.latitud !== undefined ? item.latitud : (item.lat !== undefined ? item.lat : 4.6097)),
           lng: parseFloat(item.longitud !== undefined ? item.longitud : (item.lng !== undefined ? item.lng : -74.0817)),
-          contacto: item.contacto || item.telefono || "",
           prioridad: item.prioridad || "Media",
+          // AQUÍ ESTÁ EL TRUCO: Si no tiene categoría, le asignamos una para que NO se borre
           tiposActivos: item.tiposActivos || ["🥣 Alimentos y Agua Potable"],
           tiposInactivos: item.tiposInactivos || [],
-          verificaciones: item.verificaciones || 1,
-          reportesCount: item.reportesCount || 0,
-          imagen: item.imagen || null,
-          otroDetalle: item.otroDetalle || item.notas || "",
-          pin: item.pin || "2026",
-          desactivado: false, // Forzar visibilidad: ningún registro se oculta por filtros de estado
-          origen: item.origen || "manual"
+          desactivado: item.desactivado || false
         };
       });
-      
-      listaGlobalPublicaciones = firebaseItems;
       aplicarFiltrosYOrden();
-      console.log("✅ Datos procesados y cargados. Total:", listaGlobalPublicaciones.length);
     });
-
       // 🚀 Sincronización automática silenciosa al arrancar la página
       sincronizarGoogleSheetsAutomatico();
 
@@ -973,32 +952,22 @@
     function aplicarFiltrosYOrden() {
       const cat = document.getElementById('filtroCategoria').value;
       const mod = document.getElementById('filtroModalidad').value;
-      const orden = document.getElementById('ordenamiento').value;
+      
+      let resultado = listaGlobalPublicaciones.filter(p => !p.desactivado);
 
-      let resultado = [...listaGlobalPublicaciones];
-      resultado = resultado.filter(p => !p.desactivado);
-
+      // FILTRADO INCLUSIVO: Si es 'todos', no filtramos nada, mostramos todo
       if (cat !== 'todos') {
-        resultado = resultado.filter(p => (p.tiposActivos || []).includes(cat) || (p.tiposInactivos || []).includes(cat));
+        resultado = resultado.filter(p => {
+          const categorias = p.tiposActivos || [];
+          return categorias.includes(cat);
+        });
       }
 
       if (mod !== 'todos') {
         resultado = resultado.filter(p => p.modalidad === mod);
       }
 
-      if (orden === 'urgentes') {
-        const peso = { 'Alta': 3, 'Media': 2, 'Baja': 1 };
-        resultado.sort((a, b) => (peso[b.prioridad] || 0) - (peso[a.prioridad] || 0));
-      } else if (orden === 'cercanos' && ubicacionUsuarioGPS) {
-        resultado.sort((a, b) => {
-          const distA = calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, a.lat, a.lng);
-          const distB = calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, b.lat, b.lng);
-          return distA - distB;
-        });
-      } else {
-        resultado.sort((a, b) => (b.fechaCreacion || 0) - (a.fechaCreacion || 0));
-      }
-
+      // Renderizado directo
       renderizarContenedorYMapa(resultado);
     }
 
